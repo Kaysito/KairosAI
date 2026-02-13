@@ -1,0 +1,259 @@
+﻿@using KairosAI.Models
+@model RegisterViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Cuenta - Kairos AI</title>
+    <meta name="description" content="Únete a Kairos AI. Comienza tu viaje de inversión inteligente con análisis de riesgo personalizado.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'kairos-purple': '#7c3aed',
+                        'kairos-dark': '#0f0f1a',
+                        'kairos-card': '#1a1a2e',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+        }
+
+        html {
+            scrollbar-width: none;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Escape para Razor */
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="h-full font-sans text-gray-100 antialiased selection:bg-purple-500 selection:text-white">
+
+    <main class="flex min-h-full flex-col justify-center px-4 py-12 sm:px-6 lg:px-8 relative z-10">
+
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+            <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-900/20 rounded-full blur-[100px]"></div>
+            <div class="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-900/10 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+            <div class="inline-flex items-center justify-center mb-6 group">
+                <img src="https://i.ibb.co/DHxtqZYf/6773224c-113b-437d-aea7-85f6f1c9f627-1-Photoroom.png"
+                     alt="Kairos AI Logo"
+                     class="w-20 h-auto object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.5)] transition-transform duration-500 group-hover:scale-110">
+            </div>
+
+            <h1 class="text-3xl font-bold tracking-tight text-white">
+                Crea tu cuenta
+            </h1>
+            <p class="mt-2 text-sm text-gray-400">
+                El primer paso hacia inversiones más inteligentes
+            </p>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-[480px]">
+            <div class="bg-kairos-card/90 backdrop-blur-xl px-8 py-10 rounded-2xl shadow-2xl border border-gray-800 ring-1 ring-white/5">
+
+                <form asp-controller="Account" asp-action="Register" method="post" class="space-y-5" id="registerForm">
+
+                    <div asp-validation-summary="ModelOnly" class="bg-red-500/10 border border-red-900/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-3" role="alert">
+                        <i data-lucide="alert-triangle" class="shrink-0 mt-0.5" style="width: 16px; height: 16px;"></i>
+                    </div>
+
+                    <div>
+                        <label asp-for="FullName" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Nombre Completo
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="user" class="text-gray-500 group-focus-within:text-kairos-purple transition-colors" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <input asp-for="FullName"
+                                   type="text"
+                                   placeholder="Juan Pérez"
+                                   class="block w-full pl-10 pr-3 py-3 bg-kairos-dark border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all shadow-sm" />
+                        </div>
+                        <span asp-validation-for="FullName" class="text-red-400 text-xs font-medium mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Email" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Correo electrónico
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="mail" class="text-gray-500 group-focus-within:text-kairos-purple transition-colors" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <input asp-for="Email"
+                                   type="email"
+                                   placeholder="nombre@ejemplo.com"
+                                   class="block w-full pl-10 pr-3 py-3 bg-kairos-dark border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all shadow-sm" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-red-400 text-xs font-medium mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Password" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Contraseña
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="lock" class="text-gray-500 group-focus-within:text-kairos-purple transition-colors" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <input asp-for="Password"
+                                   id="pass1"
+                                   type="password"
+                                   placeholder="••••••••"
+                                   class="block w-full pl-10 pr-10 py-3 bg-kairos-dark border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all shadow-sm" />
+
+                            <button type="button" onclick="togglePass('pass1', 'icon1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 cursor-pointer focus:outline-none">
+                                <i data-lucide="eye" id="icon1" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-red-400 text-xs font-medium mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="ConfirmPassword" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Confirmar Contraseña
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="lock-check" class="text-gray-500 group-focus-within:text-kairos-purple transition-colors" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <input asp-for="ConfirmPassword"
+                                   id="pass2"
+                                   type="password"
+                                   placeholder="••••••••"
+                                   class="block w-full pl-10 pr-10 py-3 bg-kairos-dark border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all shadow-sm" />
+
+                            <button type="button" onclick="togglePass('pass2', 'icon2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 cursor-pointer focus:outline-none">
+                                <i data-lucide="eye" id="icon2" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-red-400 text-xs font-medium mt-1 block"></span>
+                    </div>
+
+                    <div class="flex items-start pt-2">
+                        <div class="flex h-6 items-center">
+                            <input asp-for="TermsAccepted"
+                                   type="checkbox"
+                                   class="h-4 w-4 rounded border-gray-600 bg-kairos-dark text-kairos-purple focus:ring-2 focus:ring-kairos-purple focus:ring-offset-0 cursor-pointer" />
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label asp-for="TermsAccepted" class="font-medium text-gray-300 cursor-pointer">
+                                Acepto los <a href="#" class="text-kairos-purple hover:underline">Términos</a> y la <a href="#" class="text-kairos-purple hover:underline">Política de Privacidad</a>.
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Entiendo que el trading conlleva riesgos financieros y Kairos AI es una herramienta de asistencia.
+                            </p>
+                            <span asp-validation-for="TermsAccepted" class="text-red-400 text-xs font-medium block mt-1"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            id="submitBtn"
+                            class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-kairos-purple to-purple-700 hover:from-purple-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:ring-offset-2 focus:ring-offset-kairos-card shadow-lg shadow-purple-900/30 transition-all duration-200 hover:shadow-purple-500/40 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span id="btnText">Crear cuenta</span>
+                        <div id="btnLoader" class="loader hidden"></div>
+                        <i id="btnIcon" data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <p class="text-center text-sm text-gray-400">
+                        ¿Ya tienes una cuenta?
+                        <a asp-action="Login" class="font-bold text-kairos-purple hover:text-purple-300 transition underline-offset-4 hover:underline">
+                            Inicia sesión aquí
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+
+            // Función genérica para alternar visibilidad de contraseña
+            // Acepta el ID del input y el ID del icono como parámetros
+            window.togglePass = function(inputId, iconId) {
+                const input = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.setAttribute('data-lucide', 'eye-off');
+                } else {
+                    input.type = 'password';
+                    icon.setAttribute('data-lucide', 'eye');
+                }
+                lucide.createIcons();
+            };
+
+            // Efecto de carga
+            const form = document.getElementById('registerForm');
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const btnIcon = document.getElementById('btnIcon');
+
+            form.addEventListener('submit', function() {
+                if ($(this).valid()) {
+                    btn.disabled = true;
+                    btnText.innerText = 'Creando cuenta...';
+                    btnLoader.classList.remove('hidden');
+                    btnIcon.classList.add('hidden');
+                    btn.classList.add('opacity-75');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

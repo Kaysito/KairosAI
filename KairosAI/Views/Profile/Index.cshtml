@@ -1,0 +1,246 @@
+﻿@model KairosAI.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Mi Perfil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="h-full overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 pb-24">
+
+    <nav aria-label="Navegación" class="mb-6 animate-fade-in-up">
+        <ol class="flex items-center space-x-2 text-sm text-kairos-muted">
+            <li>
+                <a asp-controller="Dashboard" asp-action="Index" class="hover:text-kairos-purple transition-colors duration-200">
+                    Inicio
+                </a>
+            </li>
+            <li aria-hidden="true">
+                <i data-lucide="chevron-right" size="14"></i>
+            </li>
+            <li>
+                <span class="text-kairos-text font-medium" aria-current="page">Mi Perfil</span>
+            </li>
+        </ol>
+    </nav>
+
+    <header class="mb-8 animate-fade-in-up">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-kairos-text mb-2 tracking-tight">Mi Perfil</h1>
+                <p class="text-kairos-muted text-sm sm:text-base">Gestiona tu información personal y preferencias de la plataforma</p>
+            </div>
+
+            <form asp-action="ToggleTheme" method="post" class="shrink-0">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-kairos-card text-kairos-muted border border-kairos-border rounded-lg hover:text-kairos-purple hover:border-kairos-purple transition-all duration-200 shadow-sm active:scale-95 group">
+                    <i data-lucide="sun-moon" class="group-hover:rotate-12 transition-transform"></i>
+                    <span class="hidden sm:inline font-medium">Cambiar Tema</span>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <div class="animate-fade-in-up stagger-delay-1 space-y-4 mb-6">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div role="alert" class="p-4 bg-green-500/10 border-l-4 border-green-500 rounded-r-lg text-green-700 dark:text-green-400 flex items-start gap-3 shadow-sm">
+                <i data-lucide="check-circle" class="shrink-0 mt-0.5"></i>
+                <p class="font-medium">@TempData["SuccessMessage"]</p>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div role="alert" class="p-4 bg-red-500/10 border-l-4 border-red-500 rounded-r-lg text-red-700 dark:text-red-400 flex items-start gap-3 shadow-sm">
+                <i data-lucide="alert-circle" class="shrink-0 mt-0.5"></i>
+                <p class="font-medium">@TempData["ErrorMessage"]</p>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div role="alert" class="p-4 bg-blue-500/10 border-l-4 border-blue-500 rounded-r-lg text-blue-700 dark:text-blue-400 flex items-start gap-3 shadow-sm">
+                <i data-lucide="info" class="shrink-0 mt-0.5"></i>
+                <p class="font-medium">@TempData["InfoMessage"]</p>
+            </div>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up stagger-delay-2">
+
+        <section class="lg:col-span-2 bg-kairos-card rounded-2xl border border-kairos-border p-6 sm:p-8 shadow-sm" aria-labelledby="personal-info-heading">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-kairos-border">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <i data-lucide="user-cog" class="text-kairos-purple"></i>
+                </div>
+                <div>
+                    <h2 id="personal-info-heading" class="text-xl sm:text-2xl font-semibold text-kairos-text">Información Personal</h2>
+                    <p class="text-sm text-kairos-muted mt-0.5">Actualiza tus datos de contacto</p>
+                </div>
+            </div>
+
+            <form asp-action="Update" method="post" class="space-y-6" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label for="FullName" class="block text-sm font-medium text-kairos-text mb-2">
+                        Nombre Completo <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="FullName"
+                           type="text"
+                           autocomplete="name"
+                           required
+                           class="w-full px-4 py-3 rounded-lg bg-kairos-panel text-kairos-text border border-kairos-border placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all hover:border-kairos-purple/50"
+                           placeholder="Ej: María González" />
+                    <span asp-validation-for="FullName" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label for="Email" class="block text-sm font-medium text-kairos-text mb-2">
+                        Correo Electrónico <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="mail" class="text-kairos-muted w-5 h-5"></i>
+                        </div>
+                        <input asp-for="Email"
+                               type="email"
+                               autocomplete="email"
+                               required
+                               class="w-full pl-10 pr-4 py-3 rounded-lg bg-kairos-panel text-kairos-text border border-kairos-border placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kairos-purple focus:border-transparent transition-all hover:border-kairos-purple/50"
+                               placeholder="tu-email@ejemplo.com" />
+                    </div>
+                    <span asp-validation-for="Email" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label for="PreferredCurrency" class="block text-sm font-medium text-kairos-text mb-2">Moneda Base</label>
+                    <div class="relative group">
+                        <select asp-for="PreferredCurrency"
+                                class="w-full appearance-none px-4 py-3 rounded-lg bg-kairos-panel text-kairos-text border border-kairos-border focus:outline-none focus:ring-2 focus:ring-kairos-purple cursor-pointer hover:border-kairos-purple/50">
+                            <option value="MXN">🇲🇽 MXN - Peso Mexicano</option>
+                            <option value="USD">🇺🇸 USD - Dólar Estadounidense</option>
+                            <option value="EUR">🇪🇺 EUR - Euro</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-kairos-muted">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-kairos-panel rounded-lg p-4 border border-kairos-border hover:border-kairos-purple/30 transition-colors">
+                    <div class="flex items-start gap-3">
+                        <div class="flex items-center h-5">
+                            <input asp-for="EmailNotifications"
+                                   type="checkbox"
+                                   class="w-4 h-4 text-kairos-purple bg-kairos-card border-kairos-border rounded focus:ring-kairos-purple focus:ring-offset-kairos-card cursor-pointer accent-kairos-purple" />
+                        </div>
+                        <div class="flex-1">
+                            <label for="EmailNotifications" class="block text-sm font-medium text-kairos-text cursor-pointer select-none">
+                                Recibir notificaciones por correo
+                            </label>
+                            <p class="text-xs text-kairos-muted mt-1">
+                                Alertas de mercado, reportes semanales y novedades.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-kairos-border">
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-kairos-purple hover:bg-purple-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 active:scale-95 flex items-center justify-center gap-2">
+                        <i data-lucide="save" size="20"></i>
+                        Guardar Cambios
+                    </button>
+
+                    <button type="reset"
+                            class="px-6 py-3 bg-kairos-panel text-kairos-text font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 border border-kairos-border">
+                        <i data-lucide="rotate-ccw" size="20"></i>
+                        Restablecer
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="space-y-6">
+
+            <section class="bg-kairos-card rounded-2xl border border-kairos-border p-6 shadow-sm" aria-labelledby="account-status-heading">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-kairos-border">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <i data-lucide="credit-card" class="text-blue-500"></i>
+                    </div>
+                    <h2 id="account-status-heading" class="text-xl font-semibold text-kairos-text">Estado de Cuenta</h2>
+                </div>
+
+                <dl class="space-y-4">
+                    <div class="flex justify-between items-center py-2">
+                        <dt class="text-kairos-muted text-sm">Plan Actual</dt>
+                        <dd class="text-kairos-text font-medium bg-kairos-panel px-3 py-1 rounded-lg border border-kairos-border text-sm">
+                            @Model.SubscriptionPlan
+                        </dd>
+                    </div>
+
+                    <div class="flex justify-between items-center py-2 border-t border-kairos-border">
+                        <dt class="text-kairos-muted text-sm">Miembro desde</dt>
+                        <dd class="text-kairos-text font-medium">@Model.MemberSince</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="relative bg-gradient-to-br from-kairos-card to-purple-50 dark:to-purple-900/10 rounded-2xl border border-purple-200 dark:border-purple-500/30 p-6 shadow-sm overflow-hidden" aria-labelledby="risk-profile-heading">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl"></div>
+
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-kairos-border relative z-10">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center text-xl shrink-0">
+                        @Html.Raw(Model.RiskProfileIcon)
+                    </div>
+                    <h2 id="risk-profile-heading" class="text-xl font-semibold text-kairos-text">Perfil de Riesgo</h2>
+                </div>
+
+                <div class="space-y-4 relative z-10">
+                    <div>
+                        <div class="flex justify-between items-baseline mb-2">
+                            <span class="text-2xl font-bold text-kairos-text">@Model.RiskProfileLabel</span>
+                            <span class="text-sm font-mono text-kairos-muted bg-kairos-panel px-2 py-1 rounded border border-kairos-border">
+                                @Model.RiskScore/100
+                            </span>
+                        </div>
+                        <p class="text-sm text-kairos-muted leading-relaxed">@Model.RiskProfileDescription</p>
+                    </div>
+
+                    <div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-3 overflow-hidden shadow-inner">
+                            <div class="h-full @Model.RiskProfileColor rounded-full transition-all duration-1000 ease-out shadow-md"
+                                 style="width:@(Model.RiskScore)%;">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between text-[10px] text-kairos-muted mt-2 px-1 uppercase tracking-wider font-semibold">
+                            <span>Conservador</span>
+                            <span>Moderado</span>
+                            <span>Agresivo</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="RetakeTest" method="get" class="pt-4 border-t border-kairos-border">
+                        <button type="submit"
+                                class="w-full px-4 py-2.5 bg-kairos-panel text-kairos-text border border-kairos-border rounded-lg hover:border-kairos-purple hover:text-kairos-purple transition-all duration-200 flex items-center justify-center gap-2 active:scale-95">
+                            <i data-lucide="clipboard-list" size="16"></i>
+                            <span class="font-medium">Rehacer Evaluación</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </aside>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Inicializar Iconos
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    </script>
+}

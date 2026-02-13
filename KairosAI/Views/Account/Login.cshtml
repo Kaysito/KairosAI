@@ -1,0 +1,311 @@
+﻿@using KairosAI.Models.ViewModels
+@model LoginViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<!DOCTYPE html>
+<html lang="es" class="h-full antialiased">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - Kairos AI</title>
+
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://unpkg.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        kairos: {
+                            bg: '#05050a',
+                            card: '#0f0f1a',
+                            primary: '#7c3aed',
+                            glow: '#a855f7',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #0b0b14 inset !important;
+            -webkit-text-fill-color: white !important;
+            caret-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .loader {
+            border: 2px solid rgba(255,255,255,0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* --- CORRECCIÓN DE LA ANIMACIÓN NEÓN --- */
+        .neon-border {
+            position: relative;
+            /* Importante: Esto crea un contexto de apilamiento */
+            z-index: 0;
+        }
+
+            .neon-border::before,
+            .neon-border::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 18px; /* Un poco más que la tarjeta para que se vea bien */
+                padding: 2px;
+                background: linear-gradient(90deg, transparent, transparent, #7c3aed, #a855f7, #7c3aed, transparent, transparent);
+                background-size: 200% 100%;
+                /* SOLUCIÓN AL BLOQUEO DE BOTONES: */
+                z-index: -1; /* Se envía detrás del contenido */
+                pointer-events: none; /* Asegura que los clics traspasen la luz si algo falla */
+                /* SOLUCIÓN A LA VELOCIDAD: Cambiado de 3s a 10s */
+                animation: neonFlow 10s linear infinite;
+            }
+
+            .neon-border::before {
+                filter: blur(2px); /* Brillo concentrado */
+            }
+
+            .neon-border::after {
+                filter: blur(10px); /* Brillo difuso (Glow) */
+                opacity: 0.6;
+            }
+
+        @@keyframes neonFlow {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-kairos-bg h-screen w-screen overflow-hidden flex flex-col relative font-sans text-gray-200 selection:bg-kairos-primary selection:text-white">
+
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-20%] left-[20%] right-[20%] h-[500px] bg-kairos-primary/20 blur-[120px] rounded-full animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-900/10 blur-[100px] rounded-full"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    </div>
+
+    <main class="flex-grow flex items-center justify-center px-4 relative z-10 w-full">
+
+        <div class="relative w-full max-w-[480px]">
+
+            <div class="neon-border">
+
+                <div class="relative z-10 bg-kairos-card rounded-2xl border border-white/5 shadow-2xl p-8 sm:p-10 backdrop-blur-xl">
+
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="relative mb-3 hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-kairos-primary blur-2xl opacity-30 rounded-full"></div>
+                            <img src="https://i.ibb.co/DHxtqZYf/6773224c-113b-437d-aea7-85f6f1c9f627-1-Photoroom.png"
+                                 alt="Kairos AI"
+                                 class="relative w-16 h-auto object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.5)]">
+                        </div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">
+                            Kairos <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">AI</span>
+                        </h1>
+                        <p class="text-[11px] text-gray-500 mt-1 uppercase tracking-[0.2em] font-medium">Financial Intelligence</p>
+                    </div>
+
+                    <form asp-controller="Account" asp-action="Login" method="post" class="space-y-4" id="loginForm">
+                        <div asp-validation-summary="ModelOnly" class="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-2 rounded-lg text-xs flex items-center gap-2" role="alert">
+                            <i data-lucide="alert-circle" class="shrink-0 w-4 h-4"></i>
+                        </div>
+
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <div>
+                            <label asp-for="Email" class="block text-xs font-semibold text-gray-400 mb-1.5 ml-1">Correo Electrónico</label>
+                            <div class="relative group/input">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500 group-focus-within/input:text-kairos-primary transition-colors">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                <input asp-for="Email"
+                                       type="email"
+                                       autocomplete="username"
+                                       placeholder="ejemplo@kairos.ai"
+                                       class="block w-full pl-11 pr-4 py-3 bg-[#0b0b14] border border-[#2d2d42] rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-kairos-primary focus:ring-1 focus:ring-kairos-primary transition-all shadow-inner" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-red-400 text-xs pl-1 mt-1 block"></span>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5 ml-1">
+                                <label asp-for="Password" class="block text-xs font-semibold text-gray-400">Contraseña</label>
+                                <a href="#" class="text-[11px] text-kairos-primary hover:text-white transition-colors">¿Olvidaste tu contraseña?</a>
+                            </div>
+                            <div class="relative group/input">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500 group-focus-within/input:text-kairos-primary transition-colors">
+                                    <i data-lucide="lock" class="w-5 h-5"></i>
+                                </div>
+                                <input asp-for="Password"
+                                       id="passwordInput"
+                                       type="password"
+                                       autocomplete="current-password"
+                                       placeholder="••••••••"
+                                       class="block w-full pl-11 pr-11 py-3 bg-[#0b0b14] border border-[#2d2d42] rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-kairos-primary focus:ring-1 focus:ring-kairos-primary transition-all shadow-inner" />
+
+                                <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-500 hover:text-white cursor-pointer transition-colors focus:outline-none">
+                                    <i data-lucide="eye" id="eyeIcon" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-red-400 text-xs pl-1 mt-1 block"></span>
+                        </div>
+
+                        <div class="rounded-lg bg-indigo-500/10 border border-indigo-500/20 p-3 flex gap-3">
+                            <i data-lucide="shield-check" class="text-indigo-400 shrink-0 w-5 h-5"></i>
+                            <p class="text-[11px] text-indigo-200/80 leading-snug">
+                                Acceso seguro. Tras 3 intentos fallidos, la cuenta se bloqueará temporalmente por seguridad.
+                            </p>
+                        </div>
+
+                        <button type="submit"
+                                id="submitBtn"
+                                class="group/btn relative w-full flex justify-center items-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 border border-white/10 shadow-[0_0_20px_-5px_rgba(124,58,237,0.4)] transition-all duration-300 transform active:scale-[0.98]">
+                            <span id="btnText" class="flex items-center gap-2">
+                                Iniciar Sesión
+                                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"></i>
+                            </span>
+                            <div id="btnLoader" class="hidden absolute inset-0 flex items-center justify-center">
+                                <div class="loader"></div>
+                            </div>
+                        </button>
+                    </form>
+
+                    <div class="mt-6 relative flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
+                        <span class="relative bg-kairos-card px-2 text-[10px] text-gray-500 uppercase tracking-wider">O continúa con</span>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <form asp-controller="Account" asp-action="ExternalLogin" method="post" class="contents">
+                            <input type="hidden" name="provider" value="Google" />
+                            <button type="submit" class="flex items-center justify-center gap-2 rounded-xl bg-[#0b0b14] border border-[#2d2d42] hover:bg-white/5 hover:border-white/20 py-2.5 transition-all duration-300 group">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" class="text-gray-400 group-hover:text-white transition-colors" /></svg>
+                                <span class="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors">Google</span>
+                            </button>
+                        </form>
+                        <form asp-controller="Account" asp-action="ExternalLogin" method="post" class="contents">
+                            <input type="hidden" name="provider" value="Facebook" />
+                            <button type="submit" class="flex items-center justify-center gap-2 rounded-xl bg-[#0b0b14] border border-[#2d2d42] hover:bg-white/5 hover:border-white/20 py-2.5 transition-all duration-300 group">
+                                <svg class="h-4 w-4 text-[#1877F2] opacity-80 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                                <span class="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors">Facebook</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="mt-6 text-center">
+                        <a asp-action="Register" class="text-xs text-gray-500 hover:text-kairos-primary transition-colors duration-300">
+                            ¿No tienes cuenta? <span class="font-bold text-gray-300 hover:underline hover:text-white transition-colors">Regístrate gratis</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="absolute bottom-4 w-full flex justify-center z-10 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-4 text-[10px] uppercase tracking-widest text-gray-600 font-bold bg-black/40 backdrop-blur-md px-5 py-2 rounded-full border border-white/5 shadow-lg">
+            <a href="#" class="hover:text-gray-300 transition-colors">Privacidad</a>
+            <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+            <a href="#" class="hover:text-gray-300 transition-colors">Términos</a>
+            <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+            <a href="#" class="hover:text-gray-300 transition-colors">Ayuda</a>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+
+            window.togglePassword = function() {
+                const input = document.getElementById('passwordInput');
+                const icon = document.getElementById('eyeIcon');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.setAttribute('data-lucide', 'eye-off');
+                } else {
+                    input.type = 'password';
+                    icon.setAttribute('data-lucide', 'eye');
+                }
+                lucide.createIcons();
+            };
+
+            form.addEventListener('submit', function(e) {
+                if ($(form).valid()) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                    btnText.classList.add('invisible');
+                    btnLoader.classList.remove('hidden');
+                }
+            });
+
+            const validator = $(form).data('validator');
+            if (validator) {
+                 const originalHighlight = validator.settings.highlight;
+                 const originalUnhighlight = validator.settings.unhighlight;
+
+                 validator.settings.highlight = function (element, errorClass, validClass) {
+                     originalHighlight.call(this, element, errorClass, validClass);
+                     $(element).addClass('border-red-500/50 focus:ring-red-500 bg-red-900/10').removeClass('border-[#2d2d42] focus:ring-kairos-primary');
+                 };
+
+                 validator.settings.unhighlight = function (element, errorClass, validClass) {
+                     originalUnhighlight.call(this, element, errorClass, validClass);
+                     $(element).removeClass('border-red-500/50 focus:ring-red-500 bg-red-900/10').addClass('border-[#2d2d42] focus:ring-kairos-primary');
+                 };
+            }
+        });
+    </script>
+</body>
+</html>

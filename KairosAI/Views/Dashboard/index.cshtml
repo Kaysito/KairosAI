@@ -1,0 +1,538 @@
+﻿@using KairosAI.Models
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+@* Estilos locales para componentes específicos del Dashboard *@
+<style type="text/css">
+    /* Glass Panel usando variables del Layout */
+    .glass-panel {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    /* Toggle Switch Styles */
+    .toggle-checkbox:checked {
+        right: 0;
+        border-color: #10b981;
+    }
+
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+
+    /* Hover Lift Effect */
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.1);
+        }
+
+    /* Chart Styles */
+    .chart-tooltip {
+        position: absolute;
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px 12px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+        .chart-tooltip.visible {
+            opacity: 1;
+        }
+
+    .chart-line {
+        stroke-dasharray: 2000;
+        stroke-dashoffset: 2000;
+        transition: stroke-dashoffset 2s ease-out;
+    }
+
+        .chart-line.animate {
+            stroke-dashoffset: 0;
+        }
+
+    .chart-area, .chart-point {
+        opacity: 0;
+        transition: opacity 1s ease-out;
+    }
+
+        .chart-area.animate, .chart-point.animate {
+            opacity: 1;
+        }
+
+    /* Crosshair */
+    .chart-overlay {
+        cursor: crosshair;
+    }
+
+    .chart-crosshair-line {
+        stroke: #7c3aed;
+        stroke-width: 1;
+        stroke-dasharray: 5,5;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="w-full min-h-screen flex flex-col bg-kairos-dark text-kairos-text transition-colors duration-300">
+
+    <header class="h-16 border-b border-kairos-border flex items-center justify-between px-4 sm:px-6 bg-kairos-dark/80 backdrop-blur-md z-20 sticky top-0">
+
+        <div>
+            <h1 class="text-2xl font-bold text-kairos-text">Dashboard</h1>
+            <p class="text-xs sm:text-sm text-kairos-muted hidden sm:block">Visión General de tu Portafolio</p>
+        </div>
+
+        <div class="flex items-center gap-3 sm:gap-6">
+
+            <div class="flex items-center gap-2 bg-kairos-panel py-1.5 px-3 rounded-full border border-kairos-border">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-kairos-muted" id="mode-label">Simulado</span>
+
+                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="mode-toggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 top-0 border-gray-400" />
+                    <label for="mode-toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                </div>
+            </div>
+
+            <div class="h-8 w-px bg-kairos-border hidden sm:block"></div>
+
+            <div class="flex items-center gap-3">
+                <button class="p-2 text-kairos-muted hover:text-kairos-purple hover:bg-kairos-hover rounded-full transition relative" aria-label="Notificaciones">
+                    <i data-lucide="bell" size="20"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                </button>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 border border-kairos-border shadow-sm cursor-pointer hover:ring-2 ring-purple-500/50 transition"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 relative" id="dashboard-content">
+
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+            <div class="absolute top-[-10%] left-[10%] w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto space-y-6 w-full">
+
+            <section aria-labelledby="balance-heading">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <article class="glass-panel rounded-2xl p-6 lg:col-span-2 relative overflow-hidden group hover-lift animate-fade-in-up">
+                        <div class="absolute right-0 top-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
+                            <i data-lucide="wallet" class="w-32 h-32 text-kairos-purple"></i>
+                        </div>
+                        <h3 class="text-kairos-muted text-sm font-medium uppercase tracking-wider mb-1">Balance Total</h3>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl sm:text-5xl font-bold text-kairos-text tracking-tight">$@Model.TotalBalance.ToString("N2")</span>
+                            <span class="text-kairos-muted text-xl font-medium">USD</span>
+                        </div>
+
+                        <div class="mt-6 flex items-center gap-3">
+                            <div class="px-3 py-1.5 rounded-lg @(Model.MonthlyReturn >= 0 ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-red-500/10 text-red-600 dark:text-red-400") text-sm font-bold flex items-center gap-1.5">
+                                <i data-lucide="@(Model.MonthlyReturn >= 0 ? "trending-up" : "trending-down")" size="16"></i>
+                                <span>@(Model.MonthlyReturn >= 0 ? "+" : "")@Model.MonthlyReturn%</span>
+                            </div>
+                            <span class="text-kairos-muted text-sm">vs mes anterior</span>
+                        </div>
+                    </article>
+
+                    <article class="glass-panel rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden hover-lift animate-fade-in-up stagger-delay-1">
+                        <div class="flex justify-between items-start z-10">
+                            <div>
+                                <h3 class="text-kairos-muted text-sm font-medium uppercase tracking-wider">Perfil de Riesgo</h3>
+                                <p class="text-2xl font-bold text-kairos-text mt-1">@Model.RiskLabel</p>
+                            </div>
+                            <div class="p-2.5 bg-purple-500/10 rounded-xl text-kairos-purple">
+                                <i data-lucide="activity" size="20"></i>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-4 z-10">
+                            <div class="flex justify-between text-[10px] text-kairos-muted mb-2 uppercase font-semibold">
+                                <span>Seguro</span>
+                                <span>Arriesgado</span>
+                            </div>
+                            <div class="h-2 w-full bg-kairos-border rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 relative transition-all duration-1000 ease-out"
+                                     style="width: @Model.RiskScore%"></div>
+                            </div>
+                            <p class="text-xs text-purple-500 mt-3 flex items-center gap-1.5 opacity-80">
+                                <i data-lucide="bot" size="12"></i>
+                                <span>IA Calibrada</span>
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section aria-label="Accesos Rápidos" class="animate-fade-in-up stagger-delay-2">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <a asp-controller="News" asp-action="Index" class="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-kairos-hover transition-colors group cursor-pointer border-l-4 border-l-transparent hover:border-l-kairos-purple">
+                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                            <i data-lucide="newspaper" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-kairos-text">Noticias</p>
+                            <p class="text-xs text-kairos-muted">Ver Feed</p>
+                        </div>
+                    </a>
+
+                    <a href="#market-section" class="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-kairos-hover transition-colors group cursor-pointer border-l-4 border-l-transparent hover:border-l-green-500">
+                        <div class="p-2 bg-green-500/10 rounded-lg text-green-500 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                            <i data-lucide="candlestick-chart" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-kairos-text">Mercado</p>
+                            <p class="text-xs text-kairos-muted">Top Activos</p>
+                        </div>
+                    </a>
+
+                    <a asp-controller="Education" asp-action="Index" class="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-kairos-hover transition-colors group cursor-pointer border-l-4 border-l-transparent hover:border-l-yellow-500">
+                        <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                            <i data-lucide="graduation-cap" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-kairos-text">Academia</p>
+                            <p class="text-xs text-kairos-muted">Aprender</p>
+                        </div>
+                    </a>
+
+                    <a asp-controller="Kairos" asp-action="Index" class="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-kairos-hover transition-colors group cursor-pointer border-l-4 border-l-transparent hover:border-l-purple-500">
+                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                            <i data-lucide="message-circle" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-kairos-text">Chat AI</p>
+                            <p class="text-xs text-kairos-muted">Consultar</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section aria-labelledby="performance-heading">
+                <div class="glass-panel rounded-2xl p-6 animate-fade-in-up stagger-delay-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 id="performance-heading" class="text-kairos-text font-semibold flex items-center gap-2">
+                            <i data-lucide="line-chart" size="18" class="text-kairos-purple"></i>
+                            <span>Rendimiento Histórico</span>
+                        </h2>
+                        <div class="flex bg-kairos-dark p-1 rounded-lg border border-kairos-border">
+                            <button class="px-3 py-1 text-xs font-medium rounded-md bg-kairos-panel text-kairos-text shadow-sm transition">7D</button>
+                            <button class="px-3 py-1 text-xs font-medium rounded-md text-kairos-muted hover:text-kairos-text transition">1M</button>
+                            <button class="px-3 py-1 text-xs font-medium rounded-md text-kairos-muted hover:text-kairos-text transition">1A</button>
+                        </div>
+                    </div>
+
+                    <div class="h-64 w-full relative chart-container">
+                        <div id="chartTooltip" class="chart-tooltip">
+                            <div class="text-xs text-kairos-muted mb-1" id="tooltipDate"></div>
+                            <div class="text-lg font-bold text-kairos-text" id="tooltipValue"></div>
+                            <div class="text-xs font-medium mt-1" id="tooltipChange"></div>
+                        </div>
+
+                        @{
+                            var data = Model.PerformanceData;
+                            // ... Lógica de cálculo de puntos (se mantiene igual) ...
+                            string points = "";
+                            string fillPoints = "";
+                            double width = 1000;
+                            double height = 200;
+                            double stepX = 0;
+                            decimal minVal = 0;
+                            decimal range = 1;
+
+                            if (data.Any())
+                            {
+                                minVal = data.Min(d => d.Value);
+                                decimal maxVal = data.Max(d => d.Value);
+                                range = maxVal - minVal;
+                                if (range == 0) range = 1;
+                                stepX = data.Count > 1 ? width / (data.Count - 1) : 0;
+                                var pointList = new List<string>();
+                                for (int i = 0; i < data.Count; i++)
+                                {
+                                    double x = i * stepX;
+                                    double normalizedY = (double)((data[i].Value - minVal) / range);
+                                    double y = height - (normalizedY * height);
+                                    pointList.Add($"{x.ToString(System.Globalization.CultureInfo.InvariantCulture)},{y.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                                }
+                                points = string.Join(" ", pointList);
+                                fillPoints = $"0,{height} " + points + $" {width},{height}";
+                            }
+                        }
+
+                        <svg viewBox="0 0 1000 200" preserveAspectRatio="none" class="w-full h-full overflow-visible" id="chartSvg">
+                            <line x1="0" y1="50" x2="1000" y2="50" class="stroke-kairos-border" stroke-width="1" stroke-dasharray="5,5" />
+                            <line x1="0" y1="100" x2="1000" y2="100" class="stroke-kairos-border" stroke-width="1" stroke-dasharray="5,5" />
+                            <line x1="0" y1="150" x2="1000" y2="150" class="stroke-kairos-border" stroke-width="1" stroke-dasharray="5,5" />
+                            <line id="crosshairLine" x1="0" y1="0" x2="0" y2="200" class="chart-crosshair-line" style="opacity: 0;" />
+
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3" />
+                                    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+
+                            @if (data.Any())
+                            {
+                                <polygon points="@fillPoints" fill="url(#chartGradient)" class="chart-area" />
+                                <polyline points="@points" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="chart-line" />
+                                <circle id="hoverCircle" r="6" fill="#7c3aed" stroke="#fff" stroke-width="2" style="opacity: 0; pointer-events: none;" />
+                                @for (int i = 0; i < data.Count; i++)
+                                {
+                                    double x = i * stepX;
+                                    double normalizedY = (double)((data[i].Value - minVal) / range);
+                                    double y = height - (normalizedY * height);
+                                    string cx = x.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                    string cy = y.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                    string delay = $"chart-point stagger-delay-{Math.Min(i + 1, 4)}";
+
+                                    <g class="@delay" data-index="@i">
+                                        <circle cx="@cx" cy="@cy" r="4" class="fill-kairos-dark stroke-white hover:r-6 transition-all cursor-pointer"
+                                                stroke-width="2" data-date="@data[i].Date" data-value="@data[i].Value.ToString("N2")" data-x="@cx" data-y="@cy"></circle>
+                                        <circle cx="@cx" cy="@cy" r="8" fill="transparent" class="cursor-pointer" />
+                                    </g>
+                                }
+                            }
+                        </svg>
+                        <div class="chart-overlay" id="chartOverlay"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="market-section">
+                <section aria-labelledby="market-heading" class="animate-fade-in-up stagger-delay-3">
+                    <article class="glass-panel rounded-2xl p-6 h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 id="market-heading" class="text-kairos-text font-semibold flex items-center gap-2">
+                                <i data-lucide="layers" size="18" class="text-blue-400"></i>
+                                <span>Mercado Hoy</span>
+                            </h2>
+                            <a href="#" class="text-xs text-kairos-purple hover:underline font-medium">Ver todo</a>
+                        </div>
+
+                        <ul class="space-y-3 flex-1" role="list">
+                            @foreach (var asset in Model.TopAssets)
+                            {
+                                <li>
+                                    <a href="#" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-kairos-hover transition cursor-pointer group">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-kairos-panel border border-kairos-border flex items-center justify-center font-bold text-xs text-kairos-text">
+                                                @asset.Symbol.Substring(0, 1)
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-sm text-kairos-text group-hover:text-kairos-purple transition-colors">@asset.Symbol</div>
+                                                <div class="text-xs text-kairos-muted">@asset.Name</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-sm font-medium text-kairos-text">$@asset.Price.ToString("N2")</div>
+                                            <div class="text-xs font-medium @(asset.Change24h >= 0 ? "text-green-500" : "text-red-500")">
+                                                @(asset.Change24h >= 0 ? "+" : "")@asset.Change24h%
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </article>
+                </section>
+
+                <section aria-labelledby="news-heading" class="lg:col-span-2 animate-fade-in-up stagger-delay-4">
+                    <article class="glass-panel rounded-2xl p-6 h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 id="news-heading" class="text-kairos-text font-semibold flex items-center gap-2">
+                                <i data-lucide="zap" size="18" class="text-yellow-400"></i>
+                                <span>Últimas Noticias</span>
+                            </h2>
+                            <a asp-controller="News" asp-action="Index" class="text-xs text-kairos-purple hover:underline font-medium flex items-center gap-1">
+                                Ir al Feed <i data-lucide="arrow-right" size="12"></i>
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                            @foreach (var news in Model.RecentNews.Take(4))
+                            {
+                                <a href="#" class="p-4 rounded-xl border border-kairos-border hover:border-kairos-purple transition group cursor-pointer hover-lift bg-kairos-dark/30 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="text-[10px] font-bold text-kairos-purple uppercase tracking-wide">@news.Source</span>
+                                            <time class="text-[10px] text-kairos-muted">@news.TimeAgo</time>
+                                        </div>
+                                        <h3 class="text-sm font-medium text-kairos-text group-hover:text-kairos-purple mb-2 transition-colors line-clamp-2">
+                                            @news.Title
+                                        </h3>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium
+                                                @(news.Sentiment == "Positivo" ? "bg-green-500/10 text-green-500" :
+                                                                                            news.Sentiment == "Negativo" ? "bg-red-500/10 text-red-500" :
+                                                                                            "bg-gray-500/10 text-gray-500")">
+                                        @news.Sentiment
+                                    </span>
+                                </div>
+                            </a>
+                                                        }
+                        </div>
+                    </article>
+                </section>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // -- Lógica del Toggle Simulado/Real --
+    const modeToggle = document.getElementById('mode-toggle');
+    const modeLabel = document.getElementById('mode-label');
+
+    // Checkear estado inicial (podrías guardarlo en localStorage o traerlo del backend)
+    let isRealMode = false;
+
+    modeToggle.addEventListener('change', function() {
+        isRealMode = this.checked;
+        if(isRealMode) {
+            modeLabel.textContent = "Modo Real";
+            modeLabel.style.color = "#10b981"; // Verde
+            // Aquí podrías recargar la página o hacer una petición AJAX para cambiar datos
+            // window.location.href = '?mode=real';
+        } else {
+            modeLabel.textContent = "Simulado";
+            modeLabel.style.color = "var(--text-muted)";
+        }
+    });
+
+    // -- Lógica del Gráfico (Mantenida igual) --
+    const chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.PerformanceData.Select(d => new { date = d.Date, value = d.Value }).ToList()));
+
+    // ... [Mantener el resto de la función initChartInteractivity y los EventListeners tal cual el ejemplo anterior] ...
+
+    function initChartInteractivity() {
+        const overlay = document.getElementById('chartOverlay');
+        const tooltip = document.getElementById('chartTooltip');
+        const svg = document.getElementById('chartSvg');
+        const crosshair = document.getElementById('crosshairLine');
+        const hoverCircle = document.getElementById('hoverCircle');
+        const circles = document.querySelectorAll('#chartSvg circle[data-date]');
+
+        if (!overlay || !tooltip || !svg || chartData.length === 0) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        // Mapeo de puntos
+        const points = Array.from(circles).map(circle => ({
+            x: parseFloat(circle.getAttribute('data-x')),
+            y: parseFloat(circle.getAttribute('data-y')),
+            date: circle.getAttribute('data-date'),
+            value: parseFloat(circle.getAttribute('data-value'))
+        }));
+
+        function findClosestPoint(mouseX) {
+            const svgX = (mouseX / svgRect.width) * 1000;
+            let closest = points[0];
+            let minDistance = Math.abs(svgX - closest.x);
+            points.forEach(point => {
+                const distance = Math.abs(svgX - point.x);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = point;
+                }
+            });
+            return closest;
+        }
+
+        function calculateChange(currentValue, previousValue) {
+            if (!previousValue || previousValue === 0) return null;
+            return ((currentValue - previousValue) / previousValue) * 100;
+        }
+
+        overlay.addEventListener('mousemove', function(e) {
+            const rect = overlay.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const closest = findClosestPoint(mouseX);
+            const closestIndex = points.indexOf(closest);
+
+            const tooltipDate = document.getElementById('tooltipDate');
+            const tooltipValue = document.getElementById('tooltipValue');
+            const tooltipChange = document.getElementById('tooltipChange');
+
+            tooltipDate.textContent = closest.date;
+            tooltipValue.textContent = '$' + closest.value.toFixed(2);
+
+            if (closestIndex > 0) {
+                const previousValue = points[closestIndex - 1].value;
+                const change = calculateChange(closest.value, previousValue);
+                if (change !== null) {
+                    const changeText = change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+                    const changeColor = change >= 0 ? '#10b981' : '#ef4444';
+                    const changeIcon = change >= 0 ? '↑' : '↓';
+                    tooltipChange.innerHTML = `<span style="color: ${changeColor}">${changeIcon} ${changeText} vs ayer</span>`;
+                }
+            } else {
+                tooltipChange.textContent = 'Inicio';
+            }
+
+            // Posicionar tooltip
+            let tooltipX = mouseX + 15;
+            let tooltipY = mouseY - 60;
+            if (tooltipX + tooltip.offsetWidth > rect.width) tooltipX = mouseX - tooltip.offsetWidth - 15;
+            if (tooltipY < 0) tooltipY = mouseY + 15;
+
+            tooltip.style.left = tooltipX + 'px';
+            tooltip.style.top = tooltipY + 'px';
+            tooltip.classList.add('visible');
+
+            // Crosshair
+            crosshair.setAttribute('x1', closest.x);
+            crosshair.setAttribute('x2', closest.x);
+            crosshair.style.opacity = '1';
+
+            hoverCircle.setAttribute('cx', closest.x);
+            hoverCircle.setAttribute('cy', closest.y);
+            hoverCircle.style.opacity = '1';
+        });
+
+        overlay.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('visible');
+            crosshair.style.opacity = '0';
+            hoverCircle.style.opacity = '0';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animaciones iniciales
+        setTimeout(() => {
+            document.querySelectorAll('.animate-fade-in-up').forEach((el, index) => {
+                setTimeout(() => el.classList.add('visible'), index * 100);
+            });
+        }, 100);
+
+        setTimeout(() => {
+            const chartLine = document.querySelector('.chart-line');
+            const chartArea = document.querySelector('.chart-area');
+            const chartPoints = document.querySelectorAll('.chart-point');
+            if (chartLine) chartLine.classList.add('animate');
+            if (chartArea) chartArea.classList.add('animate');
+            chartPoints.forEach((point, index) => {
+                setTimeout(() => point.classList.add('animate'), 2000 + (index * 50));
+            });
+            setTimeout(() => initChartInteractivity(), 2500);
+        }, 200);
+    });
+</script>

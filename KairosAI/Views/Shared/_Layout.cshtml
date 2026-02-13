@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KairosAI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            if (savedTheme === 'light' || (!savedTheme && systemTheme === 'light')) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
+    <style>
+        /* --- TUS VARIABLES ORIGINALES (RESTUARADAS) --- */
+        :root {
+            /* TEMA DARK (Por defecto) */
+            --bg-main: #0f0f1a;
+            --bg-panel: #1a1a2e;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+            --scrollbar-track: #0f0f1a;
+            --scrollbar-thumb: #2d2d44;
+        }
+
+        [data-theme="light"] {
+            /* TEMA LIGHT */
+            --bg-main: #ffffff;
+            --bg-panel: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --hover-bg: rgba(124, 58, 237, 0.1);
+            --scrollbar-track: #f1f5f9;
+            --scrollbar-thumb: #cbd5e1;
+        }
+
+        /* --- ESTILOS BASE --- */
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            /* Transición suave de colores de fondo */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #7c3aed;
+            }
+
+        /* Transiciones generales */
+        aside, div, nav, a, header, button {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        /* Clases de utilidad mapeadas a tus variables */
+        .bg-kairos-main {
+            background-color: var(--bg-main);
+        }
+
+        .bg-kairos-panel {
+            background-color: var(--bg-panel);
+        }
+
+        .text-kairos-main {
+            color: var(--text-main);
+        }
+
+        .text-kairos-muted {
+            color: var(--text-muted);
+        }
+
+        .border-kairos {
+            border-color: var(--border-color);
+        }
+
+        .hover-kairos:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .text-kairos-purple {
+            color: #7c3aed;
+        }
+
+        /* IMPORTANTE: Usamos @@media para que Razor no crea que es código C#
+                   Esto arregla el error CS0103
+                */
+        @@media (max-width: 1024px) {
+            aside {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 50;
+                transform: translateX(-100%);
+                width: 280px;
+                /* Transición fluida del menú móvil */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+                aside.open {
+                    transform: translateX(0);
+                    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+                }
+
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.6);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                backdrop-filter: blur(2px);
+            }
+
+                .overlay.open {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+        }
+    </style>
+</head>
+
+<body class="h-full overflow-hidden flex flex-col lg:flex-row">
+
+    <div id="mobile-overlay" class="overlay lg:hidden" onclick="closeSidebar()"></div>
+
+    <header class="lg:hidden flex items-center justify-between px-4 py-3 bg-kairos-panel border-b border-kairos shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <button onclick="openSidebar()" class="text-kairos-muted hover:text-kairos-main p-1">
+                <i data-lucide="menu" size="24"></i>
+            </button>
+            <span class="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                KairosAI
+            </span>
+        </div>
+        <button onclick="toggleTheme()" class="theme-btn p-2 rounded-lg text-kairos-muted hover-kairos active:scale-90 transition-transform">
+            <i data-lucide="sun" class="sun-icon hidden"></i>
+            <i data-lucide="moon" class="moon-icon hidden"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="bg-kairos-panel border-r border-kairos flex flex-col shrink-0 lg:w-[260px] h-full">
+
+        <div class="h-16 hidden lg:flex items-center px-6 border-b border-kairos">
+            <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                KairosAI
+            </span>
+        </div>
+
+        <div class="h-16 flex lg:hidden items-center justify-between px-6 border-b border-kairos bg-kairos-panel">
+            <span class="text-xl font-bold text-kairos-main">Menú</span>
+            <button onclick="closeSidebar()" class="text-kairos-muted hover:text-kairos-main">
+                <i data-lucide="x" size="24"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+            <a asp-controller="Dashboard" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="layout-dashboard" size="20"></i>
+                <span class="font-medium">Inicio</span>
+            </a>
+
+            <a asp-controller="Kairos" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="message-circle" size="20"></i>
+                <span class="font-medium">KairosAI</span>
+            </a>
+
+            <a asp-controller="Education" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="graduation-cap" size="20"></i>
+                <span class="font-medium">Academia</span>
+            </a>
+
+            <a asp-controller="Rewards" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="gift" size="20"></i>
+                <span class="font-medium">Recompensas</span>
+            </a>
+
+            <a asp-controller="News" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="newspaper" size="20"></i>
+                <span class="font-medium">Noticias</span>
+            </a>
+
+            <a asp-controller="Profile" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
+                <i data-lucide="user" size="20"></i>
+                <span class="font-medium">Perfil</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-kairos flex items-center justify-between gap-2 bg-kairos-panel">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover-kairos cursor-pointer transition flex-1">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 shrink-0"></div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-medium text-kairos-main truncate">Kevin H.</p>
+                    <p class="text-xs text-kairos-muted truncate">Admin</p>
+                </div>
+            </div>
+
+            <button onclick="toggleTheme()"
+                    class="theme-btn p-2 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple transition-all active:scale-90 active:rotate-12 hidden lg:block"
+                    title="Cambiar tema">
+                <i data-lucide="sun" class="sun-icon hidden transition-transform duration-500 hover:rotate-90"></i>
+                <i data-lucide="moon" class="moon-icon hidden transition-transform duration-500 hover:-rotate-12"></i>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-kairos-main relative text-kairos-main">
+        <main class="flex-1 overflow-y-auto w-full">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // --- INICIALIZACIÓN ---
+        lucide.createIcons();
+
+        // --- LÓGICA DE TEMA ---
+        function updateIcons(theme) {
+            const suns = document.querySelectorAll('.sun-icon');
+            const moons = document.querySelectorAll('.moon-icon');
+
+            if (theme === 'dark') {
+                suns.forEach(el => el.style.display = 'block');
+                moons.forEach(el => el.style.display = 'none');
+            } else {
+                suns.forEach(el => el.style.display = 'none');
+                moons.forEach(el => el.style.display = 'block');
+            }
+            // Pequeña espera para asegurar que Lucide renderizó
+            setTimeout(() => lucide.createIcons(), 0);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateIcons(next);
+        }
+
+        // Establecer iconos iniciales sin demora
+        updateIcons(document.documentElement.getAttribute('data-theme'));
+
+        // --- LÓGICA MENÚ MÓVIL (Javascript Puro) ---
+        // Usamos funciones globales para evitar problemas de scope
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        window.openSidebar = function() {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        window.closeSidebar = function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

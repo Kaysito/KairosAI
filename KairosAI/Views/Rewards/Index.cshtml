@@ -1,0 +1,138 @@
+﻿@model KairosAI.Models.ViewModels.RewardsIndexViewModel
+@{
+    ViewData["Title"] = "Recompensas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="flex flex-col gap-6 animate-fade-in-up">
+
+    <header class="h-20 border-b border-kairos-border flex items-center justify-between px-6 bg-kairos-dark/80 backdrop-blur-md rounded-xl sticky top-0 z-20 transition-colors">
+        <div>
+            <h1 class="text-2xl font-bold text-kairos-text">Recompensas</h1>
+            <p class="text-sm text-kairos-muted">Canjea tus puntos por beneficios reales</p>
+        </div>
+
+        <div class="px-5 py-2 bg-kairos-card border border-kairos-border rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="bg-yellow-500/10 p-1.5 rounded-lg">
+                <i data-lucide="coins" class="w-5 h-5 text-yellow-500"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-kairos-muted uppercase">Saldo</span>
+                <p class="text-lg font-bold text-kairos-text leading-none">@Model.UserPoints <span class="text-xs font-normal">pts</span></p>
+            </div>
+        </div>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-600 dark:text-green-400">
+            <i data-lucide="check-circle" size="20"></i>
+            <span class="font-medium">@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+        @foreach (var reward in Model.Rewards)
+        {
+            var canAfford = reward.CanAfford(Model.UserPoints);
+
+            // LÓGICA DE IMÁGENES:
+            // Aquí asignamos URLs de logos reales basándonos en el título.
+            // Puedes cambiar estas URLs por imágenes locales en tu carpeta wwwroot/images/
+            string bgImage = "";
+            string logoOverlay = "";
+            string gradient = "from-gray-700 to-gray-900"; // Default
+
+            if (reward.Title.Contains("Amazon", StringComparison.OrdinalIgnoreCase))
+            {
+                gradient = "from-orange-400 to-yellow-500";
+                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg";
+            }
+            else if (reward.Title.Contains("Google", StringComparison.OrdinalIgnoreCase))
+            {
+                gradient = "from-blue-500 to-cyan-400";
+                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_Play_2022_icon.svg";
+            }
+            else if (reward.Title.Contains("Spotify", StringComparison.OrdinalIgnoreCase))
+            {
+                gradient = "from-green-500 to-green-700";
+                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg";
+            }
+            else if (reward.Title.Contains("Netflix", StringComparison.OrdinalIgnoreCase))
+            {
+                gradient = "from-red-600 to-red-900";
+                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg";
+            }
+            else if (reward.Title.Contains("Steam", StringComparison.OrdinalIgnoreCase))
+            {
+                gradient = "from-blue-900 to-indigo-900";
+                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg";
+            }
+            else
+            {
+                // Genérico (Kairos Style)
+                gradient = "from-purple-600 to-blue-600";
+                logoOverlay = ""; // Usará el icono de Lucide por defecto si no hay logo
+            }
+
+            <div class="group relative bg-kairos-card rounded-2xl border border-kairos-border overflow-hidden flex flex-col transition-all hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/20 hover:-translate-y-1">
+
+                <div class="h-32 w-full bg-gradient-to-br @gradient relative overflow-hidden flex items-center justify-center p-6">
+                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+                    @if (!string.IsNullOrEmpty(logoOverlay))
+                    {
+                        <img src="@logoOverlay" alt="@reward.Title" class="h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-110 duration-300" />
+                    }
+                    else
+                    {
+                        <i data-lucide="@reward.Icon" class="w-12 h-12 text-white drop-shadow-md"></i>
+                    }
+
+                <div class="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/10">
+                    @reward.Cost pts
+                </div>
+            </div>
+
+            <div class="p-5 flex flex-col flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-kairos-text font-bold text-lg leading-tight">@reward.Title</h2>
+                </div>
+
+                <p class="text-sm text-kairos-muted mb-6 line-clamp-2 flex-1">
+                    @reward.Description
+                </p>
+
+                <form asp-action="Redeem" method="post" class="mt-auto">
+                    <input type="hidden" name="id" value="@reward.Id" />
+
+                    <button type="submit"
+                            class="w-full py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm
+                                @(canAfford
+                                                                ? "bg-kairos-purple text-white hover:bg-purple-600 hover:shadow-purple-500/25 active:scale-95"
+                                                                : "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed")"
+                            @(canAfford ? "" : "disabled")>
+
+                        @if (canAfford)
+                            {
+                                <i data-lucide="gift" size="18"></i>
+                                <span>Canjear Recompensa</span>
+                            }
+                            else
+                            {
+                                <i data-lucide="lock" size="18"></i>
+                                <span>Insuficientes Puntos</span>
+                            }
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    </script>
+}

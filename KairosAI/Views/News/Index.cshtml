@@ -1,0 +1,133 @@
+﻿@model KairosAI.Models.ViewModels.NewsIndexViewModel
+@{
+    ViewData["Title"] = "Noticias - KairosAI";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="h-full overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 pb-24">
+
+    <header class="mb-8 animate-fade-in-up">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-kairos-text flex items-center gap-3">
+                    <i data-lucide="newspaper" class="text-kairos-purple"></i>
+                    Inteligencia de Mercado
+                </h1>
+                <p class="text-kairos-muted text-sm mt-1">
+                    Análisis de sentimiento, videos y noticias en tiempo real.
+                </p>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                <button class="px-4 py-2 rounded-full bg-kairos-purple text-white text-sm font-medium shadow-lg shadow-purple-500/20">
+                    Todo
+                </button>
+                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors">
+                    Cripto
+                </button>
+                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors">
+                    Forex
+                </button>
+                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors flex items-center gap-2">
+                    <i data-lucide="youtube" size="14"></i> Videos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in-up stagger-delay-1">
+
+        @foreach (var item in Model.Headlines)
+        {
+            // Lógica de Sentimiento (Colores Adaptables)
+            var sentimentColor = item.Sentiment switch
+            {
+                "Positivo" => "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
+                "Negativo" => "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
+                _ => "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20"
+            };
+
+            var sentimentIcon = item.Sentiment switch
+            {
+                "Positivo" => "trending-up",
+                "Negativo" => "trending-down",
+                _ => "minus"
+            };
+
+            // Simulamos propiedades si no existen en tu modelo actual
+            // En tu backend deberías mapear esto real
+            string externalLink = "#"; // item.Url
+            string videoId = ""; // item.YouTubeVideoId (ej: "M7lc1UVf-VE")
+
+            // Lógica ficticia para demostración: Si el título dice "Video" o "Análisis", mostramos video
+            if (item.Title.Contains("Video") || item.Title.Contains("Análisis"))
+            {
+                videoId = "plz-8Z8GzK8"; // ID de ejemplo de YouTube (Bitcoin News)
+            }
+
+            <article class="bg-kairos-card border border-kairos-border rounded-2xl overflow-hidden hover:border-kairos-purple/50 hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/20 transition-all duration-300 group flex flex-col">
+
+                @if (!string.IsNullOrEmpty(videoId))
+                {
+                    <div class="relative w-full aspect-video bg-black">
+                        <iframe src="https://www.youtube.com/embed/@videoId"
+                                title="@item.Title"
+                                class="absolute top-0 left-0 w-full h-full"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                }
+                else
+                {
+                    <div class="h-2 bg-gradient-to-r from-kairos-purple to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                }
+
+                <div class="p-5 flex flex-col flex-1">
+
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border @sentimentColor flex items-center gap-1.5">
+                            <i data-lucide="@sentimentIcon" size="12"></i>
+                            @item.Sentiment
+                        </span>
+                        <span class="text-xs text-kairos-muted flex items-center gap-1">
+                            <i data-lucide="clock" size="12"></i>
+                            @item.TimeAgo
+                        </span>
+                    </div>
+
+                    <h2 class="text-lg font-bold text-kairos-text mb-2 leading-snug group-hover:text-kairos-purple transition-colors">
+                        @item.Title
+                    </h2>
+
+                    <p class="text-sm text-kairos-muted leading-relaxed mb-4 line-clamp-3 flex-1">
+                        @item.Summary
+                    </p>
+
+                    <div class="pt-4 border-t border-kairos-border flex items-center justify-between mt-auto">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-kairos-panel flex items-center justify-center text-[10px] font-bold text-kairos-muted border border-kairos-border">
+                                @item.Source.Substring(0, 1)
+                            </div>
+                            <span class="text-xs font-medium text-kairos-text">@item.Source</span>
+                        </div>
+
+                        <a href="@externalLink" target="_blank"
+                           class="text-xs font-semibold text-kairos-purple hover:text-purple-500 flex items-center gap-1 transition-colors group/link">
+                            Leer nota
+                            <i data-lucide="external-link" size="12" class="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    </script>
+}
