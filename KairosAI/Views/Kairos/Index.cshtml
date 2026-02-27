@@ -6,43 +6,71 @@
 }
 
 <style>
-    /* Efecto de fondo "Nebulosa" sutil para el chat */
-    .chat-bg-nebula {
-        background: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 25%);
-        animation: pulseNebula 8s ease-in-out infinite alternate;
+    .bubble-user {
+        background: rgba(124,58,237,0.08);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
     }
 
-    @@keyframes pulseNebula {
-        0% {
-            opacity: 0.5;
-            transform: scale(1);
+    [data-theme="light"] .bubble-user {
+        background: #eff6ff;
+        border-color: #dbeafe;
+        color: #1e293b;
+    }
+
+    .chat-input-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .chat-input-box:focus-within {
+            border-color: rgba(124,58,237,0.5);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.07);
         }
 
-        100% {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-    }
-
-    /* Scrollbar invisible para el contenedor de chat, pero funcional */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .no-scrollbar {
-        -ms-overflow-style: none;
+    .chat-textarea {
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        resize: none;
+        outline: none;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        width: 100%;
+        max-height: 140px;
+        padding: 13px 0;
+        font-family: inherit;
         scrollbar-width: none;
     }
 
-    /* Animación de entrada de mensajes */
-    .message-enter {
-        animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        .chat-textarea::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chat-textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+    .scroll-h {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
-    @@keyframes slideInUp {
+        .scroll-h::-webkit-scrollbar {
+            display: none;
+        }
+
+    .msg-enter {
+        animation: msgIn 0.38s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @@keyframes msgIn {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(10px);
         }
 
         to {
@@ -51,216 +79,631 @@
         }
     }
 
-    /* Efecto Glow en el Input al enfocar */
-    .input-glow:focus-within {
-        box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
-        border-color: rgba(124, 58, 237, 0.5);
+    .avatar-ai {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: rgba(124,58,237,0.1);
+        border: 1px solid rgba(124,58,237,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7c3aed;
+    }
+
+    .avatar-user {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg,#7c3aed,#06b6d4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .ai-prose {
+        font-size: 0.875rem;
+        line-height: 1.78;
+        color: var(--text-main);
+    }
+
+        .ai-prose p {
+            margin-bottom: 0.65em;
+            color: var(--text-main);
+        }
+
+        .ai-prose strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .ai-prose em {
+            color: var(--text-muted);
+        }
+
+        .ai-prose h1, .ai-prose h2, .ai-prose h3 {
+            color: var(--text-main);
+            font-weight: 700;
+            margin: 0.9em 0 0.4em;
+        }
+
+        .ai-prose ul, .ai-prose ol {
+            padding-left: 1.3em;
+            margin-bottom: 0.6em;
+            color: var(--text-main);
+        }
+
+        .ai-prose li {
+            margin-bottom: 0.3em;
+        }
+
+        .ai-prose code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            background: rgba(124,58,237,0.08);
+            padding: 1px 6px;
+            border-radius: 5px;
+            color: #7c3aed;
+        }
+
+    [data-theme="light"] .ai-prose code {
+        background: rgba(124,58,237,0.07);
+        color: #6d28d9;
+    }
+
+    .ai-prose pre {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px 14px;
+        overflow-x: auto;
+        margin: 0.6em 0;
+    }
+
+        .ai-prose pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--text-main);
+        }
+
+    .ai-prose a {
+        color: #7c3aed;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .ai-prose blockquote {
+        border-left: 3px solid rgba(124,58,237,0.35);
+        padding-left: 12px;
+        margin: 0.6em 0;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .ai-prose table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+        margin: 0.6em 0;
+        color: var(--text-main);
+    }
+
+    .ai-prose th {
+        background: rgba(124,58,237,0.08);
+        padding: 7px 10px;
+        font-weight: 700;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .ai-prose td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .typing-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #7c3aed;
+        opacity: 0.6;
+        animation: tBounce 1.2s ease infinite;
+    }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.18s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.36s;
+        }
+
+    @@keyframes tBounce {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.45;
+        }
+
+        30% {
+            transform: translateY(-5px);
+            opacity: 1;
+        }
+    }
+
+    .suggestion-chip {
+        padding: 11px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        text-align: left;
+        cursor: pointer;
+        line-height: 1.45;
+        transition: border-color 0.18s, background 0.18s, color 0.18s, transform 0.18s;
+    }
+
+        .suggestion-chip:hover {
+            border-color: rgba(124,58,237,0.45);
+            color: var(--text-main);
+            background: rgba(124,58,237,0.04);
+            transform: translateY(-1px);
+        }
+
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10b981;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: rgba(16,185,129,0.3);
+            animation: lPing 1.8s ease infinite;
+        }
+
+    @@keyframes lPing {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+
+    .input-fade {
+        background: linear-gradient(to top, var(--bg-main) 60%, transparent);
+    }
+
+    .act-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+    }
+
+        .act-btn:hover {
+            background: rgba(124,58,237,0.08);
+            color: var(--text-main);
+        }
+
+    .send-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        background: #7c3aed;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.28);
+        transition: background 0.18s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
+    }
+
+        .send-btn:hover {
+            background: #6d28d9;
+            box-shadow: 0 6px 20px rgba(124,58,237,0.38);
+            transform: scale(1.06);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+    .k-fade-in {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: kFadeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    @@keyframes kFadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .stop-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 14px rgba(239,68,68,0.28);
+        transition: background 0.18s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+        .stop-btn:hover {
+            background: #dc2626;
+            transform: scale(1.06);
+        }
+
+        .stop-btn:active {
+            transform: scale(0.95);
+        }
+
+    .reasoning-details summary::-webkit-details-marker {
+        display: none;
     }
 </style>
 
-<div class="flex flex-col h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] relative overflow-hidden rounded-3xl border border-kairos-border bg-kairos-bg shadow-2xl">
+<div style="display:flex;flex-direction:column;height:calc(100dvh - 2rem);background:var(--bg-main);overflow:hidden;">
 
-    <div class="absolute inset-0 chat-bg-nebula pointer-events-none z-0"></div>
-    <div class="absolute inset-0 opacity-[0.03] pointer-events-none z-0 mix-blend-overlay"
-         style="background-image: url('https://grainy-gradients.vercel.app/noise.svg');"></div>
-
-    <header class="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 bg-kairos-card/70 backdrop-blur-md border-b border-white/5">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-lg shadow-lg shadow-violet-500/20">
-                <i data-lucide="sparkles" class="text-white w-5 h-5"></i>
+    <header style="height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--bg-panel);border-bottom:1px solid var(--border-color);z-index:20;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.08));border:1px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="bot" style="width:16px;height:16px;color:#7c3aed;"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-kairos-main flex items-center gap-2">
-                    Kairos IA
-                    <span class="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-wider border border-green-500/20">Online</span>
-                </h1>
-                <p class="text-xs text-kairos-muted">Analista Financiero 24/7</p>
+                <div style="font-size:0.82rem;font-weight:700;color:var(--text-main);line-height:1.2;letter-spacing:0.02em;">Kairos Intelligence</div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:0.6rem;font-weight:700;color:#10b981;letter-spacing:0.08em;font-family:'JetBrains Mono',monospace;text-transform:uppercase;">
+                    <div class="live-dot"></div> Modelo financiero activo
+                </div>
             </div>
         </div>
-
-        <form asp-action="Clear" method="post">
-            <button class="p-2 text-kairos-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all tooltip-trigger" title="Limpiar conversación">
-                <i data-lucide="trash-2" size="18"></i>
-            </button>
-        </form>
+        <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.58rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(124,58,237,0.1);color:#7c3aed;font-family:'JetBrains Mono',monospace;border:1px solid rgba(124,58,237,0.18);">v2.4</span>
+            <form asp-action="Clear" method="post">
+                <button type="submit" class="act-btn" title="Nueva conversación" style="margin-left:2px;">
+                    <i data-lucide="square-pen" style="width:16px;height:16px;"></i>
+                </button>
+            </form>
+        </div>
     </header>
 
-    <div id="chatContainer" class="flex-1 overflow-y-auto px-4 sm:px-6 pt-20 pb-24 z-10 scroll-smooth space-y-6">
+    <main style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--bg-main);">
+        <div id="chatContainer" class="scroll-h" style="flex:1;overflow-y:auto;padding:20px 16px 150px;scroll-behavior:smooth;">
 
-        @if (!Model.ConversationHistory.Any())
-        {
-            <div class="h-full flex flex-col items-center justify-center text-center opacity-0 animate-[fadeIn_0.8s_ease-out_forwards]">
-                <div class="w-20 h-20 bg-gradient-to-b from-kairos-purple/20 to-transparent rounded-full flex items-center justify-center mb-6 border border-kairos-purple/20 shadow-[0_0_30px_rgba(124,58,237,0.15)]">
-                    <i data-lucide="bot" class="w-10 h-10 text-kairos-purple"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-kairos-main mb-2">¿Qué analizamos hoy?</h2>
-                <p class="text-kairos-muted max-w-md mb-8">
-                    Puedo analizar tendencias de mercado, explicar conceptos cripto o revisar tu portafolio simulado.
-                </p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
-                    <button onclick="fillInput('Analiza la tendencia de Bitcoin para esta semana')"
-                            class="p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-kairos-purple/30 transition-all text-left group">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="trending-up" class="w-4 h-4 text-green-400"></i>
-                            <span class="text-sm font-semibold text-kairos-main group-hover:text-kairos-purple transition-colors">Tendencia Bitcoin</span>
-                        </div>
-                        <p class="text-xs text-kairos-muted">Análisis técnico corto plazo</p>
-                    </button>
-
-                    <button onclick="fillInput('Explícame qué es un ETF de Ethereum')"
-                            class="p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-kairos-purple/30 transition-all text-left group">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="book-open" class="w-4 h-4 text-blue-400"></i>
-                            <span class="text-sm font-semibold text-kairos-main group-hover:text-kairos-purple transition-colors">Conceptos</span>
-                        </div>
-                        <p class="text-xs text-kairos-muted">Explicación simple de ETFs</p>
-                    </button>
-                </div>
-            </div>
-        }
-        else
-        {
-            @foreach (var msg in Model.ConversationHistory)
+            @if (!Model.ConversationHistory.Any())
             {
-                var isAi = msg.Role == "Kairos";
-
-                <div class="flex w-full @(isAi ? "justify-start" : "justify-end") message-enter">
-                    <div class="flex max-w-[90%] md:max-w-[75%] gap-3 @(isAi ? "flex-row" : "flex-row-reverse")">
-
-                        <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center border
-                                            @(isAi ? "bg-kairos-card border-kairos-purple/30" : "bg-gradient-to-br from-violet-500 to-fuchsia-500 border-transparent")">
-                            @if (isAi)
-                            {
-                                <i data-lucide="sparkles" class="w-4 h-4 text-kairos-purple"></i>
-                            }
-                            else
-                            {
-
-                                <i data-lucide="user" class="w-4 h-4 text-white"></i>
-                            }
+                <div id="emptyState" class="k-fade-in" style="min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 16px;animation-delay:0.1s;">
+                    <div style="width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.06));border:1px solid rgba(124,58,237,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 28px rgba(124,58,237,0.1);">
+                        <i data-lucide="sparkles" style="width:30px;height:30px;color:#7c3aed;"></i>
                     </div>
-
-                    <div class="relative px-5 py-3.5 rounded-2xl shadow-sm text-sm leading-relaxed
-                                        @(isAi
-                                                                 ? "bg-kairos-card/80 backdrop-blur-sm border border-white/10 text-kairos-main rounded-tl-none"
-                                                                 : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/10 rounded-tr-none")">
-
-                            @if (isAi)
-                            {
-                                <div class="text-[10px] font-bold text-kairos-purple uppercase tracking-wider mb-1 flex items-center gap-1">
-                                    Kairos
-                                    @if (msg.IsWarning)
-                                    {
-                                        <span class="text-yellow-500 ml-1 flex items-center"><i data-lucide="alert-triangle" class="w-3 h-3 mr-0.5"></i> Nota</span>
-                                    }
-                                </div>
-                            }
-
-                            <div class="prose prose-invert prose-sm max-w-none">
-                                @msg.Text
-                            </div>
-
-                            <span class="text-[9px] absolute bottom-1 right-3 opacity-60">
-                                @msg.Timestamp.ToShortTimeString()
-                            </span>
-                        </div>
+                    <h2 style="font-size:1.25rem;font-weight:800;color:var(--text-main);margin-bottom:8px;">Hola, Kevin 👋</h2>
+                    <p style="max-width:340px;font-size:0.8rem;line-height:1.7;color:var(--text-muted);margin-bottom:26px;">
+                        Soy tu asesor financiero IA. Analizo portafolios, explico conceptos DeFi y te ayudo a invertir con más criterio.
+                    </p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;width:100%;max-width:480px;">
+                        <button onclick="fillInput('Analiza mi rendimiento mensual')" class="suggestion-chip">
+                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">📈 Rendimiento</span>
+                            ¿Cómo va mi portafolio este mes?
+                        </button>
+                        <button onclick="fillInput('¿Qué es un ETF de Bitcoin?')" class="suggestion-chip">
+                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#06b6d4;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">📚 Academia</span>
+                            ¿Qué es un ETF de Bitcoin?
+                        </button>
+                        <button onclick="fillInput('¿Cuál es mi perfil de riesgo actual?')" class="suggestion-chip">
+                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">🎯 Estrategia</span>
+                            ¿Cuál es mi perfil de riesgo?
+                        </button>
+                        <button onclick="fillInput('Dame noticias del mercado crypto hoy')" class="suggestion-chip">
+                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">⚡ Mercado</span>
+                            Noticias crypto de hoy
+                        </button>
                     </div>
                 </div>
             }
-        }
+            else
+            {
+                <div id="messagesWrapper" style="max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:22px;">
+                    @foreach (var msg in Model.ConversationHistory)
+                    {
+                        bool isAi = msg.Role == "Kairos";
+                        if (isAi)
+                        {
+                            <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;">
+                                <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:0.58rem;font-weight:800;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;">
+                                        KAIROS AI <span style="width:3px;height:3px;border-radius:50%;background:rgba(124,58,237,0.35);"></span>
+                                        <span style="font-weight:500;color:var(--text-muted);letter-spacing:0.03em;text-transform:none;font-size:0.56rem;">v2.4</span>
+                                    </div>
+                                    <div class="ai-prose raw-markdown">@msg.Text</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;flex-direction:row-reverse;">
+                                <div class="avatar-user">KH</div>
+                                <div style="max-width:76%;flex-shrink:0;">
+                                    <div class="bubble-user" style="padding:11px 15px;border-radius:18px;border-top-right-radius:4px;font-size:0.875rem;line-height:1.6;word-break:break-word;">
+                                        @msg.Text
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
 
-        <div id="typingIndicator" class="hidden flex justify-start w-full pl-11">
-            <div class="bg-kairos-card/50 border border-white/5 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-kairos-purple rounded-full animate-bounce"></span>
-                <span class="w-1.5 h-1.5 bg-kairos-purple rounded-full animate-bounce delay-100"></span>
-                <span class="w-1.5 h-1.5 bg-kairos-purple rounded-full animate-bounce delay-200"></span>
+            <div id="typingIndicator" class="hidden" style="max-width:740px;margin:12px auto 0;">
+                <div style="display:flex;gap:11px;align-items:flex-start;">
+                    <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
+                    <div style="display:flex;align-items:center;gap:5px;padding:12px 14px;border-radius:14px;background:var(--bg-card);border:1px solid var(--border-color);">
+                        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-    </div>
-
-    <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-kairos-bg via-kairos-bg/95 to-transparent z-20">
-        <form asp-action="Send" method="post" class="max-w-4xl mx-auto relative input-glow rounded-2xl transition-all duration-300">
-
-            <div class="relative bg-kairos-panel/80 backdrop-blur-xl border border-white/10 rounded-2xl flex items-end p-2 shadow-2xl">
-
-                <button type="button" class="p-3 text-kairos-muted hover:text-kairos-main transition-colors rounded-xl hover:bg-white/5 h-[52px]">
-                    <i data-lucide="paperclip" size="20"></i>
-                </button>
-
-                <textarea asp-for="CurrentInput"
-                          id="chatInput"
-                          rows="1"
-                          placeholder="Pregunta sobre mercados, activos o predicciones..."
-                          class="w-full bg-transparent border-none text-kairos-main placeholder-gray-500 focus:ring-0 resize-none py-3.5 max-h-32 text-sm scrollbar-hide"
-                          oninput="autoResize(this)"
-                          onkeydown="handleEnter(event)"></textarea>
-
-                <button type="submit"
-                        class="p-3 bg-kairos-purple hover:bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-200 hover:scale-105 h-[52px] w-[52px] flex items-center justify-center">
-                    <i data-lucide="arrow-up" size="20" stroke-width="3"></i>
-                </button>
-            </div>
-
-            <p class="text-center text-[10px] text-kairos-muted mt-2 opacity-60">
-                KairosAI puede cometer errores. Verifica la información financiera importante.
-            </p>
-        </form>
-    </div>
+        <div class="input-fade" style="position:absolute;bottom:0;left:0;right:0;padding:8px 16px 18px;z-index:20;">
+            <form id="chatForm" style="max-width:740px;margin:0 auto;">
+                <div class="chat-input-box" style="display:flex;align-items:flex-end;gap:6px;padding:5px 7px;">
+                    <button type="button" class="act-btn" title="Adjuntar">
+                        <i data-lucide="paperclip" style="width:17px;height:17px;"></i>
+                    </button>
+                    <textarea asp-for="CurrentInput" id="chatInput" rows="1" placeholder="Pregunta sobre activos, estrategias o conceptos..." class="chat-textarea" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+                    <button type="submit" id="sendBtn" class="send-btn" title="Enviar">
+                        <i data-lucide="arrow-up" style="width:17px;height:17px;stroke-width:2.5;"></i>
+                    </button>
+                    <button type="button" id="stopBtn" class="stop-btn hidden" title="Detener" onclick="stopGeneration()">
+                        <i data-lucide="square" style="width:15px;height:15px;fill:currentColor;"></i>
+                    </button>
+                </div>
+                <p style="text-align:center;font-size:0.58rem;color:var(--text-muted);margin-top:6px;opacity:0.65;">
+                    Kairos puede cometer errores · Verifica siempre la información financiera
+                </p>
+            </form>
+        </div>
+    </main>
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
-        // Inicializar Iconos
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         const chatContainer = document.getElementById('chatContainer');
-        const chatInput = document.getElementById('chatInput');
+        const chatInput     = document.getElementById('chatInput');
+        const chatForm      = document.getElementById('chatForm');
+        const sendBtn       = document.getElementById('sendBtn');
+        const stopBtn       = document.getElementById('stopBtn');
+        const typingInd     = document.getElementById('typingIndicator');
 
-        // 1. Auto-scroll al fondo
+        let fetchController = null;
+
+        // Renderizar Markdown de mensajes pre-existentes (cargados desde el servidor)
+        document.querySelectorAll('.raw-markdown').forEach(el => {
+            el.innerHTML = marked.parse(el.textContent);
+            el.classList.remove('raw-markdown');
+        });
+
         function scrollToBottom() {
-            if (chatContainer) {
-                chatContainer.scrollTo({
-                    top: chatContainer.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
+            if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Ejecutar al cargar
-        scrollToBottom();
-
-        // 2. Auto-resize del Textarea
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-            // Limitar altura máxima visualmente si crece mucho (CSS max-h-32 ya lo hace)
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 140) + 'px';
         }
 
-        // 3. Enviar con Enter (Shift+Enter para salto de línea)
         function handleEnter(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Evitar salto de línea
-                if(e.target.value.trim() !== "") {
-                    // Mostrar indicador de "Escribiendo..." visualmente
-                    document.getElementById('typingIndicator')?.classList.remove('hidden');
-                    scrollToBottom();
-                    e.target.form.submit();
-                }
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
             }
         }
 
-        // 4. Llenar input desde sugerencias
         window.fillInput = function(text) {
-            if(chatInput) {
+            if (chatInput) {
                 chatInput.value = text;
                 chatInput.focus();
                 autoResize(chatInput);
             }
+        };
+
+        window.stopGeneration = function() {
+            if (fetchController) {
+                fetchController.abort();
+                resetUI();
+            }
+        };
+
+        function resetUI() {
+            typingInd.classList.add('hidden');
+            stopBtn.classList.add('hidden');
+            sendBtn.classList.remove('hidden');
+            chatInput.disabled = false;
+            chatInput.focus();
         }
 
-        // Enfocar al cargar
-        chatInput?.focus();
+        // Obtiene o crea el wrapper de mensajes, ocultando la pantalla vacía si es necesario
+        function getOrCreateWrapper() {
+            let wrapper = document.getElementById('messagesWrapper');
+            if (!wrapper) {
+                const emptyState = document.getElementById('emptyState');
+                if (emptyState) emptyState.style.display = 'none';
+
+                wrapper = document.createElement('div');
+                wrapper.id = 'messagesWrapper';
+                wrapper.style.cssText = 'max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:22px;';
+                chatContainer.insertBefore(wrapper, typingInd);
+            }
+            return wrapper;
+        }
+
+        function appendUserMessage(text) {
+            const wrapper = getOrCreateWrapper();
+            const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            wrapper.insertAdjacentHTML('beforeend', `
+                <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;flex-direction:row-reverse;">
+                    <div class="avatar-user">KH</div>
+                    <div style="max-width:76%;flex-shrink:0;">
+                        <div class="bubble-user" style="padding:11px 15px;border-radius:18px;border-top-right-radius:4px;font-size:0.875rem;line-height:1.6;word-break:break-word;">${safe}</div>
+                    </div>
+                </div>`);
+        }
+
+        // Crea la burbuja de respuesta de Kairos y devuelve el div donde escribir el texto
+        function appendAiMessage() {
+            const wrapper = getOrCreateWrapper();
+            const id = 'ai-msg-' + Date.now();
+            wrapper.insertAdjacentHTML('beforeend', `
+                <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;">
+                    <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.58rem;font-weight:800;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;">
+                            KAIROS AI <span style="width:3px;height:3px;border-radius:50%;background:rgba(124,58,237,0.35);"></span>
+                            <span style="font-weight:500;color:var(--text-muted);letter-spacing:0.03em;text-transform:none;font-size:0.56rem;">v2.4</span>
+                        </div>
+                        <div id="${id}" class="ai-prose" style="min-height:1em;"></div>
+                    </div>
+                </div>`);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return document.getElementById(id);
+        }
+
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendUserMessage(text);
+            chatInput.value = '';
+            autoResize(chatInput);
+
+            typingInd.classList.remove('hidden');
+            sendBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            chatInput.disabled = true;
+            scrollToBottom();
+
+            fetchController = new AbortController();
+
+            try {
+                const formData = new FormData();
+                formData.append('CurrentInput', text);
+
+                const response = await fetch('/Kairos/SendApi', {
+                    method: 'POST',
+                    body: formData,
+                    signal: fetchController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                // Ocultar typing indicator y crear burbuja de respuesta
+                typingInd.classList.add('hidden');
+                const aiDiv = appendAiMessage();
+                let rawText = '';
+
+                // ✅ LECTURA REAL DEL STREAM SSE
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Procesar líneas completas del buffer
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // guardar línea incompleta
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data:')) continue;
+                        const payload = line.slice(5).trim();
+                        if (payload === '[DONE]') break;
+
+                        try {
+                            // Los chunks vienen serializados como JSON string (para escapar \n)
+                            const chunk = JSON.parse(payload);
+                            rawText += chunk;
+                            // Renderizar Markdown en tiempo real
+                            aiDiv.innerHTML = marked.parse(rawText);
+                            scrollToBottom();
+                        } catch {
+                            // Si por alguna razón no es JSON, usarlo directo
+                            rawText += payload;
+                            aiDiv.innerHTML = marked.parse(rawText);
+                            scrollToBottom();
+                        }
+                    }
+                }
+
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    const wrapper = getOrCreateWrapper();
+                    wrapper.insertAdjacentHTML('beforeend', `
+                        <div style="display:flex;gap:11px;align-items:flex-start;">
+                            <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
+                            <div class="ai-prose" style="color:#ef4444;font-size:0.82rem;">
+                                ⚠️ Error de conexión. Por favor intenta de nuevo.
+                            </div>
+                        </div>`);
+                }
+            } finally {
+                resetUI();
+                scrollToBottom();
+            }
+        });
+
+        window.onload = () => {
+            scrollToBottom();
+            chatInput?.focus();
+        };
     </script>
 }

@@ -1,116 +1,333 @@
 ﻿@model KairosAI.Models.ViewModels.MarketIndexViewModel
 @{
-    ViewData["Title"] = "Mercado";
+    ViewData["Title"] = "Mercado Global";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- HEADER SUPERIOR -->
-<header class="h-20 border-b border-gray-800 flex items-center justify-between px-6 bg-kairos-dark/80 backdrop-blur-md z-20">
-    <div>
-        <h1 class="text-2xl font-bold text-white">Mercado</h1>
-        <p class="text-sm text-gray-400">Explora activos, tendencias y análisis de KairosAI</p>
-    </div>
-</header>
+<style>
+    /* ── Design tokens (sincronizados con el Dashboard) ── */
+    :root {
+        --kairos-purple: #7c3aed;
+        --kairos-purple-10: rgba(124, 58, 237, 0.10);
+        --kairos-purple-20: rgba(124, 58, 237, 0.20);
+        --kairos-green: #10b981;
+        --kairos-red: #ef4444;
+        --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
 
-<div class="p-6 space-y-6">
+    /* ── Fade-in orquestado ── */
+    .k-fade {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+    }
 
-    <!-- BUSCADOR + FILTROS -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        .k-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        <!-- BUSCADOR -->
-        <form asp-controller="Market" asp-action="Index" method="get" class="flex items-center gap-3 w-full md:w-1/3">
-            <input type="text"
-                   name="search"
-                   value="@Model.SearchTerm"
-                   placeholder="Buscar activo: BTC, ETH, NVDA..."
-                   class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </form>
+    .market-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        transition: background 0.3s, border-color 0.3s;
+    }
 
-        <!-- FILTROS -->
-        <div class="flex items-center gap-2">
-            @{
-                string[] filtros = { "Todos", "Cripto", "Accion", "ETF" };
-            }
+    .market-header {
+        background: var(--bg-main);
+        border-bottom: 1px solid var(--border-color);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
 
-            @foreach (var f in filtros)
-            {
-                <a asp-controller="Market" asp-action="Index" asp-route-filter="@f"
-                   class="px-4 py-2.5 rounded-lg text-sm transition-all
-                       @(Model.Filter == f
-                                           ? "bg-blue-600 text-white"
-                                           : "bg-white/5 text-gray-300 hover:bg-white/10")">
-                @f
-            </a>
-                        }
+    .search-input {
+        width: 100%;
+        padding: 9px 12px 9px 38px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-main);
+        font-size: 0.85rem;
+        outline: none;
+    }
+
+    .filter-pill {
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.18s ease;
+        color: var(--text-muted);
+    }
+
+        .filter-pill.active {
+            background: var(--kairos-purple);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+    .market-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .market-row {
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.15s ease;
+        cursor: pointer;
+    }
+
+        .market-row:hover {
+            background: var(--hover-bg);
+        }
+
+    .asset-logo-wrap {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-panel, rgba(17,18,24,0.45));
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .asset-logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+    .asset-logo-fallback {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--kairos-purple);
+    }
+
+    .price-mono {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+    }
+
+    .change-up {
+        color: var(--kairos-green);
+        font-weight: 700;
+    }
+
+    .change-down {
+        color: var(--kairos-red);
+        font-weight: 700;
+    }
+
+    .risk-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+        .risk-pill.low {
+            background: rgba(59,130,246,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+
+        .risk-pill.medium {
+            background: rgba(245,158,11,0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+
+        .risk-pill.high {
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+
+    .btn-analysis {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 9px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .btn-analysis:hover {
+            background: var(--kairos-purple);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+        }
+</style>
+
+<div class="w-full min-h-full flex flex-col" style="background:var(--bg-main);color:var(--text-main);">
+
+    <header class="market-header min-h-[3.75rem] py-2 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
+        <div class="flex flex-col gap-0.5 justify-center">
+            <p style="font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; opacity:0.6;">KairosAI · Mercado</p>
+            <h1 class="text-sm sm:text-[0.9rem] font-bold flex items-center gap-2">
+                <i data-lucide="globe" style="width:15px;height:15px;color:var(--kairos-purple);"></i>
+                Terminal de Mercado
+            </h1>
         </div>
-    </div>
+        <div class="status-online" style="display:inline-flex; align-items:center; gap:6px; font-size:0.62rem; font-weight:700; color:var(--kairos-green); background:rgba(16,185,129,0.1); padding:5px 11px; border-radius:99px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--kairos-green);"></span>
+            <span>EN VIVO</span>
+        </div>
+    </header>
 
-    <!-- TABLA DE ACTIVOS -->
-    <div class="overflow-hidden rounded-xl bg-white/5 border border-gray-800 backdrop-blur-md shadow-xl">
-        <table class="w-full text-left">
-            <thead class="bg-white/5 border-b border-gray-800 text-gray-400 text-sm uppercase">
-                <tr>
-                    <th class="px-6 py-4">Activo</th>
-                    <th class="px-6 py-4">Precio</th>
-                    <th class="px-6 py-4">24h</th>
-                    <th class="px-6 py-4">Riesgo</th>
-                    <th class="px-6 py-4">Tipo</th>
-                    <th class="px-6 py-4 text-right">Acción</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-200">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-5">
 
-                @foreach (var asset in Model.Assets)
-                {
-                    var changeColor = asset.Change24h > 0 ? "text-green-400" : "text-red-400";
-                    var riskColor = asset.RiskLevel switch
+        <section class="k-fade">
+            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <form asp-controller="Market" asp-action="Index" method="get" class="relative w-full sm:max-w-xs">
+                    <i data-lucide="search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%); width:15px;height:15px;color:var(--text-muted);"></i>
+                    <input type="search" name="searchTerm" value="@Model.SearchTerm" placeholder="Buscar activo… BTC, NVDA" class="search-input" />
+                </form>
+
+                <nav style="display:flex;gap:6px;background:var(--bg-card);padding:4px; border-radius:99px;border:1px solid var(--border-color);">
+                    @{
+                        var filtros = new[] { ("Todos", "Todos"), ("Cripto", "Cripto"), ("Accion", "Bolsa") };
+                    }
+                    @foreach (var (val, label) in filtros)
                     {
-                        "Bajo" => "text-green-400",
-                        "Medio" => "text-yellow-400",
-                        "Alto" => "text-orange-400",
-                        "Extremo" => "text-red-500",
-                        _ => "text-gray-300"
-                    };
-                    <tr class="border-b border-gray-800 hover:bg-white/5 transition">
-                        <td class="px-6 py-4 flex items-center gap-2">
-                            <span class="font-semibold">@asset.Symbol</span>
-                            <span class="text-gray-400 text-sm">@asset.Name</span>
+                        var isActive = Model.Filter == val || (string.IsNullOrEmpty(Model.Filter) && val == "Todos");
+                        <a asp-controller="Market" asp-action="Index" asp-route-filter="@val" class="filter-pill @(isActive ? "active" : "")">@label</a>
+                    }
+                </nav>
+            </div>
+        </section>
 
-                            @if (asset.IsTrending)
+        <section class="k-fade market-panel rounded-2xl overflow-hidden">
+            @if (!Model.Assets.Any())
+            {
+                <div style="padding:56px 24px; text-align:center;">
+                    <p>No se encontraron activos para "@Model.SearchTerm".</p>
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left; padding:12px 16px;">Activo</th>
+                                <th style="text-align:right; padding:12px 16px;">Precio</th>
+                                <th style="text-align:right; padding:12px 16px;">24 h</th>
+                                <th style="padding:12px 16px;">Riesgo</th>
+                                <th style="text-align:center; padding:12px 16px;">Análisis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var asset in Model.Assets)
                             {
-                                <span class="text-red-500 ml-2" title="Tendencia">
-                                    <i data-lucide="flame" size="16"></i>
-                                </span>
+                                <tr class="market-row" onclick="window.location='@Url.Action("Details", "Market", new { symbol = asset.Symbol })'">
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:11px; padding:12px 16px;">
+                                            <div class="asset-logo-wrap">
+                                                @if (!string.IsNullOrEmpty(asset.ImageUrl))
+                                                {
+                                                    <img src="@asset.ImageUrl" onerror="handleLogoError(this, '@(asset.Symbol)', '@(asset.Type)')" />
+                                                }
+                                                else
+                                                {
+                                                    <img data-stock-ticker="@asset.Symbol" style="display:none;" onerror="handleLogoError(this, '@(asset.Symbol)', '@(asset.Type)')" />
+                                                    <span class="asset-logo-fallback">@(string.IsNullOrEmpty(asset.Symbol) ? "?" : asset.Symbol.Substring(0, 1).ToUpper())</span>
+                                                }
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:700;">@asset.Symbol</div>
+                                                <div style="font-size:0.7rem; color:var(--text-muted);">@asset.Name</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right; padding:12px 16px;"><span class="price-mono">$@asset.Price.ToString("N2")</span></td>
+                                    <td style="text-align:right; padding:12px 16px;">
+                                        @{
+                                            var cClass = asset.Change24h >= 0 ? "change-up" : "change-down";
+                                        }
+                                        <span class="@cClass">@(asset.Change24h >= 0 ? "▲" : "▼") @Math.Abs(asset.Change24h).ToString("F2")%</span>
+                                    </td>
+                                    <td style="padding:12px 16px;">
+                                        @{
+                                            var rClass = asset.RiskLevel == "Bajo" ? "low" : (asset.RiskLevel == "Medio" ? "medium" : "high");
+                                        }
+                                        <span class="risk-pill @rClass">@asset.RiskLevel</span>
+                                    </td>
+                                    <td style="text-align:center; padding:12px 16px;">
+                                        <a asp-action="Details" asp-route-symbol="@asset.Symbol" class="btn-analysis" onclick="event.stopPropagation()">
+                                            <i data-lucide="sparkles" style="width:12px;height:12px;"></i> Análisis IA
+                                        </a>
+                                    </td>
+                                </tr>
                             }
-                        </td>
-
-                        <td class="px-6 py-4">
-                            $@asset.Price
-                        </td>
-
-                        <td class="px-6 py-4">
-                            <span class="@changeColor">
-                                @(asset.Change24h > 0 ? "+" : "")@asset.Change24h%
-                            </span>
-                        </td>
-
-                        <td class="px-6 py-4">
-                            <span class="@riskColor">@asset.RiskLevel</span>
-                        </td>
-
-                        <td class="px-6 py-4">
-                            @asset.Type
-                        </td>
-
-                        <td class="px-6 py-4 text-right">
-                            <a asp-controller="Market" asp-action="Details" asp-route-id="@asset.Symbol"
-                               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm transition">
-                                Ver más
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </main>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const TICKER_DOMAIN_MAP = { AAPL:'apple.com', MSFT:'microsoft.com', GOOGL:'google.com', AMZN:'amazon.com', NVDA:'nvidia.com' };
+            const CDN = 'https://cdn.tickerlogos.com/';
+
+            window.handleLogoError = function(img, symbol, type) {
+                if (!img.dataset.triedSynth) {
+                    img.dataset.triedSynth = '1';
+                    img.src = 'https://logo.synthfinance.com/ticker/' + (symbol || '');
+                    return;
+                }
+                img.style.display = 'none';
+                const wrap = img.closest('.asset-logo-wrap');
+                if (wrap) {
+                    let fb = wrap.querySelector('.asset-logo-fallback');
+                    if (!fb) {
+                        fb = document.createElement('span');
+                        fb.className = 'asset-logo-fallback';
+                        fb.textContent = symbol ? symbol.charAt(0).toUpperCase() : '?';
+                        wrap.appendChild(fb);
+                    }
+                    fb.style.display = '';
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                document.querySelectorAll('.k-fade').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('visible'), 70 + i * 80);
+                });
+
+                document.querySelectorAll('img[data-stock-ticker]').forEach(img => {
+                    const ticker = img.getAttribute('data-stock-ticker') || '';
+                    const domain = TICKER_DOMAIN_MAP[ticker.toUpperCase()];
+                    if (domain) {
+                        img.src = CDN + domain;
+                        img.style.display = 'block';
+                        const fb = img.parentElement.querySelector('.asset-logo-fallback');
+                        if (fb) fb.style.display = 'none';
+                    }
+                });
+            });
+        })();
+    </script>
+}

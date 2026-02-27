@@ -4,135 +4,570 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="flex flex-col gap-6 animate-fade-in-up">
+<style>
+    /* ── Fade orquestado ── */
+    .k-fade {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
 
-    <header class="h-20 border-b border-kairos-border flex items-center justify-between px-6 bg-kairos-dark/80 backdrop-blur-md rounded-xl sticky top-0 z-20 transition-colors">
-        <div>
-            <h1 class="text-2xl font-bold text-kairos-text">Recompensas</h1>
-            <p class="text-sm text-kairos-muted">Canjea tus puntos por beneficios reales</p>
-        </div>
+        .k-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        <div class="px-5 py-2 bg-kairos-card border border-kairos-border rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="bg-yellow-500/10 p-1.5 rounded-lg">
-                <i data-lucide="coins" class="w-5 h-5 text-yellow-500"></i>
+    /* ── Progress ring ── */
+    .progress-ring-circle {
+        transition: stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1);
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+
+    /* ── Points badge en header ── */
+    .points-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px 8px 10px;
+        border-radius: 14px;
+        border: 1px solid rgba(245,158,11,0.25);
+        background: rgba(245,158,11,0.07);
+    }
+
+    .points-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(245,158,11,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f59e0b;
+    }
+
+    /* ── Tier bar ── */
+    .tier-track {
+        height: 5px;
+        border-radius: 99px;
+        background: var(--border-color);
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .tier-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #f59e0b, #7c3aed);
+        transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    /* ── Filter pills ── */
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.18s ease;
+    }
+
+        .filter-pill:hover {
+            border-color: rgba(124,58,237,0.4);
+            color: var(--text-main);
+        }
+
+        .filter-pill.active {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.28);
+        }
+
+    /* ── Reward card ── */
+    .reward-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        position: relative;
+    }
+
+        .reward-card:hover {
+            border-color: rgba(124,58,237,0.45);
+            box-shadow: 0 14px 36px rgba(124,58,237,0.1);
+            transform: translateY(-3px);
+        }
+
+        .reward-card.locked {
+            opacity: 0.65;
+        }
+
+            .reward-card.locked:hover {
+                transform: translateY(-1px);
+                box-shadow: none;
+                border-color: var(--border-color);
+            }
+
+    /* Card banner */
+    .card-banner {
+        height: 130px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+        .card-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .card-banner .banner-logo {
+            position: relative;
+            z-index: 1;
+            height: 56px;
+            width: auto;
+            object-fit: contain;
+            drop-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+    .reward-card:hover .banner-logo {
+        transform: scale(1.08);
+    }
+
+    .card-banner .banner-icon {
+        position: relative;
+        z-index: 1;
+        color: rgba(255,255,255,0.9);
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .reward-card:hover .banner-icon {
+        transform: scale(1.1) rotate(-4deg);
+    }
+
+    /* Cost pill on banner */
+    .cost-pill {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.12);
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #fff;
+        font-family: 'JetBrains Mono', monospace;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        letter-spacing: 0.04em;
+    }
+
+    /* NEW badge */
+    .new-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #7c3aed, #06b6d4);
+        font-size: 0.58rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    /* Card body */
+    .card-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    /* Redeem button */
+    .btn-redeem {
+        width: 100%;
+        padding: 11px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+        .btn-redeem.can {
+            background: #7c3aed;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.25);
+        }
+
+            .btn-redeem.can:hover {
+                background: #6d28d9;
+                box-shadow: 0 6px 20px rgba(124,58,237,0.35);
+                transform: scale(1.02);
+            }
+
+            .btn-redeem.can:active {
+                transform: scale(0.97);
+            }
+
+        .btn-redeem.cant {
+            background: var(--bg-panel);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            cursor: not-allowed;
+        }
+
+    /* Points needed bar */
+    .points-progress {
+        height: 3px;
+        border-radius: 99px;
+        background: var(--border-color);
+        overflow: hidden;
+        margin-top: 6px;
+    }
+
+    .points-progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    }
+
+    /* ── Ambient ── */
+    .ambient-blob {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        background: radial-gradient(circle, rgba(124,58,237,0.06), transparent 70%);
+    }
+</style>
+
+<div style="background:var(--bg-main);color:var(--text-main);min-height:100%;padding-bottom:60px;position:relative;overflow-x:hidden;">
+
+    <!-- Ambient -->
+    <div class="ambient-blob" style="width:500px;height:500px;top:-100px;right:-100px;"></div>
+
+    <!-- ── HEADER ── -->
+    <header class="sticky top-0 z-20 px-4 sm:px-8 py-4 k-fade"
+            style="background:var(--bg-main);border-bottom:1px solid var(--border-color);backdrop-filter:blur(14px);">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+            <div class="flex items-center gap-3">
+                <div style="padding:9px;background:rgba(245,158,11,0.1);border-radius:12px;">
+                    <i data-lucide="gift" style="width:20px;height:20px;color:#f59e0b;"></i>
+                </div>
+                <div>
+                    <h1 style="font-size:1.1rem;font-weight:700;color:var(--text-main);line-height:1.2;">
+                        Recompensas
+                    </h1>
+                    <p style="font-size:0.7rem;color:var(--text-muted);">
+                        Invierte, aprende y canjea beneficios reales
+                    </p>
+                </div>
             </div>
-            <div>
-                <span class="text-xs font-bold text-kairos-muted uppercase">Saldo</span>
-                <p class="text-lg font-bold text-kairos-text leading-none">@Model.UserPoints <span class="text-xs font-normal">pts</span></p>
+
+            <!-- Points badge -->
+            <div class="points-badge">
+                <div class="points-icon">
+                    <i data-lucide="coins" style="width:17px;height:17px;"></i>
+                </div>
+                <div>
+                    <p style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;">Saldo disponible</p>
+                    <p style="font-size:1.1rem;font-weight:800;color:var(--text-main);line-height:1.1;font-family:'JetBrains Mono',monospace;">
+                        @Model.UserPoints <span style="font-size:0.65rem;font-weight:500;color:var(--text-muted);">pts</span>
+                    </p>
+                </div>
             </div>
         </div>
     </header>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-600 dark:text-green-400">
-            <i data-lucide="check-circle" size="20"></i>
-            <span class="font-medium">@TempData["SuccessMessage"]</span>
-        </div>
-    }
+    <div class="px-4 sm:px-8 pt-6 max-w-6xl mx-auto relative z-10">
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
-        @foreach (var reward in Model.Rewards)
+        <!-- ── SUCCESS MSG ── -->
+        @if (TempData["SuccessMessage"] != null)
         {
-            var canAfford = reward.CanAfford(Model.UserPoints);
+            <div class="k-fade mb-5 flex items-center gap-3 p-4 rounded-xl"
+                 style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);">
+                <i data-lucide="check-circle" style="width:18px;height:18px;color:#10b981;flex-shrink:0;"></i>
+                <span style="font-size:0.85rem;font-weight:600;color:#10b981;">@TempData["SuccessMessage"]</span>
+            </div>
+        }
 
-            // LÓGICA DE IMÁGENES:
-            // Aquí asignamos URLs de logos reales basándonos en el título.
-            // Puedes cambiar estas URLs por imágenes locales en tu carpeta wwwroot/images/
-            string bgImage = "";
-            string logoOverlay = "";
-            string gradient = "from-gray-700 to-gray-900"; // Default
-
-            if (reward.Title.Contains("Amazon", StringComparison.OrdinalIgnoreCase))
-            {
-                gradient = "from-orange-400 to-yellow-500";
-                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg";
-            }
-            else if (reward.Title.Contains("Google", StringComparison.OrdinalIgnoreCase))
-            {
-                gradient = "from-blue-500 to-cyan-400";
-                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_Play_2022_icon.svg";
-            }
-            else if (reward.Title.Contains("Spotify", StringComparison.OrdinalIgnoreCase))
-            {
-                gradient = "from-green-500 to-green-700";
-                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg";
-            }
-            else if (reward.Title.Contains("Netflix", StringComparison.OrdinalIgnoreCase))
-            {
-                gradient = "from-red-600 to-red-900";
-                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg";
-            }
-            else if (reward.Title.Contains("Steam", StringComparison.OrdinalIgnoreCase))
-            {
-                gradient = "from-blue-900 to-indigo-900";
-                logoOverlay = "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg";
-            }
-            else
-            {
-                // Genérico (Kairos Style)
-                gradient = "from-purple-600 to-blue-600";
-                logoOverlay = ""; // Usará el icono de Lucide por defecto si no hay logo
-            }
-
-            <div class="group relative bg-kairos-card rounded-2xl border border-kairos-border overflow-hidden flex flex-col transition-all hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/20 hover:-translate-y-1">
-
-                <div class="h-32 w-full bg-gradient-to-br @gradient relative overflow-hidden flex items-center justify-center p-6">
-                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-
-                    @if (!string.IsNullOrEmpty(logoOverlay))
-                    {
-                        <img src="@logoOverlay" alt="@reward.Title" class="h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-110 duration-300" />
-                    }
-                    else
-                    {
-                        <i data-lucide="@reward.Icon" class="w-12 h-12 text-white drop-shadow-md"></i>
-                    }
-
-                <div class="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/10">
-                    @reward.Cost pts
+        <!-- ── TIER PROGRESS ── -->
+        <div class="k-fade mb-6" style="transition-delay:0.06s;">
+            <div style="padding:16px 20px;border-radius:16px;border:1px solid var(--border-color);background:var(--bg-card);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">Nivel</span>
+                        <span style="padding:3px 10px;border-radius:99px;font-size:0.7rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#7c3aed);color:#fff;letter-spacing:0.04em;">
+                            @(Model.UserPoints >= 5000 ? "GOLD" : Model.UserPoints >= 2000 ? "SILVER" : "BRONZE")
+                        </span>
+                    </div>
+                    <span style="font-size:0.68rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">
+                        @Model.UserPoints / @(Model.UserPoints >= 5000 ? "∞" : Model.UserPoints >= 2000 ? "5000" : "2000") pts para siguiente nivel
+                    </span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="tier-track">
+                        <div class="tier-fill" id="tierFill"
+                             style="width:0%"
+                             data-target="@(Model.UserPoints >= 5000 ? 100 : Model.UserPoints >= 2000 ? (int)((Model.UserPoints - 2000.0) / 3000 * 100) : (int)(Model.UserPoints / 2000.0 * 100))">
+                        </div>
+                    </div>
+                    <span style="font-size:0.65rem;font-weight:700;color:#f59e0b;font-family:'JetBrains Mono',monospace;white-space:nowrap;">
+                        @(Model.UserPoints >= 5000 ? "MAX" : Model.UserPoints >= 2000 ? ((int)((Model.UserPoints - 2000.0) / 3000 * 100)) + "%" : (int)(Model.UserPoints / 2000.0 * 100) + "%")
+                    </span>
                 </div>
             </div>
+        </div>
 
-            <div class="p-5 flex flex-col flex-1">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 class="text-kairos-text font-bold text-lg leading-tight">@reward.Title</h2>
-                </div>
+        <!-- ── FILTER PILLS ── -->
+        <div class="k-fade mb-6" style="transition-delay:0.1s;display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;">
+            <button class="filter-pill active" onclick="filterRewards(this,'all')">
+                <i data-lucide="layout-grid" style="width:11px;height:11px;"></i>
+                Todo
+            </button>
+            <button class="filter-pill" onclick="filterRewards(this,'streaming')">
+                <i data-lucide="play-circle" style="width:11px;height:11px;"></i>
+                Streaming
+            </button>
+            <button class="filter-pill" onclick="filterRewards(this,'shopping')">
+                <i data-lucide="shopping-bag" style="width:11px;height:11px;"></i>
+                Compras
+            </button>
+            <button class="filter-pill" onclick="filterRewards(this,'gaming')">
+                <i data-lucide="gamepad-2" style="width:11px;height:11px;"></i>
+                Gaming
+            </button>
+            <button class="filter-pill" onclick="filterRewards(this,'kairos')">
+                <i data-lucide="sparkles" style="width:11px;height:11px;"></i>
+                KairosAI
+            </button>
+        </div>
 
-                <p class="text-sm text-kairos-muted mb-6 line-clamp-2 flex-1">
-                    @reward.Description
-                </p>
+        <!-- ── REWARD CARDS ── -->
+        <div class="k-fade" style="transition-delay:0.16s;">
+            <div id="rewardsGrid"
+                 style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">
 
-                <form asp-action="Redeem" method="post" class="mt-auto">
-                    <input type="hidden" name="id" value="@reward.Id" />
+                @foreach (var reward in Model.Rewards)
+                {
+                    var canAfford = reward.CanAfford(Model.UserPoints);
+                    int pct = canAfford ? 100 : (int)Math.Min(100, (Model.UserPoints / (double)reward.Cost) * 100);
 
-                    <button type="submit"
-                            class="w-full py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm
-                                @(canAfford
-                                                                ? "bg-kairos-purple text-white hover:bg-purple-600 hover:shadow-purple-500/25 active:scale-95"
-                                                                : "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed")"
-                            @(canAfford ? "" : "disabled")>
+                    // ── Brand config ──
+                    string gradient = "linear-gradient(135deg,#7c3aed,#06b6d4)";
+                    string logoUrl = "";
+                    string category = "kairos";
+                    bool isNew = false;
 
-                        @if (canAfford)
+                    var t = reward.Title.ToLower();
+                    if (t.Contains("amazon"))
+                    {
+                        gradient = "linear-gradient(135deg,#f97316,#f59e0b)";
+                        logoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg";
+                        category = "shopping";
+                    }
+                    else if (t.Contains("google"))
+                    {
+                        gradient = "linear-gradient(135deg,#3b82f6,#06b6d4)";
+                        logoUrl = "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_Play_2022_icon.svg";
+                        category = "shopping";
+                        isNew = true;
+                    }
+                    else if (t.Contains("spotify"))
+                    {
+                        gradient = "linear-gradient(135deg,#16a34a,#22c55e)";
+                        logoUrl = "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg";
+                        category = "streaming";
+                    }
+                    else if (t.Contains("netflix"))
+                    {
+                        gradient = "linear-gradient(135deg,#dc2626,#991b1b)";
+                        logoUrl = "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg";
+                        category = "streaming";
+                    }
+                    else if (t.Contains("steam"))
+                    {
+                        gradient = "linear-gradient(135deg,#1e3a5f,#1d4ed8)";
+                        logoUrl = "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg";
+                        category = "gaming";
+                    }
+
+                    <div class="reward-card @(canAfford ? "" : "locked")" data-category="@category">
+
+                        <!-- Banner -->
+                        <div class="card-banner" style="background:@gradient;">
+                            <!-- Texture overlay -->
+                            <div style="position:absolute;inset:0;opacity:0.08;"
+                                 style="background-image:url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23fff\' fill-opacity=\'1\'%3E%3Cpolygon points=\'20 10 10 0 0 10 10 20\'/%3E%3C/g%3E%3C/svg%3E');">
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(logoUrl))
                             {
-                                <i data-lucide="gift" size="18"></i>
-                                <span>Canjear Recompensa</span>
+                                <img src="@logoUrl" alt="@reward.Title" class="banner-logo" />
                             }
                             else
                             {
-                                <i data-lucide="lock" size="18"></i>
-                                <span>Insuficientes Puntos</span>
+                                <i data-lucide="@reward.Icon" class="banner-icon" style="width:44px;height:44px;"></i>
                             }
-                        </button>
-                    </form>
+
+                            <!-- Cost pill -->
+                            <div class="cost-pill">
+                                <i data-lucide="coins" style="width:10px;height:10px;color:#f59e0b;"></i>
+                                @reward.Cost pts
+                            </div>
+
+                            @if (isNew)
+                            {
+                                <div class="new-badge">NEW</div>
+                            }
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body">
+                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);margin-bottom:5px;line-height:1.3;">
+                                @reward.Title
+                            </h2>
+                            <p style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;margin-bottom:14px;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                @reward.Description
+                            </p>
+
+                            @if (!canAfford)
+                            {
+                                <!-- Points progress -->
+                                <div style="margin-bottom:10px;">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                        <span style="font-size:0.62rem;color:var(--text-muted);">Tu progreso</span>
+                                        <span style="font-size:0.62rem;font-weight:700;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">
+                                            @Model.UserPoints / @reward.Cost
+                                        </span>
+                                    </div>
+                                    <div class="points-progress">
+                                        <div class="points-progress-fill" style="width:@pct%;"></div>
+                                    </div>
+                                </div>
+                            }
+
+                            <form asp-action="Redeem" method="post">
+                                <input type="hidden" name="id" value="@reward.Id" />
+                                <button type="submit"
+                                        class="btn-redeem @(canAfford ? "can" : "cant")"
+                                        @(canAfford ? "" : "disabled aria-disabled='true'")>
+                                    @if (canAfford)
+                                    {
+                                        <i data-lucide="gift" style="width:15px;height:15px;"></i>
+                                        <span>Canjear ahora</span>
+                                    }
+                                    else
+                                    {
+                                        <i data-lucide="lock" style="width:14px;height:14px;"></i>
+                                        <span>Faltan @(reward.Cost - Model.UserPoints) pts</span>
+                                    }
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- ── EARN MORE CTA ── -->
+        <div class="k-fade mt-8" style="transition-delay:0.22s;">
+            <div style="padding:20px 24px;border-radius:18px;border:1px solid rgba(124,58,237,0.2);background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(6,182,212,0.04));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="padding:10px;background:rgba(124,58,237,0.12);border-radius:12px;">
+                        <i data-lucide="zap" style="width:20px;height:20px;color:#7c3aed;"></i>
+                    </div>
+                    <div>
+                        <p style="font-size:0.88rem;font-weight:700;color:var(--text-main);">¿Quieres ganar más puntos?</p>
+                        <p style="font-size:0.73rem;color:var(--text-muted);">Completa lecciones en Academia o consulta a KairosAI</p>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a asp-controller="Education" asp-action="Index"
+                       style="padding:9px 18px;border-radius:10px;font-size:0.78rem;font-weight:700;background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-main);text-decoration:none;transition:border-color 0.18s;"
+                       onmouseover="this.style.borderColor='rgba(124,58,237,0.5)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                        Academia
+                    </a>
+                    <a asp-controller="Kairos" asp-action="Index"
+                       style="padding:9px 18px;border-radius:10px;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;text-decoration:none;box-shadow:0 4px 14px rgba(124,58,237,0.25);transition:background 0.18s;"
+                       onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">
+                        Chat con Kairos
+                    </a>
                 </div>
             </div>
-        }
-    </div>
+        </div>
+
+    </div><!-- /max-w -->
 </div>
 
 @section Scripts {
     <script>
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // ── Fade in ──
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.k-fade').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), 60 + i * 80);
+            });
+
+            // Tier bar
+            setTimeout(() => {
+                const fill = document.getElementById('tierFill');
+                if (fill) fill.style.width = fill.dataset.target + '%';
+            }, 350);
+        });
+
+        // ── Filter ──
+        function filterRewards(btn, category) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('.reward-card').forEach(card => {
+                const match = category === 'all' || card.dataset.category === category;
+                card.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+                if (match) {
+                    card.style.opacity   = '1';
+                    card.style.transform = 'scale(1)';
+                    card.style.display   = '';
+                    card.style.pointerEvents = 'auto';
+                } else {
+                    card.style.opacity   = '0';
+                    card.style.transform = 'scale(0.96)';
+                    card.style.pointerEvents = 'none';
+                    setTimeout(() => { if (card.style.opacity === '0') card.style.display = 'none'; }, 220);
+                }
+            });
+        }
     </script>
 }

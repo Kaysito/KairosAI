@@ -10,20 +10,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perfil de Inversor - Kairos AI</title>
+    <title>Calibración IA - Kairos</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
                     colors: {
                         'kairos-purple': '#7c3aed',
-                        'kairos-dark': '#0f0f1a',
+                        'kairos-dark': '#0b0b15',
                         'kairos-card': '#1a1a2e',
-                        'kairos-accent': '#2e1065',
                     }
                 }
             }
@@ -32,9 +36,10 @@
 
     <style>
         body {
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            background: #0b0b15;
+            background-image: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
         }
-        /* Ocultar scrollbar */
+
         html {
             scrollbar-width: none;
         }
@@ -43,198 +48,377 @@
             display: none;
         }
 
-        /* Animación suave para la selección de tarjetas */
+        /* ── Tarjetas de Opción ── */
         .risk-card {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(30,30,46,0.5);
+            backdrop-filter: blur(10px);
         }
 
             .risk-card:hover {
-                transform: translateY(-2px);
-                border-color: #a78bfa; /* purple-400 */
+                transform: translateY(-3px);
+                border-color: rgba(124, 58, 237, 0.4);
+                background: rgba(124, 58, 237, 0.05);
+                box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
             }
+
+        /* ── Transiciones del Wizard ── */
+        .step-container {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+            .step-container.active {
+                display: block;
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+        /* ── Animación de "Procesando IA" ── */
+        .ai-pulse {
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+            animation: pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+        @@keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(124, 58, 237, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+            }
+        }
+
+        /* Barra de progreso superior */
+        #progress-bar {
+            transition: width 0.4s ease;
+        }
     </style>
 </head>
 
-<body class="h-full font-sans text-gray-100 antialiased selection:bg-purple-500 selection:text-white">
+<body class="h-full text-gray-100 antialiased flex flex-col">
 
-    <main class="min-h-full flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-
-        <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center p-3 rounded-full bg-purple-900/30 mb-4 ring-1 ring-purple-500/50">
-                <i data-lucide="brain-circuit" class="text-kairos-purple" style="width: 32px; height: 32px;"></i>
+    <header class="p-6 flex items-center justify-between z-10">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-kairos-purple to-cyan-500 flex items-center justify-center">
+                <i data-lucide="brain-circuit" class="text-white" size="18"></i>
             </div>
-            <h1 class="text-3xl font-bold text-white tracking-tight">
-                Calibrando Kairos AI
-            </h1>
-            <p class="mt-2 text-gray-400 text-sm max-w-lg mx-auto">
-                Para sugerirte las mejores estrategias, necesito entender tu psicología financiera y tolerancia al riesgo.
-            </p>
+            <span class="font-bold text-xl tracking-tight">KairosAI</span>
         </div>
+        <div class="text-sm text-gray-400 font-mono" id="step-counter">01 / 04</div>
+    </header>
 
-        <div class="bg-kairos-card/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+    <div class="w-full h-1 bg-gray-800 absolute top-20 left-0">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-kairos-purple w-1/4"></div>
+    </div>
 
-            <form asp-controller="Onboarding" asp-action="RiskAssessment" method="post" class="space-y-10" id="riskForm">
+    <main class="flex-1 flex flex-col justify-center py-8 px-4 sm:px-6 max-w-2xl mx-auto w-full relative z-10">
 
-                <div asp-validation-summary="ModelOnly" class="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20 mb-4"></div>
+        <form asp-controller="Onboarding" asp-action="RiskAssessment" method="post" id="riskForm">
 
-                <section>
-                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-kairos-purple text-xs font-bold">1</span>
-                        ¿Cuál es tu objetivo principal?
-                    </h3>
+            <div class="step-container active" data-step="1">
+                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">MÓDULO DE CONDUCTA</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
+                    Tu inversión principal acaba de caer un 25% tras una mala noticia global. ¿Qué pasa por tu cabeza?
+                </h2>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <label class="cursor-pointer relative">
-                            <input type="radio" asp-for="InvestmentGoal" value="Preservar" class="peer sr-only" />
-                            <div class="risk-card p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 hover:bg-gray-800/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple h-full flex flex-col items-center text-center gap-3">
-                                <i data-lucide="shield-check" class="text-green-400 w-8 h-8"></i>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">Preservar Capital</div>
-                                    <div class="text-xs text-gray-500 mt-1">Prefiero seguridad sobre ganancias.</div>
-                                </div>
+                <div class="space-y-3">
+                    <label class="cursor-pointer block relative group">
+                        <input type="radio" name="Behavior1" value="Panico" class="peer sr-only" required />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 shrink-0">
+                                <i data-lucide="alert-triangle" size="20"></i>
                             </div>
-                        </label>
-
-                        <label class="cursor-pointer relative">
-                            <input type="radio" asp-for="InvestmentGoal" value="Crecimiento" class="peer sr-only" />
-                            <div class="risk-card p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 hover:bg-gray-800/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple h-full flex flex-col items-center text-center gap-3">
-                                <i data-lucide="trending-up" class="text-blue-400 w-8 h-8"></i>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">Crecimiento</div>
-                                    <div class="text-xs text-gray-500 mt-1">Balance entre riesgo y retorno.</div>
-                                </div>
+                            <div>
+                                <p class="font-bold text-gray-200">"Sácame de aquí"</p>
+                                <p class="text-sm text-gray-500">Vendo para evitar perder lo poco que queda. No tolero la angustia.</p>
                             </div>
-                        </label>
+                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                        </div>
+                    </label>
 
-                        <label class="cursor-pointer relative">
-                            <input type="radio" asp-for="InvestmentGoal" value="Especulacion" class="peer sr-only" />
-                            <div class="risk-card p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 hover:bg-gray-800/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple h-full flex flex-col items-center text-center gap-3">
-                                <i data-lucide="rocket" class="text-purple-400 w-8 h-8"></i>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">Especulación</div>
-                                    <div class="text-xs text-gray-500 mt-1">Busco retornos máximos, alto riesgo.</div>
-                                </div>
+                    <label class="cursor-pointer block relative group">
+                        <input type="radio" name="Behavior1" value="Espera" class="peer sr-only" />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400 shrink-0">
+                                <i data-lucide="eye" size="20"></i>
                             </div>
-                        </label>
+                            <div>
+                                <p class="font-bold text-gray-200">"Cierro la app y respiro"</p>
+                                <p class="text-sm text-gray-500">Me frustra, pero entiendo que el mercado fluctúa. Prefiero esperar.</p>
+                            </div>
+                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer block relative group">
+                        <input type="radio" name="Behavior1" value="Oportunidad" class="peer sr-only" />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
+                                <i data-lucide="shopping-cart" size="20"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-200">"Rebajas de temporada"</p>
+                                <p class="text-sm text-gray-500">Busco liquidez inmediatamente para comprar más barato. Es mi momento.</p>
+                            </div>
+                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="step-container" data-step="2">
+                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">ANÁLISIS DE LIQUIDEZ</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
+                    Recibes un bono inesperado equivalente a 3 meses de tu sueldo. ¿Cuál es tu primer instinto real?
+                </h2>
+
+                <div class="space-y-3">
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" name="Behavior2" value="Seguridad" class="peer sr-only" />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <i data-lucide="piggy-bank" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
+                            <div>
+                                <p class="font-bold text-gray-200">Asegurar el futuro</p>
+                                <p class="text-sm text-gray-500">Pagar deudas, fondo de emergencia o guardarlo en el banco.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" name="Behavior2" value="Balance" class="peer sr-only" />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <i data-lucide="pie-chart" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
+                            <div>
+                                <p class="font-bold text-gray-200">Regla del 50/50</p>
+                                <p class="text-sm text-gray-500">La mitad a un ETF seguro, la otra mitad para disfrutar o viajar.</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" name="Behavior2" value="Riesgo" class="peer sr-only" />
+                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <i data-lucide="rocket" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
+                            <div>
+                                <p class="font-bold text-gray-200">Multiplicarlo rápido</p>
+                                <p class="text-sm text-gray-500">Crypto, startups, o ese activo volátil del que todos hablan.</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="step-container" data-step="3">
+                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">HORIZONTE TEMPORAL</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
+                    Sé honesto: ¿Cuánto tiempo estás dispuesto a inmovilizar este capital sin tocarlo bajo ninguna circunstancia?
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" asp-for="TimeHorizon" value="Corto" class="peer sr-only" />
+                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <span class="text-3xl font-bold text-white mb-1">‹ 1</span>
+                            <span class="text-sm text-gray-400">Año</span>
+                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Alta liquidez requerida</span>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" asp-for="TimeHorizon" value="Medio" class="peer sr-only" />
+                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <span class="text-3xl font-bold text-white mb-1">1-4</span>
+                            <span class="text-sm text-gray-400">Años</span>
+                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Objetivos a mediano plazo</span>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer block relative">
+                        <input type="radio" asp-for="TimeHorizon" value="Largo" class="peer sr-only" />
+                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
+                            <span class="text-3xl font-bold text-white mb-1">5+</span>
+                            <span class="text-sm text-gray-400">Años</span>
+                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Retiro o creación de riqueza</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="step-container text-center" data-step="4">
+
+                <div id="loading-state" class="py-12">
+                    <div class="w-24 h-24 mx-auto bg-kairos-purple rounded-full flex items-center justify-center ai-pulse mb-8">
+                        <i data-lucide="cpu" class="text-white" size="40"></i>
                     </div>
-                    <span asp-validation-for="InvestmentGoal" class="text-red-400 text-xs mt-2 block"></span>
-                </section>
-
-                <hr class="border-gray-800" />
-
-                <section>
-                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-kairos-purple text-xs font-bold">2</span>
-                        Si tu portafolio cae un 20% en un día...
-                    </h3>
-
-                    <div class="space-y-3">
-                        <label class="cursor-pointer relative block">
-                            <input type="radio" asp-for="DropReaction" value="Vender" class="peer sr-only" />
-                            <div class="risk-card flex items-center p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20">
-                                <div class="bg-red-500/20 p-2 rounded-lg mr-4">
-                                    <i data-lucide="alert-circle" class="text-red-400 w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">Vendo todo inmediatamente</div>
-                                    <div class="text-xs text-gray-500">Para evitar mayores pérdidas.</div>
-                                </div>
-                                <div class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple">
-                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                                </div>
-                            </div>
-                        </label>
-
-                        <label class="cursor-pointer relative block">
-                            <input type="radio" asp-for="DropReaction" value="Esperar" class="peer sr-only" />
-                            <div class="risk-card flex items-center p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20">
-                                <div class="bg-yellow-500/20 p-2 rounded-lg mr-4">
-                                    <i data-lucide="clock" class="text-yellow-400 w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">No hago nada</div>
-                                    <div class="text-xs text-gray-500">Espero a que el mercado se recupere.</div>
-                                </div>
-                                <div class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple">
-                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                                </div>
-                            </div>
-                        </label>
-
-                        <label class="cursor-pointer relative block">
-                            <input type="radio" asp-for="DropReaction" value="Comprar" class="peer sr-only" />
-                            <div class="risk-card flex items-center p-4 rounded-xl border border-gray-700 bg-kairos-dark/50 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20">
-                                <div class="bg-green-500/20 p-2 rounded-lg mr-4">
-                                    <i data-lucide="shopping-bag" class="text-green-400 w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-200">Compro más (Buy the dip)</div>
-                                    <div class="text-xs text-gray-500">Aprovecho los precios bajos.</div>
-                                </div>
-                                <div class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple">
-                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    <span asp-validation-for="DropReaction" class="text-red-400 text-xs mt-2 block"></span>
-                </section>
-
-                <hr class="border-gray-800" />
-
-                <section>
-                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-kairos-purple text-xs font-bold">3</span>
-                        ¿Cuándo necesitarás retirar este dinero?
-                    </h3>
-
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" asp-for="TimeHorizon" value="Corto" class="peer sr-only" />
-                            <div class="risk-card p-3 rounded-xl border border-gray-700 bg-kairos-dark/50 text-center peer-checked:bg-purple-900/20 peer-checked:border-kairos-purple">
-                                <span class="block text-sm font-bold text-gray-200">Menos de 1 año</span>
-                            </div>
-                        </label>
-
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" asp-for="TimeHorizon" value="Medio" class="peer sr-only" />
-                            <div class="risk-card p-3 rounded-xl border border-gray-700 bg-kairos-dark/50 text-center peer-checked:bg-purple-900/20 peer-checked:border-kairos-purple">
-                                <span class="block text-sm font-bold text-gray-200">1 - 5 años</span>
-                            </div>
-                        </label>
-
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" asp-for="TimeHorizon" value="Largo" class="peer sr-only" />
-                            <div class="risk-card p-3 rounded-xl border border-gray-700 bg-kairos-dark/50 text-center peer-checked:bg-purple-900/20 peer-checked:border-kairos-purple">
-                                <span class="block text-sm font-bold text-gray-200">Más de 5 años</span>
-                            </div>
-                        </label>
-                    </div>
-                    <span asp-validation-for="TimeHorizon" class="text-red-400 text-xs mt-2 block"></span>
-                </section>
-
-                <div class="pt-4">
-                    <button type="submit"
-                            class="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-kairos-purple to-purple-800 hover:from-purple-600 hover:to-purple-900 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transform transition hover:-translate-y-1">
-                        Analizar mi Perfil
-                        <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
-                    </button>
-
-                    <p class="text-center mt-4 text-xs text-gray-500">
-                        La IA utilizará estos datos para ajustar sus recomendaciones. Puedes recalibrar tu perfil en cualquier momento desde la configuración.
-                    </p>
+                    <h2 class="text-2xl font-bold text-white mb-2">Kairos está analizando tu perfil...</h2>
+                    <p class="text-gray-400 font-mono text-sm" id="loading-text">Evaluando tolerancia al riesgo conductual...</p>
                 </div>
 
-            </form>
-        </div>
+                <div id="result-state" class="hidden py-8">
+                    <span class="inline-block px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold font-mono rounded-full mb-6 border border-green-500/20">
+                        PERFIL CALIBRADO
+                    </span>
+
+                    <div class="bg-gradient-to-b from-gray-800/50 to-transparent border border-gray-700 rounded-2xl p-8 mb-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <i data-lucide="fingerprint" size="100"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-1 uppercase tracking-widest">Nivel de Riesgo Asignado</p>
+                        <h1 id="risk-result-title" class="text-4xl sm:text-5xl font-bold text-white mb-4">Calculando...</h1>
+                        <p id="risk-result-desc" class="text-gray-300 text-sm max-w-md mx-auto"></p>
+                    </div>
+
+                    <button type="submit" class="w-full sm:w-auto mx-auto flex items-center justify-center gap-2 py-4 px-8 rounded-xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition backdrop-blur-sm">
+                        Confirmar e ir al Dashboard
+                        <i data-lucide="arrow-right" size="18"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-10 flex justify-between items-center" id="nav-buttons">
+                <button type="button" id="btn-prev" class="hidden px-6 py-3 rounded-xl font-medium text-gray-400 hover:text-white transition" onclick="changeStep(-1)">
+                    Atrás
+                </button>
+                <button type="button" id="btn-next" class="ml-auto flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-white bg-kairos-purple hover:bg-purple-500 shadow-lg shadow-purple-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed" onclick="changeStep(1)" disabled>
+                    Siguiente <i data-lucide="arrow-right" size="18"></i>
+                </button>
+            </div>
+
+            <input type="hidden" asp-for="InvestmentGoal" id="FinalRiskLevel" />
+        </form>
+
     </main>
 
     <script>
-        // Inicializar Iconos
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+
+            // Lógica para habilitar botón "Siguiente" al seleccionar opción
+            const radios = document.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.getElementById('btn-next').disabled = false;
+                });
+            });
         });
+
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function changeStep(direction) {
+            // Ocultar paso actual
+            const currentEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+            currentEl.classList.remove('active');
+
+            currentStep += direction;
+
+            // Actualizar UI
+            document.getElementById('step-counter').textContent = `0${currentStep} / 04`;
+            document.getElementById('progress-bar').style.width = `${(currentStep / totalSteps) * 100}%`;
+
+            // Mostrar nuevo paso
+            const nextEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+            setTimeout(() => { nextEl.classList.add('active'); }, 100);
+
+            // Manejo de botones
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            if (currentStep === 1) {
+                btnPrev.classList.add('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+            }
+
+            // Deshabilitar botón "siguiente" si el nuevo paso no tiene respuesta seleccionada
+            if(currentStep < 4) {
+                const checkedInStep = nextEl.querySelector('input[type="radio"]:checked');
+                btnNext.disabled = !checkedInStep;
+                btnNext.innerHTML = 'Siguiente <i data-lucide="arrow-right" size="18"></i>';
+                lucide.createIcons();
+            }
+
+            // Si llegamos al paso 4, iniciamos la simulación de IA
+            if (currentStep === 4) {
+                document.getElementById('nav-buttons').classList.add('hidden');
+                simulateAIAnalysis();
+            }
+        }
+
+        function simulateAIAnalysis() {
+            const texts = [
+                "Cruzando datos de comportamiento...",
+                "Analizando historial de liquidez...",
+                "Evaluando matriz de volatilidad...",
+                "Calibrando perfil final..."
+            ];
+
+            let i = 0;
+            const textEl = document.getElementById('loading-text');
+
+            const interval = setInterval(() => {
+                i++;
+                if(i < texts.length) {
+                    textEl.textContent = texts[i];
+                } else {
+                    clearInterval(interval);
+                    showFinalResult();
+                }
+            }, 800);
+        }
+
+        function showFinalResult() {
+            // Lógica simple para calcular el riesgo basado en respuestas
+            // En la vida real, el backend podría hacer esto, pero aquí lo calculamos para el UI.
+            let score = 0;
+
+            const b1 = document.querySelector('input[name="Behavior1"]:checked').value; // Panico(1), Espera(2), Oportunidad(3)
+            const b2 = document.querySelector('input[name="Behavior2"]:checked').value; // Seguridad(1), Balance(2), Riesgo(3)
+            const t3 = document.querySelector('input[name="TimeHorizon"]:checked').value; // Corto(1), Medio(2), Largo(3)
+
+            if(b1 === 'Oportunidad') score += 3; else if(b1 === 'Espera') score += 2; else score += 1;
+            if(b2 === 'Riesgo') score += 3; else if(b2 === 'Balance') score += 2; else score += 1;
+            if(t3 === 'Largo') score += 3; else if(t3 === 'Medio') score += 2; else score += 1;
+
+            let resultTitle = "";
+            let resultDesc = "";
+            let colorClass = "";
+
+            if (score <= 4) {
+                resultTitle = "Controlado";
+                resultDesc = "La IA priorizará activos de renta fija, ETFs de baja volatilidad y estrategias de preservación de capital para proteger tu salud financiera y tranquilidad.";
+                colorClass = "text-blue-400";
+            } else if (score >= 5 && score <= 7) {
+                resultTitle = "Moderado";
+                resultDesc = "Kairos buscará un punto óptimo entre acciones sólidas y renta fija, permitiendo crecimiento a largo plazo sin exponerte a caídas drásticas de capital.";
+                colorClass = "text-kairos-purple";
+            } else {
+                resultTitle = "Elevado";
+                resultDesc = "Detecto una fuerte tolerancia a la volatilidad. Tus estrategias incluirán criptoactivos, acciones growth y operaciones especulativas buscando retornos agresivos.";
+                colorClass = "text-pink-500";
+            }
+
+            // Asignar al input oculto para mandar al backend
+            document.getElementById('FinalRiskLevel').value = resultTitle;
+
+            // Actualizar UI
+            const titleEl = document.getElementById('risk-result-title');
+            titleEl.textContent = resultTitle;
+            titleEl.className = `text-4xl sm:text-5xl font-bold mb-4 ${colorClass}`;
+            document.getElementById('risk-result-desc').textContent = resultDesc;
+
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('result-state').classList.remove('hidden');
+            document.getElementById('result-state').classList.add('fade-slide-in');
+        }
     </script>
 </body>
 </html>

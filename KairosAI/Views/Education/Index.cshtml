@@ -5,146 +5,632 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<header class="h-16 border-b border-kairos-border flex items-center justify-between px-6 bg-kairos-dark/80 backdrop-blur-md z-20 mb-8 rounded-b-2xl sticky top-0 transition-colors">
-    <div>
-        <h1 class="text-2xl font-bold text-kairos-text flex items-center gap-2">
-            <i data-lucide="graduation-cap" class="text-kairos-purple"></i>
-            Academia Kairos
-        </h1>
-        <p class="text-sm text-kairos-muted">Aprende, progresa y aumenta tu nivel</p>
-    </div>
+<style>
+    /* ── Animaciones ── */
+    .k-fade {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
 
-    <div class="flex items-center gap-4">
-        <button class="p-2 text-kairos-muted hover:text-kairos-purple hover:bg-kairos-hover rounded-full transition relative"
-                aria-label="Notificaciones">
-            <i data-lucide="bell" size="20"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        .k-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 border border-kairos-border"></div>
-    </div>
-</header>
+    /* ── HEADER STICKY ── */
+    .edu-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 14px 0;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background: linear-gradient(to bottom, var(--bg-main) 85%, transparent);
+        border-bottom: 1px solid var(--border-color);
+    }
 
-<div class="animate-fade-in-up pb-10">
+    /* ── XP BADGE ── */
+    .xp-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px 8px 10px;
+        border-radius: 14px;
+        border: 1px solid rgba(245,158,11,0.25);
+        background: rgba(245,158,11,0.07);
+        width: fit-content;
+    }
 
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+    .xp-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(245,158,11,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f59e0b;
+        flex-shrink: 0;
+    }
 
-        <div class="mt-4 md:mt-0 flex items-center gap-4 px-6 py-4 rounded-2xl bg-kairos-card border border-kairos-border shadow-lg shadow-purple-900/5 transition-colors">
-            <div class="bg-yellow-500/10 p-3 rounded-xl text-yellow-600 dark:text-yellow-400 border border-yellow-500/20">
-                <i data-lucide="trophy" size="24"></i>
+    /* ── STATS SCROLLABLE ── */
+    .stats-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .stats-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        flex: 1 0 auto;
+        min-width: 140px;
+    }
+
+    .stat-chip-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .xp-track {
+        height: 5px;
+        border-radius: 99px;
+        background: var(--border-color);
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .xp-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #f59e0b, #7c3aed);
+        transition: width 1.3s ease;
+        width: 0%;
+    }
+
+    /* ── STEPPER ── */
+    .path-stepper {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        padding: 16px 20px;
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .path-stepper::-webkit-scrollbar {
+            display: none;
+        }
+
+    .step-node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+
+    .step-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+        transition: transform 0.2s;
+        border: 2px solid;
+    }
+
+        .step-circle:hover {
+            transform: scale(1.15);
+        }
+
+        .step-circle.done {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: #fff;
+        }
+
+        .step-circle.active {
+            background: rgba(124,58,237,0.15);
+            border-color: #7c3aed;
+            color: #7c3aed;
+        }
+
+        .step-circle.locked {
+            background: var(--bg-panel);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+
+    .step-line {
+        flex: 1;
+        height: 2px;
+        min-width: 24px;
+        background: var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .step-line.done::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: #7c3aed;
+            animation: lineFill 0.6s ease forwards;
+        }
+
+    @@keyframes lineFill {
+        from {
+            width: 0;
+        }
+
+        to {
+            width: 100%;
+        }
+    }
+
+    /* ── TARJETA MÓDULO ── */
+    .module-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+        .module-card:not(.is-locked):hover {
+            border-color: rgba(124,58,237,0.5);
+            box-shadow: 0 14px 36px rgba(124,58,237,0.1);
+            transform: translateY(-3px);
+        }
+
+        .module-card.is-locked {
+            opacity: 0.6;
+            border-style: dashed;
+        }
+
+    .card-top-accent {
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .module-card:not(.is-locked):hover .card-top-accent {
+        opacity: 1;
+    }
+
+    /* ── ICON BOX & CHECK BADGE (SOLUCIÓN) ── */
+    .module-icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+        background: var(--bg-panel);
+        color: var(--text-muted);
+        flex-shrink: 0;
+        transition: all 0.2s;
+        position: relative; /* CLAVE para posicionar el check */
+    }
+
+    .module-card:not(.is-locked):hover .module-icon-box {
+        background: rgba(124,58,237,0.1);
+        border-color: rgba(124,58,237,0.4);
+        color: #7c3aed;
+        transform: rotate(-5deg) scale(1.08);
+    }
+
+    /* Nueva palomita integrada en el icono */
+    .completion-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 18px;
+        height: 18px;
+        background: #10b981; /* Verde éxito */
+        border: 2px solid var(--bg-card); /* Borde para separar visualmente */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    /* ── BADGES & PROGRESS ── */
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        border: 1px solid;
+        letter-spacing: 0.04em;
+    }
+
+    .level-basic {
+        background: rgba(16,185,129,0.1);
+        border-color: rgba(16,185,129,0.25);
+        color: #10b981;
+    }
+
+    .level-mid {
+        background: rgba(245,158,11,0.1);
+        border-color: rgba(245,158,11,0.25);
+        color: #f59e0b;
+    }
+
+    .level-adv {
+        background: rgba(239,68,68,0.1);
+        border-color: rgba(239,68,68,0.25);
+        color: #ef4444;
+    }
+
+    .level-default {
+        background: rgba(107,114,128,0.1);
+        border-color: rgba(107,114,128,0.2);
+        color: #9ca3af;
+    }
+
+    .mod-progress-track {
+        height: 4px;
+        border-radius: 99px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .mod-progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+        transition: width 1s ease;
+        width: 0%;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-start {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: #7c3aed;
+        color: #fff;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.25);
+        transition: all 0.18s;
+    }
+
+        .btn-start:hover {
+            background: #6d28d9;
+            transform: scale(1.03);
+        }
+
+    .btn-locked {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: 1px dashed var(--border-color);
+        color: var(--text-muted);
+        cursor: not-allowed;
+    }
+
+    /* ── UTILS ── */
+    .xp-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        background: rgba(124,58,237,0.08);
+        color: #7c3aed;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.18s ease;
+    }
+
+        .filter-pill.active {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: #fff;
+        }
+
+    .ambient-blob {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        background: radial-gradient(circle, rgba(124,58,237,0.05), transparent 70%);
+    }
+
+    .ai-tip {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(124,58,237,0.06);
+        border: 1px solid rgba(124,58,237,0.15);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+        .ai-tip strong {
+            color: var(--text-main);
+        }
+</style>
+
+<div style="background:var(--bg-main);color:var(--text-main);min-height:100%;padding-bottom:60px;position:relative;overflow-x:hidden;">
+
+    <div class="ambient-blob" style="width:600px;height:600px;top:-150px;left:-100px;"></div>
+    <div class="ambient-blob" style="width:400px;height:400px;bottom:5%;right:-80px;background:radial-gradient(circle,rgba(6,182,212,0.04),transparent 70%);"></div>
+
+    <div class="edu-header px-4 sm:px-8 k-fade">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div style="padding:9px;background:rgba(124,58,237,0.1);border-radius:12px;">
+                    <i data-lucide="graduation-cap" style="width:20px;height:20px;color:#7c3aed;"></i>
+                </div>
+                <div>
+                    <h1 style="font-size:1.1rem;font-weight:700;color:var(--text-main);line-height:1.2;">Academia Kairos</h1>
+                    <p style="font-size:0.7rem;color:var(--text-muted);">Aprende a invertir con criterio propio</p>
+                </div>
             </div>
-            <div>
-                <p class="text-xs text-kairos-muted font-bold uppercase tracking-wider">Tu Experiencia</p>
-                <p class="text-2xl font-bold text-kairos-text">@Model.TotalPoints <span class="text-sm text-kairos-purple font-medium">KP</span></p>
-            </div>
-
-            <div class="h-8 w-px bg-kairos-border mx-2 hidden md:block"></div>
-
-            <div class="hidden md:block text-right">
-                <p class="text-xs text-kairos-muted">Siguiente Nivel</p>
-                <p class="text-sm font-semibold text-kairos-purple">Explorador Sr.</p>
+            <div class="xp-badge">
+                <div class="xp-icon"><i data-lucide="trophy" style="width:17px;height:17px;"></i></div>
+                <div>
+                    <p style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;">Experiencia</p>
+                    <p style="font-size:1.1rem;font-weight:800;color:var(--text-main);line-height:1.1;font-family:'JetBrains Mono',monospace;">
+                        @Model.TotalPoints <span style="font-size:0.65rem;font-weight:500;color:#7c3aed;">KP</span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @foreach (var module in Model.Modules)
-        {
-            // CAMBIO: Estilo 'Fantasma' suave para bloqueados
-            var lockedStyle = module.IsLocked
-            ? "opacity-80 grayscale cursor-not-allowed bg-gray-50 dark:bg-[#1a1a2e]/40 border-dashed border-gray-300 dark:border-gray-700 shadow-none"
-            : "bg-kairos-card hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/20 hover:border-kairos-purple/30";
+    <div class="px-4 sm:px-8 pt-6 max-w-6xl mx-auto relative z-10">
 
-            var levelBadge = module.Level switch
-            {
-                "Básico" => "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-                "Intermedio" => "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-                "Avanzado" => "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-                _ => "bg-gray-500/10 text-gray-600 dark:text-gray-300 border-gray-500/20"
-            };
-
-            <div class="relative flex flex-col h-full border rounded-2xl p-6 transition-all duration-300 @lockedStyle group">
-
-                <div class="flex justify-between items-start mb-5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center border border-transparent transition-colors
-                                        @(module.IsLocked ? "bg-gray-100 dark:bg-gray-800 text-gray-400" : "bg-kairos-panel text-kairos-text group-hover:text-kairos-purple group-hover:border-kairos-purple/50 border-kairos-border")">
-                        @if (module.IsLocked)
-                        {
-                            <i data-lucide="lock" size="20"></i>
-                        }
-                        else
-                        {
-                            <i data-lucide="@module.Icon.ToLower()" size="24" class="transition-transform group-hover:scale-110 duration-300"></i>
-                        }
-                    </div>
-
-                    <span class="px-3 py-1 rounded-full text-xs font-bold border @levelBadge @(module.IsLocked ? "opacity-50" : "")">
-                        @module.Level
-                    </span>
-                </div>
-
-                <div class="flex-1">
-                    <h3 class="text-xl font-bold mb-2 transition-colors @(module.IsLocked ? "text-gray-400 dark:text-gray-500" : "text-kairos-text")">
-                        @module.Title
-                    </h3>
-                    <p class="text-sm leading-relaxed mb-4 line-clamp-3 @(module.IsLocked ? "text-gray-400" : "text-kairos-muted")">
-                        @module.Description
+        <div class="stats-container k-fade" style="transition-delay:0.06s;">
+            <div class="stat-chip">
+                <div class="stat-chip-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;"><i data-lucide="book-open" style="width:15px;height:15px;"></i></div>
+                <div style="min-width:0;">
+                    <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Módulos</p>
+                    <p style="font-size:0.9rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">
+                        @(Model.Modules?.Count(m => m.Progress == 100) ?? 0)/@(Model.Modules?.Count ?? 0)
                     </p>
                 </div>
-
-                <div class="mt-4 pt-4 border-t @(module.IsLocked ? "border-gray-200 dark:border-gray-700" : "border-kairos-border")">
-                    <div class="flex justify-between text-xs mb-2 font-medium @(module.IsLocked ? "text-gray-400" : "text-kairos-muted")">
-                        <span>Progreso</span>
-                        <span class="@(module.Progress == 100 ? "text-green-500" : "")">@module.Progress%</span>
-                    </div>
-
-                    <div class="w-full h-2 rounded-full overflow-hidden mb-5 @(module.IsLocked ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-800")">
-                        <div class="h-full bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-1000" style="width: @module.Progress%"></div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded-md @(module.IsLocked ? "text-gray-400 bg-gray-100 dark:bg-gray-800" : "text-purple-600 dark:text-purple-300 bg-purple-500/5")">
-                            <i data-lucide="star" size="12"></i> +@module.RewardPoints XP
-                        </span>
-
-                        @if (module.IsLocked)
-                        {
-                            <div class="px-4 py-2 text-sm font-medium text-gray-400 bg-transparent rounded-lg border border-dashed border-gray-300 dark:border-gray-600 cursor-not-allowed flex items-center gap-2">
-                                <i data-lucide="lock" size="14"></i>
-                                Bloqueado
-                            </div>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("Lesson", "Education", new { id = module.Id })"
-                               class="px-4 py-2 text-sm font-bold text-white bg-kairos-purple hover:bg-purple-600 rounded-lg transition-all flex items-center gap-2 shadow-md hover:shadow-lg shadow-purple-500/20 active:scale-95">
-                                @(module.Progress > 0 ? "Continuar" : "Empezar")
-                                <i data-lucide="arrow-right" size="16"></i>
-                            </a>
-                        }
-                    </div>
+            </div>
+            <div class="stat-chip">
+                <div class="stat-chip-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i data-lucide="flame" style="width:15px;height:15px;"></i></div>
+                <div style="min-width:0;">
+                    <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Racha</p>
+                    <p style="font-size:0.9rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">7 días</p>
                 </div>
             </div>
-        }
+            <div class="stat-chip">
+                <div class="stat-chip-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i data-lucide="star" style="width:15px;height:15px;"></i></div>
+                <div style="min-width:0;">
+                    <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Nivel</p>
+                    <p style="font-size:0.9rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">Explorador</p>
+                </div>
+            </div>
+            <div class="stat-chip" style="min-width:160px;">
+                <div style="flex:1;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                        <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Sig. nivel</p>
+                        <span style="font-size:0.62rem;font-weight:700;color:#7c3aed;font-family:'JetBrains Mono',monospace;">Explorador Sr.</span>
+                    </div>
+                    <div class="xp-track"><div class="xp-fill" id="xpFill" data-target="68"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="k-fade mb-6" style="transition-delay:0.1s;">
+            <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:8px;">Tu ruta de aprendizaje</p>
+            <div class="path-stepper">
+                @if (Model.Modules != null)
+                {
+                    for (int si = 0; si < Model.Modules.Count; si++)
+                    {
+                        var mod = Model.Modules[si];
+                        string circleClass = mod.Progress == 100 ? "done" : (mod.Progress > 0 ? "active" : "locked");
+                        <div class="step-node">
+                            <div class="step-circle @circleClass" title="@mod.Title">
+                                @if (mod.Progress == 100)
+                                {
+                                    <i data-lucide="check" style="width:13px;height:13px;"></i>
+                                }
+                                else
+                                {
+
+                                    <span>@(si + 1)</span>
+                                }
+                            </div>
+                            <span style="font-size:0.58rem;color:var(--text-muted);max-width:60px;text-align:center;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@mod.Title.Split(' ')[0]</span>
+                        </div>
+                        if (si < Model.Modules.Count - 1)
+                        {
+
+                            <div class="step-line @(mod.Progress == 100 ? "done" : "")"></div>
+                        }
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="k-fade mb-4" style="transition-delay:0.14s;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;" role="tablist">
+                <button class="filter-pill active" onclick="filterModules(this,'all')"><i data-lucide="layout-grid" style="width:11px;height:11px;"></i>Todos</button>
+                <button class="filter-pill" onclick="filterModules(this,'basico')"><i data-lucide="sprout" style="width:11px;height:11px;"></i>Básico</button>
+                <button class="filter-pill" onclick="filterModules(this,'intermedio')"><i data-lucide="trending-up" style="width:11px;height:11px;"></i>Intermedio</button>
+                <button class="filter-pill" onclick="filterModules(this,'avanzado')"><i data-lucide="zap" style="width:11px;height:11px;"></i>Avanzado</button>
+                <button class="filter-pill" onclick="filterModules(this,'progress')"><i data-lucide="play-circle" style="width:11px;height:11px;"></i>En curso</button>
+            </div>
+            <span style="font-size:0.68rem;color:var(--text-muted);" id="moduleCount">@(Model.Modules?.Count ?? 0) módulos</span>
+        </div>
+
+        <div id="moduleGrid" class="k-fade" style="transition-delay:0.18s;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:28px;">
+            @if (Model.Modules != null)
+            {
+                foreach (var module in Model.Modules)
+                {
+                    var levelClass = module.Level switch { "Básico" => "level-basic", "Intermedio" => "level-mid", "Avanzado" => "level-adv", _ => "level-default" };
+                    var levelSlug = module.Level switch { "Básico" => "basico", "Intermedio" => "intermedio", "Avanzado" => "avanzado", _ => "other" };
+
+                    <div class="module-card @(module.IsLocked ? "is-locked" : "")" data-level="@levelSlug" data-progress="@module.Progress">
+                        <div class="card-top-accent"></div>
+
+                        <div style="padding:18px;display:flex;flex-direction:column;flex:1;gap:0;">
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+
+                                <div class="module-icon-box">
+                                    @if (module.IsLocked)
+                                    {
+                                        <i data-lucide="lock" style="width:18px;height:18px;"></i>
+                                    }
+                                    else
+                                    {
+
+                                        <i data-lucide="@module.Icon.ToLower()" style="width:20px;height:20px;"></i>
+                                    }
+
+                                    @if (module.Progress == 100)
+                                    {
+                                        <div class="completion-badge" title="Módulo completado">
+                                            <i data-lucide="check" style="width:10px;height:10px;stroke-width:3;"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <span class="level-badge @levelClass">@module.Level</span>
+                            </div>
+
+                            <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:6px;line-height:1.35;">@module.Title</h3>
+                            <p style="font-size:0.77rem;color:var(--text-muted);line-height:1.55;margin-bottom:14px;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">@module.Description</p>
+
+                            <div style="margin-bottom:14px;">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                                    <span style="font-size:0.62rem;color:var(--text-muted);font-weight:600;">Progreso</span>
+                                    <span style="font-size:0.62rem;font-weight:800;color:@(module.Progress == 100 ? "#10b981" : "#7c3aed");font-family:'JetBrains Mono',monospace;">@module.Progress%</span>
+                                </div>
+                                <div class="mod-progress-track">
+                                    <div class="mod-progress-fill" data-target="@module.Progress"></div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border-color);">
+                                <span class="xp-pill"><i data-lucide="star" style="width:10px;height:10px;"></i> +@module.RewardPoints KP</span>
+                                @if (module.IsLocked)
+                                {
+                                    <div class="btn-locked"><i data-lucide="lock" style="width:13px;height:13px;"></i> Bloqueado</div>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Lesson", "Education", new { id = module.Id })" class="btn-start">
+                                        @(module.Progress == 100 ? "Repasar" : module.Progress > 0 ? "Continuar" : "Empezar")
+                                        <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="k-fade" style="transition-delay:0.24s;">
+            <div class="ai-tip">
+                <i data-lucide="sparkles" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;color:#7c3aed;"></i>
+                <span><strong>KairosAI recomienda:</strong> basado en tu perfil de riesgo, el módulo <strong>Diversificación de Portafolio</strong> es clave.</span>
+            </div>
+        </div>
     </div>
+</div>
 
 @section Scripts {
-        <script>
-            // Aseguramos que los iconos carguen
-            if(typeof lucide !== 'undefined') lucide.createIcons();
-
-            // Animación simple de entrada
-            document.addEventListener('DOMContentLoaded', () => {
-                 const container = document.querySelector('.animate-fade-in-up');
-                 if(container) {
-                     container.style.opacity = '0';
-                     container.style.transform = 'translateY(10px)';
-                     setTimeout(() => {
-                         container.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                         container.style.opacity = '1';
-                         container.style.transform = 'translateY(0)';
-                     }, 100);
-                 }
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.k-fade').forEach((el, i) => setTimeout(() => el.classList.add('visible'), 60 + i * 80));
+            setTimeout(() => { const xp = document.getElementById('xpFill'); if (xp) xp.style.width = xp.dataset.target + '%'; }, 350);
+            setTimeout(() => { document.querySelectorAll('.mod-progress-fill').forEach(bar => { bar.style.width = (bar.dataset.target || 0) + '%'; }); }, 500);
+            document.querySelectorAll('.step-line.done').forEach((line, i) => { line.style.animationDelay = (i * 120) + 'ms'; });
+        });
+        function filterModules(btn, filter) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active')); btn.classList.add('active');
+            const cards = document.querySelectorAll('.module-card');
+            let visible = 0;
+            cards.forEach(card => {
+                let show = false;
+                if (filter === 'all') show = true;
+                else if (filter === 'progress') show = parseInt(card.dataset.progress) > 0 && parseInt(card.dataset.progress) < 100;
+                else show = card.dataset.level === filter;
+                card.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+                if (show) { card.style.opacity = '1'; card.style.transform = 'scale(1)'; card.style.display = ''; card.style.pointerEvents = 'auto'; visible++; }
+                else { card.style.opacity = '0'; card.style.transform = 'scale(0.96)'; card.style.pointerEvents = 'none'; setTimeout(() => { if (card.style.opacity === '0') card.style.display = 'none'; }, 220); }
             });
-        </script>
+            const counter = document.getElementById('moduleCount'); if (counter) counter.textContent = visible + ' módulos';
+        }
+    </script>
 }

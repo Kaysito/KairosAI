@@ -4,130 +4,634 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="h-full overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 pb-24">
+<style>
+    /* ── Variables locales ── */
+    .news-page {
+        background: var(--bg-main);
+        color: var(--text-main);
+    }
 
-    <header class="mb-8 animate-fade-in-up">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-kairos-text flex items-center gap-3">
-                    <i data-lucide="newspaper" class="text-kairos-purple"></i>
-                    Inteligencia de Mercado
-                </h1>
-                <p class="text-kairos-muted text-sm mt-1">
-                    Análisis de sentimiento, videos y noticias en tiempo real.
-                </p>
+    /* ── Fade orquestado ── */
+    .k-fade {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
+
+        .k-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    /* ── Header ── */
+    .news-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 14px 0 12px;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background: linear-gradient(to bottom, var(--bg-main) 80%, transparent);
+    }
+
+    /* ── Pill filter tabs ── */
+    .filter-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.18s ease;
+        letter-spacing: 0.02em;
+    }
+
+        .filter-pill:hover {
+            border-color: rgba(124,58,237,0.45);
+            color: var(--text-main);
+        }
+
+        .filter-pill.active {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+        }
+
+    /* ── Live ticker ── */
+    .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 99px;
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.25);
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #10b981;
+        letter-spacing: 0.1em;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: livePulse 1.8s ease infinite;
+    }
+
+    @@keyframes livePulse {
+        0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 0 0 rgba(16,185,129,0.4);
+        }
+
+        50% {
+            opacity: .7;
+            box-shadow: 0 0 0 4px rgba(16,185,129,0);
+        }
+    }
+
+    /* ── Sentiment meter (header) ── */
+    .sentiment-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        min-width: 220px;
+    }
+
+    .sentiment-track {
+        flex: 1;
+        height: 5px;
+        border-radius: 99px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .sentiment-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #ef4444 0%, #f59e0b 45%, #10b981 100%);
+        transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    /* ── FEATURED card (primera noticia grande) ── */
+    .card-featured {
+        grid-column: span 2;
+        display: flex;
+        flex-direction: column;
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        text-decoration: none;
+        position: relative;
+    }
+
+    @@media (max-width: 900px) {
+        .card-featured {
+            grid-column: span 1;
+        }
+    }
+
+    .card-featured:hover {
+        border-color: rgba(124,58,237,0.5);
+        box-shadow: 0 16px 40px rgba(124,58,237,0.1);
+        transform: translateY(-2px);
+    }
+
+    /* ── STANDARD card ── */
+    .card-news {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        overflow: hidden;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        text-decoration: none;
+        position: relative;
+    }
+
+        .card-news:hover {
+            border-color: rgba(124,58,237,0.45);
+            box-shadow: 0 10px 30px rgba(124,58,237,0.08);
+            transform: translateY(-2px);
+        }
+
+    /* Accent bar top */
+    .card-accent-bar {
+        height: 3px;
+        background: linear-gradient(90deg, #7c3aed, #06b6d4);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .card-news:hover .card-accent-bar,
+    .card-featured:hover .card-accent-bar {
+        opacity: 1;
+    }
+
+    /* Video embed */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+        background: #000;
+    }
+
+        .video-wrapper iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+    /* ── Sentiment badge ── */
+    .s-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border: 1px solid;
+    }
+
+        .s-badge.pos {
+            background: rgba(16,185,129,0.1);
+            border-color: rgba(16,185,129,0.25);
+            color: #10b981;
+        }
+
+        .s-badge.neg {
+            background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.25);
+            color: #ef4444;
+        }
+
+        .s-badge.neu {
+            background: rgba(107,114,128,0.1);
+            border-color: rgba(107,114,128,0.2);
+            color: #9ca3af;
+        }
+
+    /* ── Source chip ── */
+    .source-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .source-avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono', monospace;
+        flex-shrink: 0;
+    }
+
+    /* ── Category color map ── */
+    .tag-cripto {
+        background: rgba(245,158,11,0.1);
+        color: #f59e0b;
+    }
+
+    .tag-forex {
+        background: rgba(59,130,246,0.1);
+        color: #3b82f6;
+    }
+
+    .tag-acciones {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+    }
+
+    .tag-macro {
+        background: rgba(124,58,237,0.1);
+        color: #7c3aed;
+    }
+
+    .tag-default {
+        background: rgba(107,114,128,0.1);
+        color: #9ca3af;
+    }
+
+    .category-tag {
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+
+    /* ── Kairos insight chip ── */
+    .kairos-insight {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: rgba(124,58,237,0.06);
+        border: 1px solid rgba(124,58,237,0.15);
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        line-height: 1.45;
+        margin-top: 10px;
+    }
+
+        .kairos-insight i {
+            flex-shrink: 0;
+            margin-top: 1px;
+            color: #7c3aed;
+        }
+</style>
+
+<div class="news-page h-full overflow-y-auto" style="padding: 0 0 60px;">
+
+    <!-- ── STICKY HEADER ── -->
+    <div class="news-header px-5 sm:px-8">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Top row -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 k-fade">
+                <div class="flex items-center gap-3">
+                    <div style="padding:8px;background:rgba(124,58,237,0.1);border-radius:10px;">
+                        <i data-lucide="newspaper" style="width:18px;height:18px;color:#7c3aed;"></i>
+                    </div>
+                    <div>
+                        <h1 style="font-size:1.15rem;font-weight:700;color:var(--text-main);line-height:1.2;">
+                            Inteligencia de Mercado
+                        </h1>
+                        <p style="font-size:0.7rem;color:var(--text-muted);">
+                            Sentimiento, señales y análisis en tiempo real
+                        </p>
+                    </div>
+                    <div class="live-badge hidden sm:inline-flex">
+                        <div class="live-dot"></div>
+                        LIVE
+                    </div>
+                </div>
+
+                <!-- Sentiment meter global -->
+                <div class="sentiment-bar-wrap k-fade" style="transition-delay:0.1s;">
+                    <span style="font-size:0.62rem;font-weight:700;color:var(--text-muted);white-space:nowrap;font-family:'JetBrains Mono',monospace;">FEAR / GREED</span>
+                    <div class="sentiment-track">
+                        <div class="sentiment-fill" id="sentimentFill" style="width:0%;" data-target="62"></div>
+                    </div>
+                    <span style="font-size:0.7rem;font-weight:700;color:#10b981;font-family:'JetBrains Mono',monospace;" id="sentimentVal">62</span>
+                </div>
             </div>
 
-            <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-                <button class="px-4 py-2 rounded-full bg-kairos-purple text-white text-sm font-medium shadow-lg shadow-purple-500/20">
+            <!-- Filter pills -->
+            <div class="filter-tabs k-fade" style="transition-delay:0.15s;" role="tablist" aria-label="Filtrar noticias">
+                <button class="filter-pill active" onclick="filterNews(this,'todo')" role="tab" aria-selected="true">
+                    <i data-lucide="layout-grid" style="width:12px;height:12px;"></i>
                     Todo
                 </button>
-                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors">
+                <button class="filter-pill" onclick="filterNews(this,'cripto')" role="tab" aria-selected="false">
+                    <i data-lucide="bitcoin" style="width:12px;height:12px;"></i>
                     Cripto
                 </button>
-                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors">
+                <button class="filter-pill" onclick="filterNews(this,'forex')" role="tab" aria-selected="false">
+                    <i data-lucide="dollar-sign" style="width:12px;height:12px;"></i>
                     Forex
                 </button>
-                <button class="px-4 py-2 rounded-full bg-kairos-card border border-kairos-border text-kairos-muted text-sm font-medium hover:text-kairos-text hover:border-kairos-purple transition-colors flex items-center gap-2">
-                    <i data-lucide="youtube" size="14"></i> Videos
+                <button class="filter-pill" onclick="filterNews(this,'acciones')" role="tab" aria-selected="false">
+                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i>
+                    Acciones
+                </button>
+                <button class="filter-pill" onclick="filterNews(this,'macro')" role="tab" aria-selected="false">
+                    <i data-lucide="globe" style="width:12px;height:12px;"></i>
+                    Macro
+                </button>
+                <button class="filter-pill" onclick="filterNews(this,'video')" role="tab" aria-selected="false">
+                    <i data-lucide="youtube" style="width:12px;height:12px;"></i>
+                    Videos
                 </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in-up stagger-delay-1">
+    <!-- ── NEWS GRID ── -->
+    <div class="px-5 sm:px-8 mt-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 k-fade" style="transition-delay:0.2s;" id="newsGrid">
 
-        @foreach (var item in Model.Headlines)
-        {
-            // Lógica de Sentimiento (Colores Adaptables)
-            var sentimentColor = item.Sentiment switch
-            {
-                "Positivo" => "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
-                "Negativo" => "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
-                _ => "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20"
-            };
-
-            var sentimentIcon = item.Sentiment switch
-            {
-                "Positivo" => "trending-up",
-                "Negativo" => "trending-down",
-                _ => "minus"
-            };
-
-            // Simulamos propiedades si no existen en tu modelo actual
-            // En tu backend deberías mapear esto real
-            string externalLink = "#"; // item.Url
-            string videoId = ""; // item.YouTubeVideoId (ej: "M7lc1UVf-VE")
-
-            // Lógica ficticia para demostración: Si el título dice "Video" o "Análisis", mostramos video
-            if (item.Title.Contains("Video") || item.Title.Contains("Análisis"))
-            {
-                videoId = "plz-8Z8GzK8"; // ID de ejemplo de YouTube (Bitcoin News)
-            }
-
-            <article class="bg-kairos-card border border-kairos-border rounded-2xl overflow-hidden hover:border-kairos-purple/50 hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/20 transition-all duration-300 group flex flex-col">
-
-                @if (!string.IsNullOrEmpty(videoId))
+                @if (!Model.Headlines.Any())
                 {
-                    <div class="relative w-full aspect-video bg-black">
-                        <iframe src="https://www.youtube.com/embed/@videoId"
-                                title="@item.Title"
-                                class="absolute top-0 left-0 w-full h-full"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen>
-                        </iframe>
+                    <div class="empty-state">
+                        <i data-lucide="inbox" style="width:40px;height:40px;margin:0 auto 12px;opacity:0.3;"></i>
+                        <p style="font-size:0.9rem;">No hay noticias disponibles por ahora.</p>
                     </div>
                 }
-                else
-                {
-                    <div class="h-2 bg-gradient-to-r from-kairos-purple to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+
+                @{
+                    bool isFirst = true;
                 }
 
-                <div class="p-5 flex flex-col flex-1">
+                @foreach (var item in Model.Headlines)
+                {
+                    var sClass = item.Sentiment switch
+                    {
+                        "Positivo" => "pos",
+                        "Negativo" => "neg",
+                        _ => "neu"
+                    };
+                    var sIcon = item.Sentiment switch
+                    {
+                        "Positivo" => "trending-up",
+                        "Negativo" => "trending-down",
+                        _ => "minus"
+                    };
 
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border @sentimentColor flex items-center gap-1.5">
-                            <i data-lucide="@sentimentIcon" size="12"></i>
-                            @item.Sentiment
-                        </span>
-                        <span class="text-xs text-kairos-muted flex items-center gap-1">
-                            <i data-lucide="clock" size="12"></i>
-                            @item.TimeAgo
-                        </span>
-                    </div>
+                    // Category detection (simple heuristic — reemplaza con tu campo real)
+                    string cat = "default";
+                    string catLabel = "General";
+                    var titleLower = item.Title.ToLower();
+                    if (titleLower.Contains("bitcoin") || titleLower.Contains("eth") || titleLower.Contains("crypto") || titleLower.Contains("cripto") || titleLower.Contains("defi"))
+                    { cat = "cripto"; catLabel = "Cripto"; }
+                    else if (titleLower.Contains("dólar") || titleLower.Contains("euro") || titleLower.Contains("forex") || titleLower.Contains("divisa"))
+                    { cat = "forex"; catLabel = "Forex"; }
+                    else if (titleLower.Contains("bolsa") || titleLower.Contains("acción") || titleLower.Contains("nasdaq") || titleLower.Contains("s&p"))
+                    { cat = "acciones"; catLabel = "Acciones"; }
+                    else if (titleLower.Contains("fed") || titleLower.Contains("inflación") || titleLower.Contains("pib") || titleLower.Contains("macro"))
+                    { cat = "macro"; catLabel = "Macro"; }
 
-                    <h2 class="text-lg font-bold text-kairos-text mb-2 leading-snug group-hover:text-kairos-purple transition-colors">
-                        @item.Title
-                    </h2>
+                    // Video detection
+                    string videoId = "";
+                    if (item.Title.Contains("Video") || item.Title.Contains("Análisis"))
+                    {
+                        videoId = "plz-8Z8GzK8";
+                        cat = "video"; catLabel = "Video";
+                    }
 
-                    <p class="text-sm text-kairos-muted leading-relaxed mb-4 line-clamp-3 flex-1">
-                        @item.Summary
-                    </p>
+                    string externalLink = "#"; // item.Url
 
-                    <div class="pt-4 border-t border-kairos-border flex items-center justify-between mt-auto">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-full bg-kairos-panel flex items-center justify-center text-[10px] font-bold text-kairos-muted border border-kairos-border">
-                                @item.Source.Substring(0, 1)
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                        <!-- FEATURED -->
+                        <article class="card-featured" data-category="@cat">
+                            <div class="card-accent-bar"></div>
+
+                            @if (!string.IsNullOrEmpty(videoId))
+                            {
+                                <div class="video-wrapper">
+                                    <iframe src="https://www.youtube.com/embed/@videoId"
+                                            title="@item.Title" frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen loading="lazy"></iframe>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Decorative gradient placeholder -->
+                                <div style="height:180px;background:linear-gradient(135deg,rgba(124,58,237,0.12) 0%,rgba(6,182,212,0.06) 100%);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border-color);position:relative;overflow:hidden;">
+                                    <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);top:-40px;left:-40px;"></div>
+                                    <div style="position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.1),transparent 70%);bottom:-30px;right:20px;"></div>
+                                    <div style="text-align:center;position:relative;z-index:1;">
+                                        <i data-lucide="newspaper" style="width:36px;height:36px;color:rgba(124,58,237,0.4);margin:0 auto 8px;display:block;"></i>
+                                        <span style="font-size:0.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">ANÁLISIS DESTACADO</span>
+                                    </div>
+                                </div>
+                            }
+
+                            <div style="padding:20px;display:flex;flex-direction:column;flex:1;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span class="s-badge @sClass">
+                                            <i data-lucide="@sIcon" style="width:10px;height:10px;"></i>
+                                            @item.Sentiment
+                                        </span>
+                                        <span class="category-tag tag-@cat">@catLabel</span>
+                                    </div>
+                                    <span style="font-size:0.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:4px;">
+                                        <i data-lucide="clock" style="width:11px;height:11px;"></i>
+                                        @item.TimeAgo
+                                    </span>
+                                </div>
+
+                                <h2 style="font-size:1.05rem;font-weight:700;color:var(--text-main);line-height:1.35;margin-bottom:8px;">
+                                    @item.Title
+                                </h2>
+                                <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;">
+                                    @item.Summary
+                                </p>
+
+                                <!-- KairosAI insight chip -->
+                                <div class="kairos-insight">
+                                    <i data-lucide="sparkles" style="width:13px;height:13px;"></i>
+                                    <span>KairosAI detecta señal <strong style="color:var(--text-main);">@item.Sentiment.ToLower()</strong> en este artículo. Puede impactar activos relacionados en las próximas 24h.</span>
+                                </div>
+
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-color);">
+                                    <div class="source-chip">
+                                        <div class="source-avatar">@item.Source.Substring(0, 1)</div>
+                                        <span style="font-size:0.75rem;font-weight:600;color:var(--text-main);">@item.Source</span>
+                                    </div>
+                                    <a href="@externalLink" target="_blank"
+                                       style="font-size:0.75rem;font-weight:700;color:#7c3aed;text-decoration:none;display:flex;align-items:center;gap:4px;transition:opacity 0.15s;"
+                                       onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                        Leer análisis completo
+                                        <i data-lucide="arrow-up-right" style="width:13px;height:13px;"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <span class="text-xs font-medium text-kairos-text">@item.Source</span>
-                        </div>
+                        </article>
+                    }
+                    else
+                    {
+                        <!-- STANDARD -->
+                        <article class="card-news" data-category="@cat">
+                            <div class="card-accent-bar"></div>
 
-                        <a href="@externalLink" target="_blank"
-                           class="text-xs font-semibold text-kairos-purple hover:text-purple-500 flex items-center gap-1 transition-colors group/link">
-                            Leer nota
-                            <i data-lucide="external-link" size="12" class="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform"></i>
-                        </a>
-                    </div>
-                </div>
-            </article>
-        }
+                            @if (!string.IsNullOrEmpty(videoId))
+                            {
+                                <div class="video-wrapper">
+                                    <iframe src="https://www.youtube.com/embed/@videoId"
+                                            title="@item.Title" frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen loading="lazy"></iframe>
+                                </div>
+                            }
 
+                            <div style="padding:16px;display:flex;flex-direction:column;flex:1;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:6px;flex-wrap:wrap;">
+                                    <div style="display:flex;align-items:center;gap:5px;">
+                                        <span class="s-badge @sClass">
+                                            <i data-lucide="@sIcon" style="width:10px;height:10px;"></i>
+                                            @item.Sentiment
+                                        </span>
+                                        <span class="category-tag tag-@cat">@catLabel</span>
+                                    </div>
+                                    <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:3px;">
+                                        <i data-lucide="clock" style="width:10px;height:10px;"></i>
+                                        @item.TimeAgo
+                                    </span>
+                                </div>
+
+                                <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                    @item.Title
+                                </h2>
+                                <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:12px;">
+                                    @item.Summary
+                                </p>
+
+                                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border-color);">
+                                    <div class="source-chip">
+                                        <div class="source-avatar">@item.Source.Substring(0, 1)</div>
+                                        <span style="font-size:0.72rem;font-weight:600;color:var(--text-main);">@item.Source</span>
+                                    </div>
+                                    <a href="@externalLink" target="_blank"
+                                       style="font-size:0.7rem;font-weight:700;color:#7c3aed;text-decoration:none;display:flex;align-items:center;gap:3px;transition:opacity 0.15s;"
+                                       onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                        Leer nota
+                                        <i data-lucide="external-link" style="width:11px;height:11px;"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // ── Fade inicial ──
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.k-fade').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), 60 + i * 80);
+            });
+
+            // Sentiment bar animation
+            setTimeout(() => {
+                const fill = document.getElementById('sentimentFill');
+                const val  = document.getElementById('sentimentVal');
+                if (fill) fill.style.width = fill.dataset.target + '%';
+                // Color dinámico según valor
+                const v = parseInt(fill?.dataset.target || 50);
+                if (val) val.style.color = v >= 60 ? '#10b981' : v >= 40 ? '#f59e0b' : '#ef4444';
+            }, 400);
+        });
+
+        // ── Filter tabs ──
+        function filterNews(btn, category) {
+            // Pill activa
+            document.querySelectorAll('.filter-pill').forEach(p => {
+                p.classList.remove('active');
+                p.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            // Filtrar cards
+            const cards = document.querySelectorAll('#newsGrid article');
+            cards.forEach(card => {
+                const match = category === 'todo' || card.dataset.category === category;
+                card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                if (match) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                    card.style.pointerEvents = 'auto';
+                    card.style.display = '';
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.97)';
+                    card.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        if (card.style.opacity === '0') card.style.display = 'none';
+                    }, 250);
+                }
+            });
+        }
     </script>
 }

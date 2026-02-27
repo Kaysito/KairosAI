@@ -5,60 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - KairosAI</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!--
+        KairosAI · ASP.NET Core Razor Layout
+        ─────────────────────────────────────
+        Versión : α 0.1  (Alpha)
+        Motor IA: Meta Llama (via API)
+        Build   : .NET 8 · Razor Pages
 
+        Theme strategy:
+          › no-transition class en <html> antes del primer paint → cero FOUC
+          › Transiciones sólo en propiedades que realmente cambian, no en `*`
+          › will-change en superficies clave → GPU compositor
+          › color-scheme meta → scrollbars y controles nativos en sync
+    -->
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/png" href="~/images/brand/kairos-icon.png" />
+
+    <!-- ① THEME BOOT — primer script, antes de cualquier hoja de estilos -->
     <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-            if (savedTheme === 'light' || (!savedTheme && systemTheme === 'light')) {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
+        (function () {
+            var saved  = localStorage.getItem('kairos-theme');
+            var prefer = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            var theme  = (saved === 'light' || saved === 'dark') ? saved : prefer;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('color-scheme', theme);
+            document.documentElement.classList.add('no-transition');
         })();
     </script>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
-        /* --- TUS VARIABLES ORIGINALES (RESTUARADAS) --- */
+        /* ═══════════════════════════════════════════════════
+               DESIGN TOKENS
+            ═══════════════════════════════════════════════════ */
         :root {
-            /* TEMA DARK (Por defecto) */
-            --bg-main: #0f0f1a;
-            --bg-panel: #1a1a2e;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --hover-bg: rgba(255, 255, 255, 0.05);
-            --scrollbar-track: #0f0f1a;
-            --scrollbar-thumb: #2d2d44;
+            --bg-main: #0b0b15;
+            --bg-panel: #13131f;
+            --bg-card: #1a1a2e;
+            --text-main: #f1f2f6;
+            --text-muted: #8b8fa8;
+            --border-color: rgba(255,255,255,0.07);
+            --kairos-purple: #7c3aed;
+            --kairos-purple-soft: rgba(124,58,237,0.12);
+            --kairos-purple-glow: rgba(124,58,237,0.22);
+            --kairos-cyan: #06b6d4;
+            --hover-bg: rgba(255,255,255,0.04);
+            --scrollbar-track: #0b0b15;
+            --scrollbar-thumb: #2a2a40;
+            --nav-active-bg: rgba(124,58,237,0.14);
+            --nav-active-border: #7c3aed;
+            /* Easing library */
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+            /* Single token to tune ALL theme transitions */
+            --theme-dur: 200ms;
         }
 
         [data-theme="light"] {
-            /* TEMA LIGHT */
-            --bg-main: #ffffff;
-            --bg-panel: #f8fafc;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --hover-bg: rgba(124, 58, 237, 0.1);
-            --scrollbar-track: #f1f5f9;
-            --scrollbar-thumb: #cbd5e1;
+            --bg-main: #f2f2f8;
+            --bg-panel: #ffffff;
+            --bg-card: #ebebf5;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --border-color: rgba(0,0,0,0.08);
+            --kairos-purple-soft: rgba(124,58,237,0.07);
+            --hover-bg: rgba(124,58,237,0.05);
+            --scrollbar-track: #f2f2f8;
+            --scrollbar-thumb: #d1d5db;
+            --nav-active-bg: rgba(124,58,237,0.09);
         }
 
-        /* --- ESTILOS BASE --- */
+        /* ═══════════════════════════════════════════════════
+               TRANSITION STRATEGY — never `*`
+            ═══════════════════════════════════════════════════ */
+        .no-transition,
+        .no-transition * {
+            transition: none !important;
+        }
+
+        body, #sidebar, .main-content {
+            will-change: background-color;
+            transition: background-color var(--theme-dur) ease;
+        }
+
+        .theme-t {
+            transition: background-color var(--theme-dur) ease, border-color var(--theme-dur) ease, color var(--theme-dur) ease;
+        }
+
+        /* ═══════════════════════════════════════════════════
+               BASE
+            ═══════════════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Space Grotesk', system-ui, sans-serif;
             background-color: var(--bg-main);
             color: var(--text-main);
-            /* Transición suave de colores de fondo */
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Scrollbars */
+        :focus-visible {
+            outline: 2px solid var(--kairos-purple);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 4px;
+            height: 4px;
         }
 
         ::-webkit-scrollbar-track {
@@ -67,177 +127,781 @@
 
         ::-webkit-scrollbar-thumb {
             background: var(--scrollbar-thumb);
-            border-radius: 4px;
+            border-radius: 99px;
+            transition: background var(--theme-dur) ease;
         }
 
             ::-webkit-scrollbar-thumb:hover {
-                background: #7c3aed;
+                background: var(--kairos-purple);
             }
 
-        /* Transiciones generales */
-        aside, div, nav, a, header, button {
-            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        /* ═══════════════════════════════════════════════════
+               PAGE ENTER — clip-path reveal + fade
+            ═══════════════════════════════════════════════════ */
+        @@keyframes pageReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+                clip-path: inset(6px 0 0 0 round 10px);
+            }
+
+            65% {
+                clip-path: inset(0 0 0 0 round 3px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                clip-path: inset(0 0 0 0 round 0);
+            }
         }
 
-        /* Clases de utilidad mapeadas a tus variables */
-        .bg-kairos-main {
-            background-color: var(--bg-main);
+        .page-transition {
+            animation: pageReveal 0.48s var(--ease-out) both;
         }
 
-        .bg-kairos-panel {
-            background-color: var(--bg-panel);
+        /* ═══════════════════════════════════════════════════
+               LOGO
+            ═══════════════════════════════════════════════════ */
+        .logo-text {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .text-kairos-main {
-            color: var(--text-main);
+        /* One-shot shimmer sweep on load */
+        @@keyframes logoShimmer {
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: 300% center;
+            }
         }
 
-        .text-kairos-muted {
+        .logo-shimmer {
+            background: linear-gradient( 105deg, #c4b5fd 0%, #7c3aed 25%, #e9d5ff 45%, #06b6d4 60%, #7c3aed 75%, #c4b5fd 100% );
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: logoShimmer 2.2s var(--ease-in-out) 0.4s 1 forwards;
+        }
+
+        /* Alpha badge */
+        .alpha-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.56rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            color: #c4b5fd;
+            background: rgba(124,58,237,0.16);
+            border: 1px solid rgba(124,58,237,0.3);
+            flex-shrink: 0;
+            animation: alphaPulse 4s ease infinite;
+            vertical-align: middle;
+        }
+
+        @@keyframes alphaPulse {
+            0%, 100% {
+                border-color: rgba(124,58,237,0.3);
+                box-shadow: none;
+            }
+
+            50% {
+                border-color: rgba(124,58,237,0.65);
+                box-shadow: 0 0 7px rgba(124,58,237,0.22);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+               NAV LINKS — scaleY accent bar + ripple
+            ═══════════════════════════════════════════════════ */
+        .nav-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
             color: var(--text-muted);
+            text-decoration: none;
+            overflow: hidden;
+            transition: background-color 0.16s ease, color 0.16s ease;
         }
 
-        .border-kairos {
-            border-color: var(--border-color);
+            /* Animated left accent bar */
+            .nav-link::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 20%;
+                bottom: 20%;
+                width: 2.5px;
+                border-radius: 99px;
+                background: var(--kairos-purple);
+                transform: scaleY(0);
+                transform-origin: center;
+                transition: transform 0.22s var(--ease-spring), opacity 0.18s ease;
+            }
+
+            .nav-link:hover::before {
+                transform: scaleY(0.45);
+                opacity: 0.5;
+            }
+
+            .nav-link.active::before {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            .nav-link:hover {
+                background: var(--hover-bg);
+                color: var(--text-main);
+            }
+
+            .nav-link.active {
+                background: var(--nav-active-bg);
+                color: var(--kairos-purple);
+            }
+
+            /* Ripple */
+            .nav-link .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(124,58,237,0.14);
+                transform: scale(0);
+                animation: rippleOut 0.5s var(--ease-out) forwards;
+                pointer-events: none;
+            }
+
+        @@keyframes rippleOut {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
         }
 
-        .hover-kairos:hover {
-            background-color: var(--hover-bg);
+        /* Nav icon */
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: transform 0.25s var(--ease-spring), background-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
         }
 
-        .text-kairos-purple {
-            color: #7c3aed;
+        .nav-link:hover .nav-icon,
+        .nav-link.active .nav-icon {
+            background: var(--kairos-purple);
+            color: #fff !important;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+            transform: scale(1.1) translateY(-1px);
         }
 
-        /* IMPORTANTE: Usamos @@media para que Razor no crea que es código C#
-                   Esto arregla el error CS0103
-                */
+            .nav-link:hover .nav-icon svg,
+            .nav-link.active .nav-icon svg {
+                stroke: #fff !important;
+            }
+
+        /* Staggered nav entry */
+        @@keyframes navItemIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .nav-item-anim {
+            opacity: 0;
+            animation: navItemIn 0.38s var(--ease-out) both;
+        }
+
+        .nav-section-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            opacity: 0.5;
+            padding: 10px 14px 4px;
+        }
+
+        /* ═══════════════════════════════════════════════════
+               ACCORDION
+            ═══════════════════════════════════════════════════ */
+        #historyPanel {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s var(--ease-in-out);
+        }
+
+        #historyChevron {
+            transition: transform 0.22s ease;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.14s ease, color 0.14s ease, transform 0.2s var(--ease-spring);
+        }
+
+            .history-item:hover {
+                background: var(--hover-bg);
+                color: var(--text-main);
+                transform: translateX(4px);
+            }
+
+            .history-item.active {
+                background: var(--kairos-purple-soft);
+                color: var(--kairos-purple);
+            }
+
+        /* ═══════════════════════════════════════════════════
+               THEME BUTTON + RIPPLE
+            ═══════════════════════════════════════════════════ */
+        .theme-btn {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.22s var(--ease-spring), box-shadow 0.18s ease, border-color 0.16s ease;
+        }
+
+            .theme-btn:hover {
+                background: var(--kairos-purple);
+                color: #fff !important;
+                border-color: var(--kairos-purple);
+                box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+                transform: scale(1.07);
+            }
+
+                .theme-btn:hover svg {
+                    stroke: #fff !important;
+                }
+
+            .theme-btn:active {
+                transform: scale(0.93);
+            }
+
+        .theme-ripple {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(124,58,237,0.22);
+            transform: translate(-50%,-50%) scale(0);
+            animation: themeRipple 0.5s var(--ease-out) forwards;
+            pointer-events: none;
+        }
+
+        @@keyframes themeRipple {
+            to {
+                transform: translate(-50%,-50%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Sun / moon crossfade */
+        .theme-icon-wrap {
+            position: relative;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sun-icon, .moon-icon {
+            position: absolute;
+            transition: transform 0.3s var(--ease-spring), opacity 0.16s ease;
+        }
+
+        [data-theme="dark"] .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
+        [data-theme="light"] .sun-icon {
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+        }
+
+        [data-theme="light"] .moon-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        /* ═══════════════════════════════════════════════════
+               STATUS DOT
+            ═══════════════════════════════════════════════════ */
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+            .status-dot::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 50%;
+                background: rgba(16,185,129,0.28);
+                animation: statusPing 2.2s cubic-bezier(0,0,0.2,1) infinite;
+            }
+
+        @@keyframes statusPing {
+            0% {
+                transform: scale(1);
+                opacity: .7;
+            }
+
+            70%, 100% {
+                transform: scale(2.4);
+                opacity: 0;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+               USER AVATAR
+            ═══════════════════════════════════════════════════ */
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            transition: box-shadow 0.2s ease, transform 0.2s var(--ease-spring);
+        }
+
+        /* ═══════════════════════════════════════════════════
+               AI STATUS — subtle glitch on "IA ONLINE"
+            ═══════════════════════════════════════════════════ */
+        .ai-status-text {
+            font-size: 0.68rem;
+            color: #10b981;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            animation: glitchIdle 7s ease infinite;
+        }
+
+        @@keyframes glitchIdle {
+            0%, 90%, 100% {
+                clip-path: none;
+                transform: none;
+                opacity: 1;
+            }
+
+            92% {
+                clip-path: inset(20% 0 55% 0);
+                transform: translateX(-1.5px);
+                opacity: .88;
+            }
+
+            94% {
+                clip-path: inset(55% 0 15% 0);
+                transform: translateX( 1.5px);
+                opacity: .88;
+            }
+
+            96% {
+                clip-path: none;
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        /* Powered-by badge */
+        .powered-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.58rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--text-muted);
+            opacity: 0.5;
+            letter-spacing: 0.03em;
+            transition: opacity 0.2s ease;
+            text-decoration: none;
+        }
+
+            .powered-badge:hover {
+                opacity: 0.85;
+            }
+
+        .meta-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 1px;
+        }
+            /* Meta-style infinity dots */
+            .meta-icon span {
+                display: inline-block;
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+                .meta-icon span:nth-child(1) {
+                    background: #0082fb;
+                }
+
+                .meta-icon span:nth-child(2) {
+                    background: #0099ff;
+                    transform: translateX(-1px);
+                }
+
+        /* ═══════════════════════════════════════════════════
+               ALPHA PROGRESS BAR
+            ═══════════════════════════════════════════════════ */
+        .alpha-bar-track {
+            height: 3px;
+            border-radius: 99px;
+            background: var(--border-color);
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .alpha-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            width: 0%;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #06b6d4);
+            transition: width 1.3s var(--ease-out);
+        }
+
+        @@keyframes barShimmer {
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        .alpha-bar-fill.shimmer {
+            background: linear-gradient( 90deg, #7c3aed 0%, #a855f7 35%, #c4b5fd 50%, #06b6d4 65%, #7c3aed 100% );
+            background-size: 200% 100%;
+            animation: barShimmer 2.8s linear infinite;
+        }
+
+        /* ═══════════════════════════════════════════════════
+               SIDEBAR SLIDE (mobile) — GPU transform only
+            ═══════════════════════════════════════════════════ */
+        #sidebar {
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            will-change: transform, background-color;
+            transition: transform 0.3s var(--ease-out), background-color var(--theme-dur) ease, border-color var(--theme-dur) ease;
+        }
+
         @@media (max-width: 1024px) {
-            aside {
+            #sidebar {
                 position: fixed;
                 inset: 0 auto 0 0;
                 z-index: 50;
                 transform: translateX(-100%);
-                width: 280px;
-                /* Transición fluida del menú móvil */
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                width: 270px;
             }
 
-                aside.open {
+                #sidebar.open {
                     transform: translateX(0);
-                    box-shadow: 0 0 50px rgba(0,0,0,0.5);
-                }
-
-            .overlay {
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.6);
-                z-index: 40;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-                backdrop-filter: blur(2px);
-            }
-
-                .overlay.open {
-                    opacity: 1;
-                    pointer-events: auto;
+                    box-shadow: 20px 0 60px rgba(0,0,0,0.4);
                 }
         }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+            .overlay.open {
+                opacity: 1;
+                pointer-events: auto;
+            }
     </style>
 </head>
 
 <body class="h-full overflow-hidden flex flex-col lg:flex-row">
 
-    <div id="mobile-overlay" class="overlay lg:hidden" onclick="closeSidebar()"></div>
+    <div id="mobile-overlay" class="overlay lg:hidden" onclick="closeSidebar()" aria-hidden="true"></div>
 
-    <header class="lg:hidden flex items-center justify-between px-4 py-3 bg-kairos-panel border-b border-kairos shrink-0 z-30">
-        <div class="flex items-center gap-3">
-            <button onclick="openSidebar()" class="text-kairos-muted hover:text-kairos-main p-1">
-                <i data-lucide="menu" size="24"></i>
+    <!-- ── Mobile header ── -->
+    <header class="lg:hidden flex items-center justify-between px-4 py-3 shrink-0 z-30 theme-t"
+            style="background:var(--bg-panel);border-bottom:1px solid var(--border-color);">
+        <div class="flex items-center gap-2.5">
+            <button onclick="openSidebar()" aria-label="Abrir menú"
+                    style="color:var(--text-muted);" class="p-1.5 rounded-lg hover:opacity-75 transition-opacity">
+                <i data-lucide="menu" size="22" aria-hidden="true"></i>
             </button>
-            <span class="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
-                KairosAI
-            </span>
+            <img src="~/images/brand/kairos-icon.png" alt="KairosAI"
+                 style="width:24px;height:24px;border-radius:6px;object-fit:cover;" />
+            <span class="logo-text font-bold text-lg tracking-tight">KairosAI</span>
+            <span class="alpha-badge" aria-label="Versión alpha">α 0.1</span>
         </div>
-        <button onclick="toggleTheme()" class="theme-btn p-2 rounded-lg text-kairos-muted hover-kairos active:scale-90 transition-transform">
-            <i data-lucide="sun" class="sun-icon hidden"></i>
-            <i data-lucide="moon" class="moon-icon hidden"></i>
-        </button>
+        <div class="flex items-center gap-2.5">
+            <div class="status-dot" title="Sistema en línea" aria-label="Sistema en línea"></div>
+            <button onclick="toggleTheme(this)" class="theme-btn" aria-label="Cambiar tema">
+                <div class="theme-icon-wrap" aria-hidden="true">
+                    <i data-lucide="sun" class="sun-icon"></i>
+                    <i data-lucide="moon" class="moon-icon"></i>
+                </div>
+            </button>
+        </div>
     </header>
 
-    <aside id="sidebar" class="bg-kairos-panel border-r border-kairos flex flex-col shrink-0 lg:w-[260px] h-full">
+    <!-- ════════════════════════════════════
+         SIDEBAR
+    ════════════════════════════════════ -->
+    <aside id="sidebar" class="flex flex-col shrink-0 lg:w-[256px] h-full z-50"
+           role="navigation" aria-label="Menú principal">
 
-        <div class="h-16 hidden lg:flex items-center px-6 border-b border-kairos">
-            <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
-                KairosAI
-            </span>
-        </div>
-
-        <div class="h-16 flex lg:hidden items-center justify-between px-6 border-b border-kairos bg-kairos-panel">
-            <span class="text-xl font-bold text-kairos-main">Menú</span>
-            <button onclick="closeSidebar()" class="text-kairos-muted hover:text-kairos-main">
-                <i data-lucide="x" size="24"></i>
+        <!-- Logo -->
+        <div class="h-16 flex items-center justify-between px-5 theme-t"
+             style="border-bottom:1px solid var(--border-color);">
+            <div class="flex items-center gap-2">
+                <img src="~/images/brand/kairos-icon.png" alt="KairosAI"
+                     style="width:30px;height:30px;border-radius:8px;object-fit:cover;flex-shrink:0;" />
+                <span class="logo-shimmer font-bold text-xl tracking-tight">KairosAI</span>
+                <span class="alpha-badge" aria-label="Versión alpha 0.1">α 0.1</span>
+            </div>
+            <button onclick="closeSidebar()" class="lg:hidden p-1.5 rounded-lg hover:opacity-70 transition-opacity"
+                    style="color:var(--text-muted);" aria-label="Cerrar menú">
+                <i data-lucide="x" size="20" aria-hidden="true"></i>
             </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+        <!-- Nav -->
+        <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-px" aria-label="Navegación">
+
+            <p class="nav-section-label nav-item-anim" style="--i:0;" aria-hidden="true">General</p>
+
             <a asp-controller="Dashboard" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="layout-dashboard" size="20"></i>
-                <span class="font-medium">Inicio</span>
+               class="nav-link nav-item-anim" style="--i:1;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="layout-dashboard" size="15"></i></span>
+                <span>Inicio</span>
             </a>
 
-            <a asp-controller="Kairos" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="message-circle" size="20"></i>
-                <span class="font-medium">KairosAI</span>
+            <a asp-controller="Market" asp-action="Index"
+               class="nav-link nav-item-anim" style="--i:2;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="globe" size="15"></i></span>
+                <span>Mercado</span>
             </a>
 
-            <a asp-controller="Education" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="graduation-cap" size="20"></i>
-                <span class="font-medium">Academia</span>
-            </a>
+            <!-- KairosAI accordion -->
+            <div class="nav-item-anim" style="--i:3;">
+                <button onclick="toggleHistory()" class="nav-link w-full text-left"
+                        style="justify-content:space-between;"
+                        aria-expanded="false" id="historyToggle" aria-controls="historyPanel">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="nav-icon" aria-hidden="true">
+                            <i data-lucide="message-circle" size="15"></i>
+                        </span>
+                        <span>KairosAI</span>
+                    </div>
+                    <i data-lucide="chevron-down" size="13" id="historyChevron"
+                       style="color:var(--text-muted);flex-shrink:0;" aria-hidden="true"></i>
+                </button>
 
-            <a asp-controller="Rewards" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="gift" size="20"></i>
-                <span class="font-medium">Recompensas</span>
-            </a>
-
-            <a asp-controller="News" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="newspaper" size="20"></i>
-                <span class="font-medium">Noticias</span>
-            </a>
-
-            <a asp-controller="Profile" asp-action="Index"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple group transition-all">
-                <i data-lucide="user" size="20"></i>
-                <span class="font-medium">Perfil</span>
-            </a>
-        </nav>
-
-        <div class="p-4 border-t border-kairos flex items-center justify-between gap-2 bg-kairos-panel">
-            <div class="flex items-center gap-3 p-2 rounded-lg hover-kairos cursor-pointer transition flex-1">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 shrink-0"></div>
-                <div class="overflow-hidden">
-                    <p class="text-sm font-medium text-kairos-main truncate">Kevin H.</p>
-                    <p class="text-xs text-kairos-muted truncate">Admin</p>
+                <div id="historyPanel" role="region" aria-labelledby="historyToggle">
+                    <div style="margin-left:10px;padding-left:12px;
+                                border-left:1px solid rgba(124,58,237,0.2);
+                                margin-top:3px;padding-bottom:4px;">
+                        <a asp-controller="Kairos" asp-action="Index"
+                           style="display:flex;align-items:center;gap:8px;padding:8px 10px;
+                                  border-radius:8px;font-size:0.75rem;color:var(--kairos-purple);
+                                  font-weight:600;text-decoration:none;
+                                  transition:background 0.14s ease;margin-bottom:3px;"
+                           onmouseover="this.style.background='var(--kairos-purple-soft)'"
+                           onmouseout="this.style.background='transparent'">
+                            <i data-lucide="plus-circle" size="13" aria-hidden="true"></i>
+                            <span>Chat Principal</span>
+                        </a>
+                        <p class="nav-section-label" style="padding-left:10px;padding-top:2px;font-size:0.56rem;"
+                           aria-hidden="true">Recientes</p>
+                        <a href="#" class="history-item active truncate">
+                            <i data-lucide="message-square" size="11" aria-hidden="true"></i>
+                            Tendencia Bitcoin
+                        </a>
+                        <a href="#" class="history-item truncate">
+                            <i data-lucide="message-square" size="11" aria-hidden="true"></i>
+                            Predicción ETH
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <button onclick="toggleTheme()"
-                    class="theme-btn p-2 rounded-lg text-kairos-muted hover-kairos hover:text-kairos-purple transition-all active:scale-90 active:rotate-12 hidden lg:block"
-                    title="Cambiar tema">
-                <i data-lucide="sun" class="sun-icon hidden transition-transform duration-500 hover:rotate-90"></i>
-                <i data-lucide="moon" class="moon-icon hidden transition-transform duration-500 hover:-rotate-12"></i>
-            </button>
+            <p class="nav-section-label nav-item-anim" style="--i:4;margin-top:6px;" aria-hidden="true">Plataforma</p>
+
+            <a asp-controller="Education" asp-action="Index"
+               class="nav-link nav-item-anim" style="--i:5;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="graduation-cap" size="15"></i></span>
+                <span>Academia</span>
+            </a>
+
+            <a asp-controller="Rewards" asp-action="Index"
+               class="nav-link nav-item-anim" style="--i:6;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="gift" size="15"></i></span>
+                <span>Recompensas</span>
+                <span style="margin-left:auto;font-size:0.57rem;font-weight:700;
+                             background:linear-gradient(135deg,#7c3aed,#06b6d4);
+                             color:#fff;padding:2px 7px;border-radius:99px;" aria-label="Nuevo">NEW</span>
+            </a>
+
+            <a asp-controller="News" asp-action="Index"
+               class="nav-link nav-item-anim" style="--i:7;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="newspaper" size="15"></i></span>
+                <span>Noticias</span>
+                <span style="margin-left:auto;width:6px;height:6px;border-radius:50%;
+                             background:#ef4444;flex-shrink:0;"
+                      aria-label="Nuevas noticias"></span>
+            </a>
+
+            <a asp-controller="Profile" asp-action="Index"
+               class="nav-link nav-item-anim" style="--i:8;" onclick="addRipple(event,this)">
+                <span class="nav-icon" aria-hidden="true"><i data-lucide="user" size="15"></i></span>
+                <span>Perfil</span>
+            </a>
+        </nav>
+
+        <!-- ── Footer ── -->
+        <div class="theme-t" style="padding:10px 12px 14px;
+                                     border-top:1px solid var(--border-color);
+                                     background:var(--bg-panel);">
+
+            <!-- IA status chip -->
+            <div class="theme-t"
+                 style="display:flex;align-items:center;gap:8px;padding:7px 10px;
+                        border-radius:10px;background:rgba(16,185,129,0.06);
+                        border:1px solid rgba(16,185,129,0.14);margin-bottom:8px;"
+                 aria-label="Estado del sistema: IA en línea">
+                <div class="status-dot" aria-hidden="true"></div>
+                <span class="ai-status-text">IA ONLINE</span>
+                <span style="margin-left:auto;font-size:0.58rem;color:var(--text-muted);
+                             font-family:'JetBrains Mono',monospace;opacity:0.65;">α 0.1</span>
+            </div>
+
+            <!-- Powered by Meta -->
+            <div style="display:flex;justify-content:center;margin-bottom:8px;">
+                <span class="powered-badge" title="Motor de lenguaje: Meta Llama">
+                    <span class="meta-icon" aria-hidden="true">
+                        <span></span><span></span>
+                    </span>
+                    Powered by Meta Llama
+                </span>
+            </div>
+
+            <!-- Alpha progress bar — 8% hacia v1.0 -->
+            <div class="alpha-bar-track" title="Progreso de desarrollo" aria-hidden="true">
+                <div class="alpha-bar-fill" id="alphaBar" data-target="8"
+                     role="progressbar" aria-valuenow="8"
+                     aria-valuemin="0" aria-valuemax="100"
+                     aria-label="Progreso alpha: 8%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;">
+                <span style="font-size:0.52rem;color:var(--text-muted);opacity:0.4;
+                             font-family:'JetBrains Mono',monospace;">α 0.1</span>
+                <span style="font-size:0.52rem;color:var(--text-muted);opacity:0.4;
+                             font-family:'JetBrains Mono',monospace;">v 1.0</span>
+            </div>
+
+            <!-- User row -->
+            <div style="display:flex;align-items:center;gap:9px;margin-top:10px;">
+                <a asp-controller="Profile" asp-action="Index"
+                   style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;padding:5px 8px;
+                          border-radius:10px;text-decoration:none;
+                          transition:background-color 0.14s ease;"
+                   onmouseover="this.style.background='var(--hover-bg)'"
+                   onmouseout="this.style.background='transparent'"
+                   aria-label="Ir al perfil de Kevin H.">
+                    <div class="user-avatar" aria-hidden="true">KH</div>
+                    <div style="overflow:hidden;flex:1;min-width:0;">
+                        <p style="font-size:0.78rem;font-weight:600;color:var(--text-main);
+                                  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kevin H.</p>
+                        <p style="font-size:0.6rem;color:var(--kairos-purple);
+                                  font-family:'JetBrains Mono',monospace;letter-spacing:0.02em;">
+                            Acceso Alpha
+                        </p>
+                    </div>
+                </a>
+                <button onclick="toggleTheme(this)" class="theme-btn" aria-label="Cambiar tema">
+                    <div class="theme-icon-wrap" aria-hidden="true">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </div>
+                </button>
+            </div>
         </div>
     </aside>
 
-    <div class="flex-1 flex flex-col h-full overflow-hidden bg-kairos-main relative text-kairos-main">
-        <main class="flex-1 overflow-y-auto w-full">
+    <!-- ════════════════════════════════════
+         MAIN CONTENT
+    ════════════════════════════════════ -->
+    <div class="main-content flex-1 flex flex-col h-full overflow-hidden relative"
+         style="background:var(--bg-main);color:var(--text-main);">
+        <main class="flex-1 overflow-y-auto w-full page-transition" id="main-content"
+              tabindex="-1" aria-label="Contenido principal">
             @RenderBody()
         </main>
     </div>
@@ -247,52 +911,104 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        // --- INICIALIZACIÓN ---
-        lucide.createIcons();
+        (function () {
+            'use strict';
 
-        // --- LÓGICA DE TEMA ---
-        function updateIcons(theme) {
-            const suns = document.querySelectorAll('.sun-icon');
-            const moons = document.querySelectorAll('.moon-icon');
+            /* ─── Remove no-transition after 2 rAF frames ─────────────────────── */
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    document.documentElement.classList.remove('no-transition');
+                });
+            });
 
-            if (theme === 'dark') {
-                suns.forEach(el => el.style.display = 'block');
-                moons.forEach(el => el.style.display = 'none');
-            } else {
-                suns.forEach(el => el.style.display = 'none');
-                moons.forEach(el => el.style.display = 'block');
-            }
-            // Pequeña espera para asegurar que Lucide renderizó
-            setTimeout(() => lucide.createIcons(), 0);
-        }
+            /* ─── Icons ─────────────────────────────────────────────────────────── */
+            lucide.createIcons();
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
+            /* ─── Staggered nav animations ───────────────────────────────────────
+               Each .nav-item-anim has --i as inline style; we read it here
+               to compute an animation-delay, keeping the CSS clean.
+            ─────────────────────────────────────────────────────────────────────── */
+            document.querySelectorAll('.nav-item-anim').forEach(function (el) {
+                var i = parseFloat(el.style.getPropertyValue('--i') || '0');
+                el.style.animationDelay = (60 + i * 42) + 'ms';
+            });
 
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            updateIcons(next);
-        }
+            /* ─── Alpha progress bar ─────────────────────────────────────────────── */
+            setTimeout(function () {
+                var bar = document.getElementById('alphaBar');
+                if (!bar) return;
+                bar.style.width = bar.dataset.target + '%';
+                setTimeout(function () { bar.classList.add('shimmer'); }, 1350);
+            }, 550);
 
-        // Establecer iconos iniciales sin demora
-        updateIcons(document.documentElement.getAttribute('data-theme'));
+            /* ─── Theme toggle — with ripple burst ───────────────────────────────── */
+            window.toggleTheme = function (btn) {
+                if (btn) {
+                    var r = document.createElement('span');
+                    r.className = 'theme-ripple';
+                    r.style.left = '50%';
+                    r.style.top  = '50%';
+                    btn.appendChild(r);
+                    setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 520);
+                }
+                var html = document.documentElement;
+                var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                html.setAttribute('color-scheme', next);
+                localStorage.setItem('kairos-theme', next);
+            };
 
-        // --- LÓGICA MENÚ MÓVIL (Javascript Puro) ---
-        // Usamos funciones globales para evitar problemas de scope
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobile-overlay');
+            /* ─── Ripple on nav links ────────────────────────────────────────────── */
+            window.addRipple = function (e, el) {
+                var rect   = el.getBoundingClientRect();
+                var size   = Math.max(rect.width, rect.height);
+                var x      = e.clientX - rect.left  - size / 2;
+                var y      = e.clientY - rect.top   - size / 2;
+                var ripple = document.createElement('span');
+                ripple.className  = 'ripple';
+                ripple.style.cssText =
+                    'width:' + size + 'px;height:' + size + 'px;' +
+                    'left:'  + x    + 'px;top:'    + y    + 'px;';
+                el.appendChild(ripple);
+                setTimeout(function () { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 520);
+            };
 
-        window.openSidebar = function() {
-            sidebar.classList.add('open');
-            overlay.classList.add('open');
-        }
+            /* ─── Sidebar (mobile) ───────────────────────────────────────────────── */
+            window.openSidebar = function () {
+                document.getElementById('sidebar').classList.add('open');
+                document.getElementById('mobile-overlay').classList.add('open');
+                document.getElementById('sidebar').removeAttribute('aria-hidden');
+            };
+            window.closeSidebar = function () {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('mobile-overlay').classList.remove('open');
+                document.getElementById('sidebar').setAttribute('aria-hidden', 'true');
+            };
 
-        window.closeSidebar = function() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('open');
-        }
+            /* ─── History accordion ──────────────────────────────────────────────── */
+            var historyOpen = false;
+            window.toggleHistory = function () {
+                historyOpen = !historyOpen;
+                var panel   = document.getElementById('historyPanel');
+                var chevron = document.getElementById('historyChevron');
+                var toggle  = document.getElementById('historyToggle');
+                panel.style.maxHeight   = historyOpen ? panel.scrollHeight + 'px' : '0px';
+                chevron.style.transform = historyOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                toggle.setAttribute('aria-expanded', String(historyOpen));
+            };
+
+            /* ─── Active nav detection ───────────────────────────────────────────── */
+            var path = window.location.pathname.toLowerCase();
+            document.querySelectorAll('a.nav-link').forEach(function (link) {
+                var href = link.getAttribute('href');
+                if (!href) return;
+                var h = href.toLowerCase();
+                if ((h === '/' && path === '/') || (h !== '/' && path.startsWith(h))) {
+                    link.classList.add('active');
+                }
+            });
+
+        })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

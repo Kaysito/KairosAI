@@ -19,12 +19,15 @@ namespace KairosAI.Models.ViewModels
         public string Type { get; set; } // "Cripto", "Accion", "ETF"
         public string RiskLevel { get; set; } // "Alto", "Medio", "Bajo"
         public bool IsTrending { get; set; } // Para ponerle un fueguito 🔥
+
+        // ¡NUEVO! Para que la tabla se vea igual de profesional que el dashboard
+        public string ImageUrl { get; set; }
     }
 
     // --- VISTA DETALLADA (GRÁFICA Y COMPRA) ---
     public class AssetDetailViewModel : MarketAsset
     {
-        // Datos para la gráfica (Simulamos precios de la última semana)
+        // Datos para la gráfica
         public List<decimal> ChartData { get; set; } = new();
         public List<string> ChartLabels { get; set; } = new();
 
