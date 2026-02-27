@@ -381,8 +381,17 @@
             }
 
             .history-item.active {
-                background: var(--kairos-purple-soft);
+                /* Lighter than nav-link.active — never competes with it visually */
+                background: rgba(124,58,237,0.08) !important;
                 color: var(--kairos-purple);
+            }
+            /* Prevent history-item from inheriting nav-link hover/active icon styles */
+            .history-item .nav-icon,
+            .history-item:hover .nav-icon {
+                background: transparent !important;
+                box-shadow: none !important;
+                transform: none !important;
+                color: var(--text-muted) !important;
             }
 
         /* ═══════════════════════════════════════════════════
@@ -780,7 +789,7 @@
                         </a>
                         <p class="nav-section-label" style="padding-left:10px;padding-top:2px;font-size:0.56rem;"
                            aria-hidden="true">Recientes</p>
-                        <a href="#" class="history-item active truncate">
+                        <a href="#" class="history-item truncate">
                             <i data-lucide="message-square" size="11" aria-hidden="true"></i>
                             Tendencia Bitcoin
                         </a>
@@ -999,12 +1008,29 @@
 
             /* ─── Active nav detection ───────────────────────────────────────────── */
             var path = window.location.pathname.toLowerCase();
+
             document.querySelectorAll('a.nav-link').forEach(function (link) {
                 var href = link.getAttribute('href');
                 if (!href) return;
                 var h = href.toLowerCase();
+                // Exact root match OR prefix match — but never match the accordion toggle
+                // (the toggle is a <button>, not an <a>, so querySelectorAll('a.nav-link') already
+                //  excludes it — this guard is belt-and-suspenders for any future <a> accordions)
+                if (h === '#' || h === '') return;
                 if ((h === '/' && path === '/') || (h !== '/' && path.startsWith(h))) {
                     link.classList.add('active');
+                }
+            });
+
+            // history-item active state: derive from route, don't rely on hardcoded class
+            // Remove all hardcoded .active from history items first, then re-apply by URL match
+            document.querySelectorAll('.history-item').forEach(function (item) {
+                item.classList.remove('active');
+                var href = item.getAttribute('href');
+                if (!href || href === '#') return;
+                var h = href.toLowerCase();
+                if (path === h || (h !== '/' && h !== '#' && path.startsWith(h))) {
+                    item.classList.add('active');
                 }
             });
 
