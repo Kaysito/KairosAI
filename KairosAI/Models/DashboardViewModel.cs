@@ -7,8 +7,24 @@ namespace KairosAI.Models
     {
         public decimal TotalBalance { get; set; }
         public double MonthlyReturn { get; set; }
+
+        // Propiedades originales (compatibilidad)
         public int RiskScore { get; set; }
         public string RiskLabel { get; set; }
+
+        // ── NUEVAS PROPIEDADES PARA PERFILADO PSICOLÓGICO ──
+        // Eje A: Agresividad (Valor de 2 a 6 para el cálculo de porcentaje)
+        public int AggressionAxis { get; set; }
+
+        // Eje B: Conocimiento/Experiencia (Valor de 2 a 6)
+        public int KnowledgeAxis { get; set; }
+
+        // Perfil descriptivo (ej: "Inversor Equilibrado")
+        public string RiskProfile { get; set; }
+
+        // Nivel de intervención de la IA (1: Mínimo, 2: Moderado, 3: Máximo)
+        public int FrictionLevel { get; set; }
+
         public List<ChartDataPoint> PerformanceData { get; set; } = new();
         public List<AssetSummary> TopAssets { get; set; } = new();
         public List<NewsItem> RecentNews { get; set; } = new();
@@ -27,7 +43,7 @@ namespace KairosAI.Models
         public decimal Price { get; set; }
         public double Change24h { get; set; }
         public string RiskLevel { get; set; }
-        public string ImageUrl { get; set; } // Propiedad para los iconos
+        public string ImageUrl { get; set; }
     }
 
     public class NewsItem

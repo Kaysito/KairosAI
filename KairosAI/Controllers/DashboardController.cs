@@ -1,7 +1,11 @@
 ﻿using KairosAI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration; // Necesario para leer el appsettings.json
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace KairosAI.Controllers
 {
@@ -15,27 +19,42 @@ namespace KairosAI.Controllers
         {
             _httpClient = httpClientFactory.CreateClient();
             _config = config;
-
-            // 🛡️ Leemos la llave de forma segura
             _coinGeckoKey = _config["ApiKeys:CoinGecko"];
         }
 
         public async Task<IActionResult> Index()
         {
-            // 1. RECUPERAR DATOS DEL TEST
-            int userRiskScore = 50;
-            if (TempData["UserRiskScore"] != null)
-            {
-                if (int.TryParse(TempData["UserRiskScore"]?.ToString(), out int score))
-                {
-                    userRiskScore = score;
-                }
-            }
+            // 1. RECUPERAR DATOS DEL TEST (O valores por defecto para la demo)
+            // Agresividad: 2 (Pasivo) a 6 (Muy Agresivo)
+            int aggression = TempData["UserAggressionAxis"] != null ? (int)TempData["UserAggressionAxis"] : 4;
 
-            // 2. CALCULAR ETIQUETA DE RIESGO
-            string riskLabel = "Moderado";
-            if (userRiskScore <= 30) riskLabel = "Conservador";
-            else if (userRiskScore > 60) riskLabel = "Agresivo";
+            // Conocimiento: 2 (Principiante) a 6 (Experto)
+            int knowledge = TempData["UserKnowledgeAxis"] != null ? (int)TempData["UserKnowledgeAxis"] : 3;
+
+            // 2. DETERMINAR PERFIL PSICOLÓGICO Y FRICCIÓN (Lógica de Negocio Kairós)
+            string riskProfile = "Inversor Equilibrado";
+            int frictionLevel = 2; // Moderado por defecto
+
+            if (aggression <= 3 && knowledge <= 3)
+            {
+                riskProfile = "Inversor Cauteloso";
+                frictionLevel = 3; // Escudo máximo para principiantes pasivos
+            }
+            else if (aggression >= 5 && knowledge <= 3)
+            {
+                riskProfile = "Principiante Agresivo";
+                frictionLevel = 3; // Escudo máximo: mucho riesgo, poca experiencia
+            }
+            else if (aggression >= 5 && knowledge >= 5)
+            {
+                riskProfile = "Inversor de Alto Vuelo";
+                frictionLevel = 1; // Escudo mínimo: sabe lo que hace y es agresivo
+            }
+            else if (knowledge >= 4)
+            {
+                riskProfile = "Explorador Informado";
+                frictionLevel = 2;
+            }
 
             // 3. OBTENER DATOS REALES DE MERCADO
             var realAssets = await GetRealMarketData();
@@ -45,8 +64,13 @@ namespace KairosAI.Controllers
             {
                 TotalBalance = 245300.50m,
                 MonthlyReturn = 12.5,
-                RiskScore = userRiskScore,
-                RiskLabel = riskLabel,
+
+                // Mapeo de ejes para la vista fluida
+                AggressionAxis = aggression,
+                KnowledgeAxis = knowledge,
+                RiskProfile = riskProfile,
+                FrictionLevel = frictionLevel,
+                RiskLabel = riskProfile, // Sincronizado para compatibilidad
 
                 PerformanceData = new List<ChartDataPoint>
                 {
@@ -80,12 +104,10 @@ namespace KairosAI.Controllers
                 var request = new HttpRequestMessage(HttpMethod.Get,
                     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h");
 
-                // 🛡️ Usamos la variable privada que cargamos en el constructor
                 request.Headers.Add("x-cg-demo-api-key", _coinGeckoKey);
                 request.Headers.Add("User-Agent", "KairosAI-Dashboard/2.5");
 
                 var response = await _httpClient.SendAsync(request);
-
                 if (!response.IsSuccessStatusCode) return new List<AssetSummary>();
 
                 var json = await response.Content.ReadAsStringAsync();

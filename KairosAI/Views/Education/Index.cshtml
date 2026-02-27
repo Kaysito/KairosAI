@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Academia";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Simulamos obtener el nivel de conocimiento del usuario (vendría del ViewModel/TempData)
+    // 2 a 3 = Principiante | 4 = Intermedio | 5 a 6 = Experto
+    int userKnowledgeAxis = TempData["UserKnowledgeAxis"] != null ? (int)TempData["UserKnowledgeAxis"] : 3;
+    string userLevel = userKnowledgeAxis <= 3 ? "Principiante" : userKnowledgeAxis == 4 ? "Intermedio" : "Experto";
 }
 
 <style>
@@ -231,7 +236,7 @@
         opacity: 1;
     }
 
-    /* ── ICON BOX & CHECK BADGE (SOLUCIÓN) ── */
+    /* ── ICON BOX & CHECK BADGE ── */
     .module-icon-box {
         width: 42px;
         height: 42px;
@@ -244,7 +249,7 @@
         color: var(--text-muted);
         flex-shrink: 0;
         transition: all 0.2s;
-        position: relative; /* CLAVE para posicionar el check */
+        position: relative;
     }
 
     .module-card:not(.is-locked):hover .module-icon-box {
@@ -254,15 +259,14 @@
         transform: rotate(-5deg) scale(1.08);
     }
 
-    /* Nueva palomita integrada en el icono */
     .completion-badge {
         position: absolute;
         top: -6px;
         right: -6px;
         width: 18px;
         height: 18px;
-        background: #10b981; /* Verde éxito */
-        border: 2px solid var(--bg-card); /* Borde para separar visualmente */
+        background: #10b981;
+        border: 2px solid var(--bg-card);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -272,7 +276,7 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
 
-    /* ── BADGES & PROGRESS ── */
+    /* ── BADGES & PROGRESS (AJUSTADOS A LOS NIVELES KAIRÓS) ── */
     .level-badge {
         display: inline-flex;
         align-items: center;
@@ -285,22 +289,23 @@
         letter-spacing: 0.04em;
     }
 
+    /* Ajuste de colores por nivel (KairósAI) */
     .level-basic {
-        background: rgba(16,185,129,0.1);
-        border-color: rgba(16,185,129,0.25);
-        color: #10b981;
+        background: rgba(107,114,128,0.1);
+        border-color: rgba(107,114,128,0.25);
+        color: #9ca3af; /* Gris para principiante */
     }
 
     .level-mid {
-        background: rgba(245,158,11,0.1);
-        border-color: rgba(245,158,11,0.25);
-        color: #f59e0b;
+        background: rgba(6,182,212,0.1);
+        border-color: rgba(6,182,212,0.25);
+        color: #06b6d4; /* Cyan para Intermedio */
     }
 
     .level-adv {
-        background: rgba(239,68,68,0.1);
-        border-color: rgba(239,68,68,0.25);
-        color: #ef4444;
+        background: rgba(16,185,129,0.1);
+        border-color: rgba(16,185,129,0.25);
+        color: #10b981; /* Verde esmeralda para Experto */
     }
 
     .level-default {
@@ -471,15 +476,17 @@
             <div class="stat-chip">
                 <div class="stat-chip-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i data-lucide="star" style="width:15px;height:15px;"></i></div>
                 <div style="min-width:0;">
-                    <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Nivel</p>
-                    <p style="font-size:0.9rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">Explorador</p>
+                    <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Tu Nivel</p>
+                    <p style="font-size:0.9rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">@userLevel</p>
                 </div>
             </div>
             <div class="stat-chip" style="min-width:160px;">
                 <div style="flex:1;">
                     <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-                        <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Sig. nivel</p>
-                        <span style="font-size:0.62rem;font-weight:700;color:#7c3aed;font-family:'JetBrains Mono',monospace;">Explorador Sr.</span>
+                        <p style="font-size:0.62rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">Sig. Nivel</p>
+                        <span style="font-size:0.62rem;font-weight:700;color:#7c3aed;font-family:'JetBrains Mono',monospace;">
+                            @(userLevel == "Principiante" ? "Intermedio" : userLevel == "Intermedio" ? "Experto" : "Maestro")
+                        </span>
                     </div>
                     <div class="xp-track"><div class="xp-fill" id="xpFill" data-target="68"></div></div>
                 </div>
@@ -522,9 +529,9 @@
         <div class="k-fade mb-4" style="transition-delay:0.14s;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
             <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;" role="tablist">
                 <button class="filter-pill active" onclick="filterModules(this,'all')"><i data-lucide="layout-grid" style="width:11px;height:11px;"></i>Todos</button>
-                <button class="filter-pill" onclick="filterModules(this,'basico')"><i data-lucide="sprout" style="width:11px;height:11px;"></i>Básico</button>
+                <button class="filter-pill" onclick="filterModules(this,'principiante')"><i data-lucide="sprout" style="width:11px;height:11px;"></i>Principiante</button>
                 <button class="filter-pill" onclick="filterModules(this,'intermedio')"><i data-lucide="trending-up" style="width:11px;height:11px;"></i>Intermedio</button>
-                <button class="filter-pill" onclick="filterModules(this,'avanzado')"><i data-lucide="zap" style="width:11px;height:11px;"></i>Avanzado</button>
+                <button class="filter-pill" onclick="filterModules(this,'experto')"><i data-lucide="zap" style="width:11px;height:11px;"></i>Experto</button>
                 <button class="filter-pill" onclick="filterModules(this,'progress')"><i data-lucide="play-circle" style="width:11px;height:11px;"></i>En curso</button>
             </div>
             <span style="font-size:0.68rem;color:var(--text-muted);" id="moduleCount">@(Model.Modules?.Count ?? 0) módulos</span>
@@ -535,8 +542,9 @@
             {
                 foreach (var module in Model.Modules)
                 {
-                    var levelClass = module.Level switch { "Básico" => "level-basic", "Intermedio" => "level-mid", "Avanzado" => "level-adv", _ => "level-default" };
-                    var levelSlug = module.Level switch { "Básico" => "basico", "Intermedio" => "intermedio", "Avanzado" => "avanzado", _ => "other" };
+                    // Mapeo adaptado a Principiante, Intermedio, Experto
+                    var levelClass = module.Level switch { "Principiante" => "level-basic", "Intermedio" => "level-mid", "Experto" => "level-adv", _ => "level-default" };
+                    var levelSlug = module.Level switch { "Principiante" => "principiante", "Intermedio" => "intermedio", "Experto" => "experto", _ => "other" };
 
                     <div class="module-card @(module.IsLocked ? "is-locked" : "")" data-level="@levelSlug" data-progress="@module.Progress">
                         <div class="card-top-accent"></div>
@@ -583,7 +591,7 @@
                                 <span class="xp-pill"><i data-lucide="star" style="width:10px;height:10px;"></i> +@module.RewardPoints KP</span>
                                 @if (module.IsLocked)
                                 {
-                                    <div class="btn-locked"><i data-lucide="lock" style="width:13px;height:13px;"></i> Bloqueado</div>
+                                    <div class="btn-locked" title="Mejora tu nivel de conocimiento en el Perfil para desbloquear"><i data-lucide="lock" style="width:13px;height:13px;"></i> Bloqueado</div>
                                 }
                                 else
                                 {
@@ -602,7 +610,7 @@
         <div class="k-fade" style="transition-delay:0.24s;">
             <div class="ai-tip">
                 <i data-lucide="sparkles" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;color:#7c3aed;"></i>
-                <span><strong>KairosAI recomienda:</strong> basado en tu perfil de riesgo, el módulo <strong>Diversificación de Portafolio</strong> es clave.</span>
+                <span><strong>KairosAI recomienda:</strong> Como tu nivel es <strong>@userLevel</strong>, te sugiero completar los módulos de este nivel para ganar KP (Kairos Points) y mejorar la precisión de mis análisis sobre tu portafolio.</span>
             </div>
         </div>
     </div>

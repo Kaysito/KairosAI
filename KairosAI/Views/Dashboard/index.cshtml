@@ -3,10 +3,45 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+
+    /* ── Perfil de riesgo — cálculos Razor ── */
+    int axisA = Model.AggressionAxis;
+    int axisB = Model.KnowledgeAxis;
+    int friction = Model.FrictionLevel;
+
+    // Eliminamos la redundancia de la palabra "Inversor "
+    string riskProfile = (Model.RiskProfile ?? "En calibración").Replace("Inversor ", "");
+
+    int percA = Math.Clamp((int)(((double)(axisA - 2) / 4.0) * 100), 0, 100);
+    int percB = Math.Clamp((int)(((double)(axisB - 2) / 4.0) * 100), 0, 100);
+
+    string labelA = axisA <= 2 ? "Pasivo" : axisA <= 4 ? "Moderado" : "Agresivo";
+    string labelB = axisB <= 2 ? "Principiante" : axisB <= 4 ? "Intermedio" : "Experto";
+
+    string colorA = axisA <= 2
+        ? "linear-gradient(90deg,#3b82f6,#06b6d4)"
+        : axisA <= 4
+            ? "linear-gradient(90deg,#06b6d4,#7c3aed)"
+            : "linear-gradient(90deg,#7c3aed,#ec4899,#ef4444)";
+
+    string colorB = axisB <= 2
+        ? "linear-gradient(90deg,#6b7280,#9ca3af)"
+        : axisB <= 4
+            ? "linear-gradient(90deg,#9ca3af,#06b6d4)"
+            : "linear-gradient(90deg,#06b6d4,#10b981)";
+
+    string profileColor = riskProfile.Contains("Cauteloso") ? "#3b82f6"
+        : riskProfile.Contains("Explorador") ? "#06b6d4"
+        : riskProfile.Contains("Equilibrado") ? "#7c3aed"
+        : riskProfile.Contains("Principiante Agresivo") ? "#ef4444"
+        : "#ec4899";
+
+    string frictionClass = friction == 3 ? "friction-3" : friction == 2 ? "friction-2" : "friction-1";
+    string frictionText = friction == 3 ? "Escudo: máximo" : friction == 2 ? "Escudo: moderado" : "Escudo: mínimo";
+    string frictionIcon = friction == 3 ? "shield-alert" : friction == 2 ? "shield-check" : "shield";
 }
 
 <style type="text/css">
-    /* ── Variables locales del Dashboard ── */
     :root {
         --kairos-purple: #7c3aed;
         --kairos-purple-soft: rgba(124, 58, 237, 0.85);
@@ -21,7 +56,6 @@
         transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
 
-    /* ── Hover lift ── */
     .hover-lift {
         transition: transform 0.24s var(--ease-spring), box-shadow 0.24s ease;
     }
@@ -31,7 +65,6 @@
             box-shadow: 0 16px 36px rgba(124, 58, 237, 0.09);
         }
 
-    /* ── Fade-in-up orquestado ── */
     .k-fade {
         opacity: 0;
         transform: translateY(16px);
@@ -43,7 +76,6 @@
             transform: translateY(0);
         }
 
-    /* ── Header greeting ── */
     .greeting-time {
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.62rem;
@@ -52,27 +84,23 @@
         opacity: 0.7;
     }
 
-    /* ── Switch simulado / real ── */
+    /* ── Switch Dinámico y Vistoso ── */
     .mode-switch-wrapper {
         display: flex;
         align-items: center;
         gap: 9px;
         padding: 5px 12px 5px 8px;
         border-radius: 99px;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
+        border: 1px solid rgba(124, 58, 237, 0.35); /* Borde morado por defecto */
+        background: rgba(124, 58, 237, 0.04);
         cursor: pointer;
         user-select: none;
-        transition: border-color 0.25s, box-shadow 0.25s, transform 0.18s var(--ease-spring);
+        transition: all 0.25s var(--ease-spring);
     }
-
-        .mode-switch-wrapper:hover {
-            border-color: rgba(124, 58, 237, 0.35);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.06);
-        }
 
         .mode-switch-wrapper.is-real {
             border-color: rgba(16, 185, 129, 0.45);
+            background: rgba(16, 185, 129, 0.04);
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.07);
         }
 
@@ -81,7 +109,7 @@
         width: 34px;
         height: 19px;
         border-radius: 99px;
-        background: var(--border-color);
+        background: rgba(124, 58, 237, 0.4);
         transition: background 0.3s ease;
         flex-shrink: 0;
     }
@@ -98,7 +126,7 @@
         height: 14px;
         border-radius: 50%;
         background: #fff;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.22);
         transition: transform 0.28s var(--ease-spring);
     }
 
@@ -106,40 +134,61 @@
         transform: translateX(15px);
     }
 
-    .switch-label-sim,
-    .switch-label-real {
+    .switch-label-sim, .switch-label-real {
         font-size: 0.68rem;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: 0.07em;
-        color: var(--text-muted);
         transition: color 0.2s, opacity 0.2s;
     }
 
+    .switch-label-sim {
+        color: var(--kairos-purple);
+        opacity: 1;
+    }
+
+    .switch-label-real {
+        color: var(--text-muted);
+        opacity: 0.4;
+    }
+
     .mode-switch-wrapper.is-real .switch-label-sim {
+        color: var(--text-muted);
         opacity: 0.4;
     }
 
     .mode-switch-wrapper.is-real .switch-label-real {
         color: #10b981;
+        opacity: 1;
     }
 
     .mode-dot {
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: var(--text-muted);
-        transition: background 0.3s, box-shadow 0.3s;
+        background: var(--kairos-purple);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        animation: modePingSim 2.2s ease infinite;
         flex-shrink: 0;
+        transition: all 0.3s ease;
     }
 
     .mode-switch-wrapper.is-real .mode-dot {
         background: #10b981;
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        animation: modePing 2.2s ease infinite;
+        animation: modePingReal 2.2s ease infinite;
     }
 
-    /* ¡ESCAPADO CON DOBLE ARROBA! */
-    @@keyframes modePing {
+    @@keyframes modePingSim {
+        0%, 100% {
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.06);
+        }
+    }
+
+    @@keyframes modePingReal {
         0%, 100% {
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
         }
@@ -149,7 +198,6 @@
         }
     }
 
-    /* ¡ESCAPADO CON DOBLE ARROBA! */
     @@media (max-width: 480px) {
         .switch-label-sim, .switch-label-real, .mode-dot {
             display: none;
@@ -161,7 +209,50 @@
         }
     }
 
-    /* ── KPI Cards ── */
+    /* ── Notificación Flotante (Toast) ── */
+    #kairos-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-color);
+        padding: 12px 20px;
+        border-radius: 99px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 9999;
+        transition: all 0.4s var(--ease-spring);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        pointer-events: none;
+    }
+
+        #kairos-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+    /* ── Modal de Optimización Concepto ── */
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+        transition: transform 0.4s var(--ease-spring), opacity 0.3s ease;
+    }
+
+    .modal-hidden .modal-content {
+        transform: scale(0.95) translateY(10px);
+        opacity: 0;
+    }
+
+    /* ── KPI ── */
     .kpi-card {
         position: relative;
         overflow: hidden;
@@ -181,23 +272,20 @@
             transform: scale(1.08) rotate(-4deg);
         }
 
-    /* Balance counter */
     .balance-value {
         font-variant-numeric: tabular-nums;
         font-feature-settings: "tnum";
-        font-size: 2rem;
+        font-size: 2.2rem;
         line-height: 1.1;
     }
 
-    /* ¡ESCAPADO CON DOBLE ARROBA! */
     @@media (min-width: 640px) {
         .balance-value {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             line-height: 1;
         }
     }
 
-    /* ── Stat pill ── */
     .stat-pill {
         display: inline-flex;
         align-items: center;
@@ -210,16 +298,16 @@
     }
 
         .stat-pill.up {
-            background: rgba(16, 185, 129, 0.14);
+            background: rgba(16,185,129,0.14);
             color: #10b981;
         }
 
         .stat-pill.down {
-            background: rgba(239, 68, 68, 0.14);
+            background: rgba(239,68,68,0.14);
             color: #ef4444;
         }
 
-    /* ── Quick access cards ── */
+    /* ── Quick cards ── */
     .quick-card {
         display: flex;
         align-items: center;
@@ -237,17 +325,17 @@
         .quick-card:hover {
             background: var(--hover-bg);
             transform: translateX(4px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         }
 
         .quick-card.primary-action {
-            background: rgba(124, 58, 237, 0.07);
-            border: 1px solid rgba(124, 58, 237, 0.35);
+            background: rgba(124,58,237,0.07);
+            border: 1px solid rgba(124,58,237,0.35);
             border-left-width: 3px;
         }
 
             .quick-card.primary-action:hover {
-                background: rgba(124, 58, 237, 0.13);
+                background: rgba(124,58,237,0.13);
             }
 
         .quick-card.secondary-action {
@@ -279,7 +367,7 @@
             text-overflow: ellipsis;
         }
 
-    /* ── Call to Action ── */
+    /* ── CTA ── */
     .cta-btn {
         background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
         color: #fff;
@@ -293,36 +381,119 @@
         gap: 7px;
         cursor: pointer;
         transition: transform 0.22s var(--ease-spring), box-shadow 0.22s ease;
-        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.28);
+        box-shadow: 0 4px 16px rgba(124,58,237,0.28);
         letter-spacing: 0.01em;
     }
 
         .cta-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 8px 24px rgba(124,58,237,0.4);
         }
 
         .cta-btn:active {
             transform: translateY(0);
         }
 
-    /* ── Risk bar ── */
+    .btn-secondary {
+        background: var(--hover-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 11px 22px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+    /* ── Barras de Perfil de Riesgo ── */
     .risk-bar-track {
-        height: 6px;
+        height: 5px;
         border-radius: 99px;
-        background: var(--border-color);
-        overflow: hidden;
+        background: rgba(255,255,255,0.06);
+        overflow: visible;
+        position: relative;
+    }
+
+    [data-theme="light"] .risk-bar-track {
+        background: rgba(0,0,0,0.08);
     }
 
     .risk-bar-fill {
         height: 100%;
         border-radius: 99px;
-        background: linear-gradient(90deg, #3b82f6, #7c3aed, #ec4899);
-        transition: width 1.3s var(--ease-out);
         width: 0%;
+        position: relative;
     }
 
-    /* ── Chart ── */
+        .risk-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease 1.2s;
+        }
+
+        .risk-bar-fill.played::after {
+            opacity: 1;
+            animation: barDotPulse 2.4s ease-out infinite;
+        }
+
+    @@keyframes barDotPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255,255,255,0.35);
+        }
+
+        65% {
+            box-shadow: 0 0 0 6px rgba(255,255,255,0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(255,255,255,0);
+        }
+    }
+
+    .friction-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .friction-3 {
+        background: rgba(239,68,68,0.12);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    .friction-2 {
+        background: rgba(245,158,11,0.12);
+        color: #f59e0b;
+        border: 1px solid rgba(245,158,11,0.2);
+    }
+
+    .friction-1 {
+        background: rgba(16,185,129,0.12);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    /* ── Chart & Others ── */
     .chart-tooltip {
         position: absolute;
         background: var(--bg-card);
@@ -334,7 +505,7 @@
         opacity: 0;
         transition: opacity 0.12s ease;
         z-index: 1000;
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.16);
         min-width: 155px;
         max-width: 88vw;
     }
@@ -353,14 +524,12 @@
             stroke-dashoffset: 0;
         }
 
-    .chart-area,
-    .chart-point {
+    .chart-area, .chart-point {
         opacity: 0;
         transition: opacity 0.8s ease;
     }
 
-        .chart-area.animate,
-        .chart-point.animate {
+        .chart-area.animate, .chart-point.animate {
             opacity: 1;
         }
 
@@ -372,7 +541,7 @@
     .chart-crosshair-line {
         stroke: var(--kairos-purple-soft);
         stroke-width: 1;
-        stroke-dasharray: 4, 4;
+        stroke-dasharray: 4,4;
         opacity: 0;
         transition: opacity 0.1s;
     }
@@ -396,10 +565,9 @@
         .period-btn.active {
             background: var(--bg-card);
             color: var(--text-main);
-            border-color: rgba(124, 58, 237, 0.3);
+            border-color: rgba(124,58,237,0.3);
         }
 
-    /* ── Asset & News ── */
     .asset-row {
         display: flex;
         align-items: center;
@@ -431,7 +599,7 @@
     }
 
     .section-label {
-        font-size: 0.68rem;
+        font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.11em;
@@ -442,11 +610,10 @@
     .ambient-purple {
         position: absolute;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%);
         pointer-events: none;
     }
 
-    /* ── Divider ── */
     .v-divider {
         width: 1px;
         height: 22px;
@@ -457,25 +624,31 @@
 <div class="w-full min-h-full flex flex-col" style="background:var(--bg-main);color:var(--text-main);">
 
     <header class="min-h-[3.75rem] py-2 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30"
-            style="background:var(--bg-main);border-bottom:1px solid var(--border-color);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);">
-
+            style="background:var(--bg-main);border-bottom:1px solid var(--border-color);
+                   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);">
         <div class="flex flex-col justify-center gap-0.5">
             <div class="greeting-time hidden md:block" style="color:var(--text-muted);" id="greeting-time">—</div>
-            <h1 class="text-sm sm:text-[0.9rem] font-bold truncate" style="color:var(--text-main);line-height:1.25;">
-                Tu portafolio, bajo control.
-            </h1>
+
+            <div class="flex items-center gap-3">
+                <h1 class="text-sm sm:text-[0.9rem] font-bold truncate" style="color:var(--text-main);line-height:1.25;">
+                    Tu portafolio, bajo control.
+                </h1>
+                <span id="globalModeBadge"
+                      style="font-size:0.55rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em; transition: all 0.3s ease;
+                             background: rgba(124, 58, 237, 0.15); color: #c4b5fd; border: 1px solid rgba(124, 58, 237, 0.4);">
+                    MODO SIMULADO
+                </span>
+            </div>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <div class="mode-switch-wrapper" id="modeSwitchWrapper" onclick="toggleMode()" role="switch"
-                 aria-checked="false" tabindex="0" title="Cambiar entre modo simulado y real"
-                 aria-label="Modo de operación">
-                <div class="mode-dot" id="modeDot"></div>
-                <span class="switch-label-sim" id="labelSim" aria-hidden="true">SIM</span>
-                <div class="switch-track" id="switchTrack">
-                    <div class="switch-thumb" id="switchThumb"></div>
-                </div>
-                <span class="switch-label-real" id="labelReal" aria-hidden="true">REAL</span>
+            <div class="mode-switch-wrapper" id="modeSwitchWrapper" onclick="toggleMode()"
+                 role="switch" aria-checked="false" tabindex="0"
+                 title="Cambiar entre modo simulado y real" aria-label="Modo de operación">
+                <div class="mode-dot"></div>
+                <span class="switch-label-sim" aria-hidden="true">SIM</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+                <span class="switch-label-real" aria-hidden="true">REAL</span>
             </div>
 
             <div class="v-divider hidden sm:block"></div>
@@ -485,97 +658,106 @@
                     onmouseover="this.style.color='var(--kairos-purple-soft)';this.style.background='rgba(124,58,237,0.09)'"
                     onmouseout="this.style.color='var(--text-muted)';this.style.background='transparent'">
                 <i data-lucide="bell" class="w-5 h-5"></i>
-                <span aria-hidden="true" style="position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:#ef4444;"
-                      class="animate-pulse"></span>
+                <span aria-hidden="true"
+                      style="position:absolute;top:7px;right:7px;width:6px;height:6px;
+                             border-radius:50%;background:#ef4444;" class="animate-pulse"></span>
             </button>
-
             <button aria-label="Perfil de usuario"
-                    style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06b6d4);
-                           border:2px solid var(--border-color);transition:box-shadow 0.2s;flex-shrink:0;"
+                    style="width:32px;height:32px;border-radius:50%;
+                           background:linear-gradient(135deg,#7c3aed,#06b6d4);
+                           border:2px solid var(--border-color);
+                           transition:box-shadow 0.2s;flex-shrink:0;"
                     onmouseover="this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.28)'"
                     onmouseout="this.style.boxShadow='none'"></button>
         </div>
     </header>
 
     <main class="flex-1 p-4 sm:p-6 lg:p-8 relative overflow-x-hidden w-full">
-
-        <div class="ambient-purple hidden sm:block"
-             style="width:520px;height:520px;top:-120px;left:-60px;opacity:0.55;"></div>
+        <div class="ambient-purple hidden sm:block" id="ambientLeft"
+             style="width:520px;height:520px;top:-120px;left:-60px;opacity:0.55; transition: background 0.5s ease;"></div>
         <div class="ambient-purple"
              style="width:320px;height:320px;bottom:8%;right:4%;opacity:0.38;
                     background:radial-gradient(circle,rgba(6,182,212,0.06) 0%,transparent 70%);"></div>
-
         <div class="max-w-7xl mx-auto space-y-5 relative">
 
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade" aria-label="Resumen principal">
 
-                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 lg:col-span-2 hover-lift flex flex-col justify-center">
+                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 lg:col-span-2 hover-lift flex flex-col justify-between h-full">
                     <div class="bg-icon">
                         <i data-lucide="trending-up" style="width:130px;height:130px;color:var(--kairos-purple,#7c3aed)"></i>
                     </div>
-
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <p class="section-label mb-2">Balance Total del Portafolio</p>
-                            <div class="flex flex-wrap items-baseline gap-2 mb-1">
-                                <span class="balance-value font-bold"
-                                      style="color:var(--text-main);font-family:'JetBrains Mono',monospace;">
-                                    $@Model.TotalBalance.ToString("N2")
-                                </span>
-                                <span style="color:var(--text-muted);font-size:0.95rem;font-weight:500;">USD</span>
-                            </div>
+                    <div>
+                        <p class="section-label mb-2">Balance Total del Portafolio</p>
+                        <div class="flex flex-wrap items-baseline gap-2 mb-1">
+                            <span class="balance-value font-bold" style="color:var(--text-main);font-family:'JetBrains Mono',monospace;">
+                                $@Model.TotalBalance.ToString("N2")
+                            </span>
+                            <span style="color:var(--text-muted);font-size:0.95rem;font-weight:500;">USD</span>
                         </div>
-
-                        <button class="cta-btn w-full sm:w-auto justify-center z-10" type="button">
-                            <i data-lucide="sparkles" size="17"></i>
-                            Optimizar Portafolio
-                        </button>
+                        <div class="flex items-center gap-3 mt-2 flex-wrap">
+                            <span class="stat-pill @(Model.MonthlyReturn >= 0 ? "up" : "down")">
+                                <i data-lucide="@(Model.MonthlyReturn >= 0 ? "trending-up" : "trending-down")" style="width:14px;height:14px;"></i>
+                                @(Model.MonthlyReturn >= 0 ? "+" : "")@Model.MonthlyReturn%
+                            </span>
+                            <span style="color:var(--text-muted);font-size:0.82rem;">vs mes anterior</span>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-3 mt-4 flex-wrap">
-                        <span class="stat-pill @(Model.MonthlyReturn >= 0 ? "up" : "down")">
-                            <i data-lucide="@(Model.MonthlyReturn >= 0 ? "trending-up" : "trending-down")"
-                               style="width:14px;height:14px;"></i>
-                            @(Model.MonthlyReturn >= 0 ? "+" : "")@Model.MonthlyReturn%
-                        </span>
-                        <span style="color:var(--text-muted);font-size:0.82rem;">vs mes anterior</span>
-
-                        <span class="ml-auto" style="font-size:0.62rem;opacity:0.55;font-family:'JetBrains Mono',monospace;
-                                                     color:var(--text-muted);" id="last-update">
+                    <div class="mt-4 pt-4 flex justify-between items-center" style="border-top:1px solid var(--border-color);">
+                        <span style="font-size:0.62rem;opacity:0.55;font-family:'JetBrains Mono',monospace;color:var(--text-muted);" id="last-update">
                             Actualizado hace 2 min
                         </span>
+                        <button id="btnOptimize" onclick="openOptimizationModal()" class="cta-btn w-full sm:w-auto justify-center z-10" type="button">
+                            <i data-lucide="sparkles" size="17" id="iconOptimize"></i>
+                            <span id="textOptimize">Optimizar Portafolio</span>
+                        </button>
                     </div>
                 </article>
 
-                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover-lift">
-                    <div class="flex justify-between items-start mb-4">
+                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover-lift h-full" aria-labelledby="profile-title">
+                    <div class="flex justify-between items-start mb-3">
                         <div>
-                            <p class="section-label mb-1">Perfil de Riesgo IA</p>
-                            <p class="text-xl font-bold" style="color:var(--text-main);line-height:1.2;">@Model.RiskLabel</p>
+                            <p class="section-label mb-1" id="profile-title">Perfil de Riesgo</p>
+                            <p class="text-[1.1rem] font-bold leading-tight" style="color:@profileColor">@riskProfile</p>
                         </div>
-                        <div style="padding:8px;background:rgba(124,58,237,0.1);border-radius:10px;color:#7c3aed;">
-                            <i data-lucide="brain-circuit" size="17"></i>
+                        <div style="padding:7px;background:rgba(124,58,237,0.1);border-radius:10px;color:#7c3aed;" aria-hidden="true">
+                            <i data-lucide="brain-circuit" style="width:16px;height:16px"></i>
                         </div>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between mb-2"
-                             style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-muted);">
-                            <span>Conservador</span>
-                            <span>Agresivo</span>
+                    <div class="space-y-3 flex-1 flex flex-col justify-center">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span style="font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Comportamiento</span>
+                                <span style="font-size:0.65rem;font-weight:700;color:var(--text-main);">@labelA</span>
+                            </div>
+                            <div class="risk-bar-track" role="progressbar" aria-valuenow="@percA" aria-valuemin="0" aria-valuemax="100" aria-label="Comportamiento: @labelA">
+                                <div class="risk-bar-fill" id="barFillA" data-target="@percA" style="background:@colorA;box-shadow:0 2px 10px rgba(124,58,237,0.3);"></div>
+                            </div>
                         </div>
-                        <div class="risk-bar-track">
-                            <div class="risk-bar-fill" id="riskBarFill"
-                                 style="width:0%" data-target="@Model.RiskScore"></div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span style="font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Conocimiento</span>
+                                <span style="font-size:0.65rem;font-weight:700;color:var(--text-main);">@labelB</span>
+                            </div>
+                            <div class="risk-bar-track" role="progressbar" aria-valuenow="@percB" aria-valuemin="0" aria-valuemax="100" aria-label="Conocimiento: @labelB">
+                                <div class="risk-bar-fill" id="barFillB" data-target="@percB" style="background:@colorB;box-shadow:0 2px 10px rgba(6,182,212,0.25);"></div>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between mt-3">
-                            <p style="font-size:0.68rem;color:#7c3aed;display:flex;align-items:center;gap:5px;">
-                                <i data-lucide="sparkles" style="width:11px;height:11px;"></i>
-                                Calibrado por KairosAI
-                            </p>
-                            <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--text-muted);">
-                                @Model.RiskScore/100
-                            </span>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3 pt-3" style="border-top:1px solid var(--border-color);">
+                        <span class="friction-badge @frictionClass">
+                            <i data-lucide="@frictionIcon" style="width:11px;height:11px;"></i>
+                            @frictionText
+                        </span>
+
+                        <div style="display:flex; align-items:center; gap:4px; opacity:0.6; transition:opacity 0.2s; cursor:default;"
+                             onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"
+                             title="Análisis psicológico generado por el motor de KairósAI">
+                            <span style="font-size:0.55rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">Powered by</span>
+                            <span style="font-size:0.65rem; font-weight:700; color:var(--kairos-purple); font-family:'JetBrains Mono', monospace;">KairósAI</span>
                         </div>
                     </div>
                 </article>
@@ -584,7 +766,6 @@
             <section class="k-fade" style="transition-delay:0.08s;" aria-label="Accesos rápidos">
                 <p class="section-label mb-3">Navegación Rápida</p>
                 <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3">
-
                     <a asp-controller="Kairos" asp-action="Index"
                        class="quick-card primary-action" style="border-left-color:#7c3aed;"
                        onmouseover="this.querySelector('.qc-icon').style.background='#7c3aed';this.querySelector('.qc-icon').style.color='#fff'"
@@ -597,7 +778,6 @@
                             <p style="font-size:0.68rem;color:var(--text-muted);">Pregunta ahora</p>
                         </div>
                     </a>
-
                     <a href="#market-section" class="quick-card" style="border-left-color:#10b981;"
                        onmouseover="this.querySelector('.qc-icon').style.background='#10b981';this.querySelector('.qc-icon').style.color='#fff'"
                        onmouseout="this.querySelector('.qc-icon').style.background='rgba(16,185,129,0.1)';this.querySelector('.qc-icon').style.color='#10b981'">
@@ -609,7 +789,6 @@
                             <p style="font-size:0.68rem;color:var(--text-muted);">Ver oportunidades</p>
                         </div>
                     </a>
-
                     <a asp-controller="News" asp-action="Index" class="quick-card" style="border-left-color:#3b82f6;"
                        onmouseover="this.querySelector('.qc-icon').style.background='#3b82f6';this.querySelector('.qc-icon').style.color='#fff'"
                        onmouseout="this.querySelector('.qc-icon').style.background='rgba(59,130,246,0.1)';this.querySelector('.qc-icon').style.color='#3b82f6'">
@@ -621,7 +800,6 @@
                             <p style="font-size:0.68rem;color:var(--text-muted);">Feed en tiempo real</p>
                         </div>
                     </a>
-
                     <a asp-controller="Education" asp-action="Index" class="quick-card secondary-action" style="border-left-color:#f59e0b;"
                        onmouseover="this.querySelector('.qc-icon').style.background='#f59e0b';this.querySelector('.qc-icon').style.color='#fff'"
                        onmouseout="this.querySelector('.qc-icon').style.background='rgba(245,158,11,0.1)';this.querySelector('.qc-icon').style.color='#f59e0b'">
@@ -642,23 +820,25 @@
                         <div>
                             <p class="section-label mb-1">Rendimiento Histórico</p>
                             <h2 id="performance-heading"
-                                style="font-size:0.93rem;font-weight:600;color:var(--text-main);display:flex;align-items:center;gap:6px;">
+                                style="font-size:0.93rem;font-weight:600;color:var(--text-main);
+                                       display:flex;align-items:center;gap:6px;">
                                 <i data-lucide="line-chart" style="width:15px;height:15px;color:#7c3aed;"></i>
                                 Evolución del portafolio
                             </h2>
                         </div>
                         <div style="display:flex;background:var(--bg-main);padding:3px;border-radius:11px;
-                                    border:1px solid var(--border-color);gap:3px;">
+                                    border:1px solid var(--border-color);gap:3px;"
+                             role="group" aria-label="Selección de periodo de gráfico">
                             @foreach (var period in new[] { "7D", "1M", "1A" })
                             {
                                 <button onclick="selectPeriod(this)" data-period="@period" type="button"
+                                        aria-pressed="@(period == "7D" ? "true" : "false")"
                                         class="period-btn @(period == "7D" ? "active" : "")">
                                     @period
                                 </button>
                             }
                         </div>
                     </div>
-
                     <div class="relative w-full" style="height:220px;">
                         <div id="chartTooltip" class="chart-tooltip">
                             <div style="font-size:0.63rem;color:var(--text-muted);margin-bottom:4px;
@@ -667,13 +847,10 @@
                                         font-family:'JetBrains Mono',monospace;" id="tooltipValue"></div>
                             <div style="font-size:0.73rem;font-weight:600;margin-top:5px;" id="tooltipChange"></div>
                         </div>
-
                         @{
                             var data = Model.PerformanceData;
-                            string points = "";
-                            string fillPoints = "";
-                            double svgW = 1000, svgH = 180;
-                            double stepX = 0;
+                            string points = "", fillPoints = "";
+                            double svgW = 1000, svgH = 180, stepX = 0;
                             decimal minVal = 0, maxVal = 0, range = 1;
 
                             if (data.Any())
@@ -695,36 +872,29 @@
                                 fillPoints = $"0,{svgH} " + points + $" {svgW},{svgH}";
                             }
                         }
-
                         <svg viewBox="0 0 1000 180" preserveAspectRatio="none"
-                             class="w-full h-full overflow-visible" id="chartSvg" role="img"
-                             aria-label="Gráfico de rendimiento del portafolio">
+                             class="w-full h-full overflow-visible" id="chartSvg"
+                             role="img" aria-label="Gráfico de rendimiento del portafolio">
                             <defs>
                                 <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
                                     <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.22" />
                                     <stop offset="100%" stop-color="#7c3aed" stop-opacity="0" />
                                 </linearGradient>
                             </defs>
-
                             @foreach (var yPos in new[] { 40, 90, 140 })
                             {
                                 <line x1="0" y1="@yPos" x2="1000" y2="@yPos"
                                       stroke="var(--border-color)" stroke-width="1"
                                       stroke-dasharray="5,6" opacity="0.45" />
                             }
-
-                            <line id="crosshairLine" x1="0" y1="0" x2="0" y2="180"
-                                  class="chart-crosshair-line" />
-
+                            <line id="crosshairLine" x1="0" y1="0" x2="0" y2="180" class="chart-crosshair-line" />
                             @if (data.Any())
                             {
                                 <polygon points="@fillPoints" fill="url(#chartGrad)" class="chart-area" />
                                 <polyline points="@points" fill="none" stroke="#7c3aed" stroke-width="2.5"
-                                          stroke-linecap="round" stroke-linejoin="round"
-                                          class="chart-line" />
+                                          stroke-linecap="round" stroke-linejoin="round" class="chart-line" />
                                 <circle id="hoverCircle" r="5" fill="#7c3aed" stroke="#fff"
                                         stroke-width="2.5" style="opacity:0;pointer-events:none;" />
-
                                 @for (int i = 0; i < data.Count; i++)
                                 {
                                     double x = i * stepX;
@@ -734,18 +904,17 @@
                                     string cy = y.ToString(System.Globalization.CultureInfo.InvariantCulture);
                                     bool isMax = data[i].Value == maxVal;
                                     bool isMin = data[i].Value == minVal;
-                                    string dotColor = isMax ? "#10b981" : isMin ? "#ef4444" : "var(--bg-main)";
-                                    string strokeColor = isMax ? "#10b981" : isMin ? "#ef4444" : "#7c3aed";
-                                    double radius = isMax || isMin ? 5 : 3.5;
+                                    string dotClr = isMax ? "#10b981" : isMin ? "#ef4444" : "var(--bg-main)";
+                                    string stkClr = isMax ? "#10b981" : isMin ? "#ef4444" : "#7c3aed";
+                                    double rad = isMax || isMin ? 5 : 3.5;
 
                                     <g class="chart-point" data-index="@i">
-                                        <circle cx="@cx" cy="@cy" r="@radius"
-                                                fill="@dotColor" stroke="@strokeColor" stroke-width="2"
+                                        <circle cx="@cx" cy="@cy" r="@rad"
+                                                fill="@dotClr" stroke="@stkClr" stroke-width="2"
                                                 data-date="@data[i].Date"
                                                 data-value="@data[i].Value.ToString("N2")"
                                                 data-x="@cx" data-y="@cy" />
                                         <circle cx="@cx" cy="@cy" r="14" fill="transparent" class="cursor-pointer" />
-
                                         @if (isMax)
                                         {
                                             @Html.Raw($"<text x=\"{cx}\" y=\"{(y - 10).ToString(System.Globalization.CultureInfo.InvariantCulture)}\" fill=\"#10b981\" font-size=\"9.5\" text-anchor=\"middle\" font-weight=\"700\">MAX</text>")
@@ -764,41 +933,55 @@
                 </article>
             </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade" style="transition-delay:0.24s;" id="market-section">
-
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade"
+                 style="transition-delay:0.24s;" id="market-section">
                 <section aria-labelledby="news-heading" class="lg:col-span-2">
                     <article class="glass-panel rounded-2xl p-5 h-full flex flex-col justify-start">
                         <div class="flex justify-between items-center mb-5">
-                            <h2 id="news-heading" style="font-size:0.95rem;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:7px;">
+                            <h2 id="news-heading"
+                                style="font-size:0.95rem;font-weight:700;color:var(--text-main);
+                                       display:flex;align-items:center;gap:7px;">
                                 <i data-lucide="zap" style="width:16px;height:16px;color:#f59e0b;"></i>
                                 Señales del Mercado
                             </h2>
-                            <a asp-controller="News" asp-action="Index" style="font-size:0.75rem;color:#7c3aed;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:3px;opacity:0.85;transition:opacity 0.15s;" onmouseover="this.style.opacity='1';this.style.textDecoration='underline'" onmouseout="this.style.opacity='0.85';this.style.textDecoration='none'">
+                            <a asp-controller="News" asp-action="Index"
+                               style="font-size:0.75rem;color:#7c3aed;text-decoration:none;font-weight:600;
+                                      display:flex;align-items:center;gap:3px;opacity:0.85;transition:opacity 0.15s;"
+                               onmouseover="this.style.opacity='1';this.style.textDecoration='underline'"
+                               onmouseout="this.style.opacity='0.85';this.style.textDecoration='none'">
                                 Ver feed completo →
                             </a>
                         </div>
-
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">
                             @foreach (var news in Model.RecentNews.Take(4))
                             {
-                                <a href="#" style="padding:16px; display:flex; flex-direction:column; justify-content:flex-start; gap:12px; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-panel); text-decoration:none; transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(124,58,237,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                                        <span style="font-size:0.65rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.08em;">@news.Source</span>
-                                        <time style="font-size:0.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">@news.TimeAgo</time>
-                                    </div>
+                                var sColor = news.Sentiment == "Positivo" ? "#10b981" : news.Sentiment == "Negativo" ? "#ef4444" : "#9ca3af";
+                                var sBg = news.Sentiment == "Positivo" ? "rgba(16,185,129,0.12)" : news.Sentiment == "Negativo" ? "rgba(239,68,68,0.12)" : "rgba(156,163,175,0.12)";
+                                var sIcon = news.Sentiment == "Positivo" ? "trending-up" : news.Sentiment == "Negativo" ? "trending-down" : "minus";
 
-                                    <h3 style="font-size:0.88rem;font-weight:600;color:var(--text-main);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                                <a href="#"
+                                   style="padding:16px;display:flex;flex-direction:column;justify-content:flex-start;
+                                              gap:12px;border-radius:12px;border:1px solid var(--border-color);
+                                              background:var(--bg-panel);text-decoration:none;
+                                              transition:transform 0.2s,box-shadow 0.2s;"
+                                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(124,58,237,0.1)'"
+                                   onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <span style="font-size:0.65rem;font-weight:800;color:#7c3aed;
+                                                         text-transform:uppercase;letter-spacing:0.08em;">@news.Source</span>
+                                        <time style="font-size:0.65rem;color:var(--text-muted);
+                                                         font-family:'JetBrains Mono',monospace;">@news.TimeAgo</time>
+                                    </div>
+                                    <h3 style="font-size:0.88rem;font-weight:600;color:var(--text-main);line-height:1.4;
+                                                   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
                                         @news.Title
                                     </h3>
-
-                                    <div style="margin-top:auto; display:flex;">
-                                        @{
-                                            var sColor = news.Sentiment == "Positivo" ? "#10b981" : news.Sentiment == "Negativo" ? "#ef4444" : "#9ca3af";
-                                            var sBg = news.Sentiment == "Positivo" ? "rgba(16,185,129,0.12)" : news.Sentiment == "Negativo" ? "rgba(239,68,68,0.12)" : "rgba(156,163,175,0.12)";
-                                            var sIcon = news.Sentiment == "Positivo" ? "trending-up" : news.Sentiment == "Negativo" ? "trending-down" : "minus";
-                                        }
-                                        <span style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:99px;font-size:0.7rem;font-weight:700;background:@sBg;color:@sColor;">
-                                            <i data-lucide="@sIcon" style="width:12px;height:12px;"></i> @news.Sentiment
+                                    <div style="margin-top:auto;display:flex;">
+                                        <span style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;
+                                                         border-radius:99px;font-size:0.7rem;font-weight:700;
+                                                         background:@sBg;color:@sColor;">
+                                            <i data-lucide="@sIcon" style="width:12px;height:12px;"></i>
+                                            @news.Sentiment
                                         </span>
                                     </div>
                                 </a>
@@ -806,42 +989,54 @@
                         </div>
                     </article>
                 </section>
-
                 <section aria-labelledby="market-heading">
                     <article class="glass-panel rounded-2xl p-5 h-full flex flex-col">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 id="market-heading" style="font-size:0.88rem;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:7px;">
+                            <h2 id="market-heading"
+                                style="font-size:0.88rem;font-weight:700;color:var(--text-main);
+                                       display:flex;align-items:center;gap:7px;">
                                 <i data-lucide="layers" style="width:15px;height:15px;color:#3b82f6;"></i>
                                 Mercado Hoy
                             </h2>
                         </div>
-
-                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;flex:1;max-height:380px;overflow-y:auto;padding-right:4px;" role="list">
+                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
+                                   gap:4px;flex:1;max-height:380px;overflow-y:auto;padding-right:4px;"
+                            role="list">
                             @foreach (var asset in Model.TopAssets)
                             {
                                 <li>
-                                    <a href="#" class="asset-row" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                                    <a href="#" class="asset-row"
+                                       style="display:flex;align-items:center;justify-content:space-between;
+                                                  padding:10px 12px;border-radius:10px;text-decoration:none;
+                                                  transition:background 0.2s;"
+                                       onmouseover="this.style.background='var(--hover-bg)'"
+                                       onmouseout="this.style.background='transparent'">
                                         <div style="display:flex;align-items:center;gap:12px;">
                                             @if (!string.IsNullOrEmpty(asset.ImageUrl))
                                             {
-                                                <img src="@asset.ImageUrl" alt="@asset.Name icon" style="width:34px; height:34px; border-radius:50%; object-fit:cover; background-color:var(--bg-main);" />
+                                                <img src="@asset.ImageUrl" alt="@asset.Name"
+                                                     style="width:34px;height:34px;border-radius:50%;
+                                                                    object-fit:cover;background-color:var(--bg-main);" />
                                             }
                                             else
                                             {
-                                                <div class="asset-symbol-badge" style="width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.68rem; border:1px solid var(--border-color); background:var(--bg-panel); color:var(--text-main); font-family:'JetBrains Mono',monospace;">
-                                                    @asset.Symbol.Substring(0, 1)
-                                                </div>
+                                                <div class="asset-symbol-badge">@asset.Symbol.Substring(0, 1)</div>
                                             }
                                             <div>
                                                 <div style="font-size:0.83rem;font-weight:700;color:var(--text-main);">@asset.Symbol</div>
-                                                <div style="font-size:0.68rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:85px;">@asset.Name</div>
+                                                <div style="font-size:0.68rem;color:var(--text-muted);white-space:nowrap;
+                                                                overflow:hidden;text-overflow:ellipsis;max-width:85px;">
+                                                    @asset.Name
+                                                </div>
                                             </div>
                                         </div>
                                         <div style="text-align:right;">
-                                            <div style="font-size:0.83rem;font-weight:600;color:var(--text-main);font-family:'JetBrains Mono',monospace;">
+                                            <div style="font-size:0.83rem;font-weight:600;color:var(--text-main);
+                                                            font-family:'JetBrains Mono',monospace;">
                                                 $@asset.Price.ToString("N2")
                                             </div>
-                                            <div style="font-size:0.73rem;font-weight:700;color:@(asset.Change24h >= 0 ? "#10b981" : "#ef4444");">
+                                            <div style="font-size:0.73rem;font-weight:700;
+                                                            color:@(asset.Change24h >= 0 ? "#10b981" : "#ef4444");">
                                                 @(asset.Change24h >= 0 ? "▲" : "▼") @Math.Abs(asset.Change24h).ToString("F2")%
                                             </div>
                                         </div>
@@ -854,6 +1049,50 @@
             </div>
         </div>
     </main>
+
+    <div id="kairos-toast" aria-live="polite">
+        <i id="toast-icon" data-lucide="info" style="width:18px;height:18px;"></i>
+        <span id="toast-message">Notificación</span>
+    </div>
+
+    <div id="optimizeModal" class="fixed inset-0 z-[100] flex items-center justify-center modal-overlay modal-hidden" style="opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div class="glass-panel modal-content rounded-2xl p-6 max-w-md w-full mx-4" style="border: 1px solid var(--kairos-purple);">
+
+            <div class="flex items-center gap-3 mb-4">
+                <div style="padding:8px; background:rgba(124,58,237,0.15); border-radius:10px; color:#c4b5fd;">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold" style="color:var(--text-main);">Sugerencia KairósAI</h3>
+                    <p class="text-xs" style="color:var(--text-muted); font-family:'JetBrains Mono', monospace;">Análisis en tiempo real</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <p class="text-sm" style="color:var(--text-main); line-height: 1.5;">
+                    He detectado una desviación en tu tolerancia al riesgo. Para mantener tu perfil <strong style="color:@profileColor">@riskProfile</strong> en un mercado volátil, sugiero la siguiente acción de balanceo:
+                </p>
+
+                <div class="p-4 rounded-xl" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2);">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider" style="color:#10b981;">Rebalanceo Recomendado</span>
+                        <i data-lucide="arrow-right-left" size="14" style="color:#10b981;"></i>
+                    </div>
+                    <p class="text-sm font-medium" style="color:var(--text-main);">Asegurar ganancias: Mover 5% de activos de alto riesgo hacia Stablecoins (USDT).</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeOptimizationModal()" class="btn-secondary">
+                    Ignorar
+                </button>
+                <button onclick="applyOptimization()" class="cta-btn text-sm px-5 py-2">
+                    Aplicar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -872,17 +1111,38 @@
         } catch (e) {}
     })();
 
-    // ── Animaciones al cargar ──
     document.addEventListener('DOMContentLoaded', () => {
+        // Fade-in escalonado
         document.querySelectorAll('.k-fade').forEach((el, i) => {
             setTimeout(() => el.classList.add('visible'), 70 + i * 85);
         });
 
+        // ── Animación barras de perfil de riesgo ──
         setTimeout(() => {
-            const bar = document.getElementById('riskBarFill');
-            if (bar) bar.style.width = bar.dataset.target + '%';
-        }, 380);
+            function animateBar(el) {
+                if (!el) return;
+                const target = parseInt(el.dataset.target, 10);
+                const overshoot = Math.min(target + 7, 100);
 
+                // Fase 1: spring con overshoot
+                el.style.transition = 'width 0.85s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                el.style.width = overshoot + '%';
+
+                // Fase 2: settle
+                setTimeout(() => {
+                    el.style.transition = 'width 0.32s cubic-bezier(0.22, 1, 0.36, 1)';
+                    el.style.width = target + '%';
+                }, 880);
+
+                // Fase 3: dot pulsante
+                setTimeout(() => el.classList.add('played'), 1240);
+            }
+
+            animateBar(document.getElementById('barFillA'));
+            setTimeout(() => animateBar(document.getElementById('barFillB')), 160);
+        }, 400);
+
+        // ── Chart ──
         setTimeout(() => {
             const line = document.querySelector('.chart-line');
             const area = document.querySelector('.chart-area');
@@ -895,56 +1155,157 @@
         }, 280);
     });
 
-    // ── Switch Simulado / Real ──
+    // ── Utilidad para mostrar Toast Notificacions ──
+    let toastTimeout;
+    function showToast(message, mode) {
+        const toast = document.getElementById('kairos-toast');
+        const msgEl = document.getElementById('toast-message');
+        const iconEl = document.getElementById('toast-icon');
+
+        msgEl.textContent = message;
+
+        if (mode === 'real') {
+            toast.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            toast.style.color = '#10b981';
+            iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'; // Check
+        } else if (mode === 'sim') {
+            toast.style.borderColor = 'rgba(124, 58, 237, 0.4)';
+            toast.style.color = '#c4b5fd';
+            iconEl.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'; // Info
+        } else {
+            toast.style.borderColor = 'var(--border-color)';
+            toast.style.color = 'var(--text-main)';
+            iconEl.innerHTML = '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path>';
+        }
+
+        lucide.createIcons({ root: toast });
+        toast.classList.add('show');
+
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+
+    // ── Switch Simulado / Real (Con Lógica de Diseño Vistosa) ──
     let isRealMode = false;
     function toggleMode() {
         isRealMode = !isRealMode;
+
+        // Elementos UI a cambiar
         const wrapper = document.getElementById('modeSwitchWrapper');
+        const globalBadge = document.getElementById('globalModeBadge');
+        const ambientGlow = document.getElementById('ambientLeft');
+
+        // Toggle clases
         wrapper.classList.toggle('is-real', isRealMode);
         wrapper.setAttribute('aria-checked', String(isRealMode));
 
+        // Efecto físico del botón
         wrapper.style.transition = 'none';
-        wrapper.style.transform  = 'scale(0.95)';
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                wrapper.style.transition = 'transform 0.28s var(--ease-spring)';
-                wrapper.style.transform  = 'scale(1)';
-            });
-        });
+        wrapper.style.transform = 'scale(0.95)';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            wrapper.style.transition = 'transform 0.28s var(--ease-spring)';
+            wrapper.style.transform = 'scale(1)';
+        }));
+
+        // Cambio global de aspecto
+        if (isRealMode) {
+            globalBadge.textContent = 'MODO REAL';
+            globalBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+            globalBadge.style.color = '#10b981';
+            globalBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+
+            if (ambientGlow) ambientGlow.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)';
+
+            showToast('Has cambiado al Modo Real. Las operaciones usarán saldo real.', 'real');
+        } else {
+            globalBadge.textContent = 'MODO SIMULADO';
+            globalBadge.style.background = 'rgba(124, 58, 237, 0.15)';
+            globalBadge.style.color = '#c4b5fd';
+            globalBadge.style.borderColor = 'rgba(124, 58, 237, 0.4)';
+
+            if (ambientGlow) ambientGlow.style.background = 'radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%)';
+
+            showToast('Has cambiado al Modo Simulado. Tus operaciones no tienen riesgo.', 'sim');
+        }
     }
 
     document.getElementById('modeSwitchWrapper').addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMode(); }
     });
 
+    // ── Lógica del Botón Conceptual "Optimizar Portafolio" ──
+    function openOptimizationModal() {
+        const btnText = document.getElementById('textOptimize');
+        const btnIcon = document.getElementById('iconOptimize');
+        const originalText = btnText.innerText;
+
+        // Estado de "Carga / Pensando" de la IA
+        btnText.innerText = "Analizando...";
+        btnIcon.setAttribute('data-lucide', 'loader-2');
+        btnIcon.classList.add('animate-spin');
+        lucide.createIcons();
+
+        // Simular tiempo de respuesta de IA (1.5s)
+        setTimeout(() => {
+            // Restaurar botón
+            btnText.innerText = originalText;
+            btnIcon.setAttribute('data-lucide', 'sparkles');
+            btnIcon.classList.remove('animate-spin');
+            lucide.createIcons();
+
+            // Mostrar Modal
+            const modal = document.getElementById('optimizeModal');
+            modal.classList.remove('modal-hidden');
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'auto';
+            lucide.createIcons({ root: modal });
+        }, 1500);
+    }
+
+    function closeOptimizationModal() {
+        const modal = document.getElementById('optimizeModal');
+        modal.classList.add('modal-hidden');
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+    }
+
+    function applyOptimization() {
+        closeOptimizationModal();
+        showToast('Rebalanceo aplicado. Portafolio asegurado.', 'real'); // Usa el estilo verde de éxito
+    }
+
     // ── Period selector ──
     function selectPeriod(btn) {
         document.querySelectorAll('.period-btn').forEach(b => {
             b.classList.remove('active');
             b.style.cssText = '';
+            b.setAttribute('aria-pressed', 'false');
         });
         btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
     }
 
-    // ── Datos del chart ──
+    // ── Chart data ──
     const chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
                                                                 Model.PerformanceData.Select(d => new { date = d.Date, value = d.Value }).ToList()
-                                ));
+                                                ));
 
     function initChart() {
-        const overlay     = document.getElementById('chartOverlay');
-        const tooltip     = document.getElementById('chartTooltip');
-        const svg         = document.getElementById('chartSvg');
-        const crosshair   = document.getElementById('crosshairLine');
+        const overlay = document.getElementById('chartOverlay');
+        const tooltip = document.getElementById('chartTooltip');
+        const svg = document.getElementById('chartSvg');
+        const crosshair = document.getElementById('crosshairLine');
         const hoverCircle = document.getElementById('hoverCircle');
-        const circles     = document.querySelectorAll('#chartSvg circle[data-date]');
+        const circles = document.querySelectorAll('#chartSvg circle[data-date]');
 
         if (!overlay || !svg || !chartData.length) return;
 
         const pts = Array.from(circles).map(c => ({
-            x:     parseFloat(c.getAttribute('data-x')),
-            y:     parseFloat(c.getAttribute('data-y')),
-            date:  c.getAttribute('data-date'),
+            x: parseFloat(c.getAttribute('data-x')),
+            y: parseFloat(c.getAttribute('data-y')),
+            date: c.getAttribute('data-date'),
             value: parseFloat(c.getAttribute('data-value'))
         }));
 
@@ -955,13 +1316,13 @@
         }
 
         function handleMove(clientX, clientY) {
-            const r  = overlay.getBoundingClientRect();
+            const r = overlay.getBoundingClientRect();
             const mx = clientX - r.left;
             const my = clientY - r.top;
-            const pt  = closest(mx);
+            const pt = closest(mx);
             const idx = pts.indexOf(pt);
 
-            document.getElementById('tooltipDate').textContent  = pt.date;
+            document.getElementById('tooltipDate').textContent = pt.date;
             document.getElementById('tooltipValue').textContent = '$' + pt.value.toFixed(2);
 
             const changeEl = document.getElementById('tooltipChange');
@@ -976,14 +1337,13 @@
             }
 
             const tooltipW = 162;
-            let tx = mx + 16;
-            let ty = my - 72;
+            let tx = mx + 16, ty = my - 72;
             if (tx + tooltipW > r.width) tx = mx - tooltipW - 10;
             if (tx < 4) tx = 4;
             if (ty < 4) ty = my + 18;
 
             tooltip.style.left = tx + 'px';
-            tooltip.style.top  = ty + 'px';
+            tooltip.style.top = ty + 'px';
             tooltip.classList.add('visible');
 
             crosshair.setAttribute('x1', pt.x);
@@ -995,19 +1355,15 @@
         }
 
         overlay.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
-
         overlay.addEventListener('mouseleave', () => {
             tooltip.classList.remove('visible');
             crosshair.style.opacity = '0';
             hoverCircle.style.opacity = '0';
         });
-
         overlay.addEventListener('touchmove', e => {
             e.preventDefault();
-            const t = e.touches[0];
-            handleMove(t.clientX, t.clientY);
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
-
         overlay.addEventListener('touchend', () => {
             setTimeout(() => {
                 tooltip.classList.remove('visible');

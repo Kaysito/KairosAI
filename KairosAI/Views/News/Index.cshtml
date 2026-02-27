@@ -2,6 +2,16 @@
 @{
     ViewData["Title"] = "Noticias - KairosAI";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // ── Lógica de Kairós: Veredicto de Noticias ──
+    int totalNews = Model.Headlines.Count();
+    int positiveCount = Model.Headlines.Count(n => n.Sentiment == "Positivo");
+    int negativeCount = Model.Headlines.Count(n => n.Sentiment == "Negativo");
+
+    // Evitar división por cero si no hay noticias
+    int positivePct = totalNews > 0 ? (int)Math.Round((double)positiveCount / totalNews * 100) : 0;
+    int negativePct = totalNews > 0 ? (int)Math.Round((double)negativeCount / totalNews * 100) : 0;
+    int neutralPct = totalNews > 0 ? 100 - positivePct - negativePct : 0;
 }
 
 <style>
@@ -112,31 +122,61 @@
         }
     }
 
-    /* ── Sentiment meter (header) ── */
-    .sentiment-bar-wrap {
+    /* ── NUEVO: Kairós Market Verdict (Reemplazo de Fear/Greed) ── */
+    .kairos-verdict-wrap {
         display: flex;
-        align-items: center;
-        gap: 10px;
+        flex-direction: column;
+        gap: 6px;
         padding: 10px 14px;
         border-radius: 12px;
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        min-width: 220px;
+        min-width: 240px;
     }
 
-    .sentiment-track {
-        flex: 1;
-        height: 5px;
+    .verdict-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .verdict-title {
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: var(--kairos-purple);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .verdict-track-container {
+        display: flex;
+        height: 6px;
         border-radius: 99px;
-        background: var(--border-color);
         overflow: hidden;
+        background: var(--border-color); /* Fallback */
     }
 
-    .sentiment-fill {
-        height: 100%;
-        border-radius: 99px;
-        background: linear-gradient(90deg, #ef4444 0%, #f59e0b 45%, #10b981 100%);
+    /* Las barras crecerán con JS para dar el efecto */
+    .verdict-fill-pos {
+        background: #10b981;
         transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        width: 0%;
+    }
+
+    .verdict-fill-neu {
+        background: #9ca3af;
+        transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        width: 0%;
+        opacity: 0.5;
+    }
+
+    .verdict-fill-neg {
+        background: #ef4444;
+        transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        width: 0%;
     }
 
     /* ── FEATURED card (primera noticia grande) ── */
@@ -332,11 +372,9 @@
 
 <div class="news-page h-full overflow-y-auto" style="padding: 0 0 60px;">
 
-    <!-- ── STICKY HEADER ── -->
     <div class="news-header px-5 sm:px-8">
         <div class="max-w-7xl mx-auto">
 
-            <!-- Top row -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 k-fade">
                 <div class="flex items-center gap-3">
                     <div style="padding:8px;background:rgba(124,58,237,0.1);border-radius:10px;">
@@ -347,7 +385,7 @@
                             Inteligencia de Mercado
                         </h1>
                         <p style="font-size:0.7rem;color:var(--text-muted);">
-                            Sentimiento, señales y análisis en tiempo real
+                            Sentimiento, señales y análisis filtrado por IA
                         </p>
                     </div>
                     <div class="live-badge hidden sm:inline-flex">
@@ -356,17 +394,26 @@
                     </div>
                 </div>
 
-                <!-- Sentiment meter global -->
-                <div class="sentiment-bar-wrap k-fade" style="transition-delay:0.1s;">
-                    <span style="font-size:0.62rem;font-weight:700;color:var(--text-muted);white-space:nowrap;font-family:'JetBrains Mono',monospace;">FEAR / GREED</span>
-                    <div class="sentiment-track">
-                        <div class="sentiment-fill" id="sentimentFill" style="width:0%;" data-target="62"></div>
+                <div class="kairos-verdict-wrap k-fade" style="transition-delay:0.1s;" title="Porcentaje de impacto de las noticias analizadas">
+                    <div class="verdict-header">
+                        <span class="verdict-title">
+                            <i data-lucide="brain-circuit" style="width:12px;height:12px;"></i>
+                            Veredicto KairósAI
+                        </span>
+                        <div style="display:flex; gap:8px; font-family:'JetBrains Mono',monospace; font-size:0.58rem; font-weight:700;">
+                            <span style="color:#10b981;">+@positivePct%</span>
+                            <span style="color:var(--text-muted);">@neutralPct%</span>
+                            <span style="color:#ef4444;">-@negativePct%</span>
+                        </div>
                     </div>
-                    <span style="font-size:0.7rem;font-weight:700;color:#10b981;font-family:'JetBrains Mono',monospace;" id="sentimentVal">62</span>
+                    <div class="verdict-track-container">
+                        <div class="verdict-fill-pos" id="fillPos" data-target="@positivePct"></div>
+                        <div class="verdict-fill-neu" id="fillNeu" data-target="@neutralPct"></div>
+                        <div class="verdict-fill-neg" id="fillNeg" data-target="@negativePct"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Filter pills -->
             <div class="filter-tabs k-fade" style="transition-delay:0.15s;" role="tablist" aria-label="Filtrar noticias">
                 <button class="filter-pill active" onclick="filterNews(this,'todo')" role="tab" aria-selected="true">
                     <i data-lucide="layout-grid" style="width:12px;height:12px;"></i>
@@ -396,7 +443,6 @@
         </div>
     </div>
 
-    <!-- ── NEWS GRID ── -->
     <div class="px-5 sm:px-8 mt-6">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 k-fade" style="transition-delay:0.2s;" id="newsGrid">
@@ -454,7 +500,6 @@
                     if (isFirst)
                     {
                         isFirst = false;
-                        <!-- FEATURED -->
                         <article class="card-featured" data-category="@cat">
                             <div class="card-accent-bar"></div>
 
@@ -469,7 +514,6 @@
                             }
                             else
                             {
-                                <!-- Decorative gradient placeholder -->
                                 <div style="height:180px;background:linear-gradient(135deg,rgba(124,58,237,0.12) 0%,rgba(6,182,212,0.06) 100%);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border-color);position:relative;overflow:hidden;">
                                     <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);top:-40px;left:-40px;"></div>
                                     <div style="position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.1),transparent 70%);bottom:-30px;right:20px;"></div>
@@ -502,7 +546,6 @@
                                     @item.Summary
                                 </p>
 
-                                <!-- KairosAI insight chip -->
                                 <div class="kairos-insight">
                                     <i data-lucide="sparkles" style="width:13px;height:13px;"></i>
                                     <span>KairosAI detecta señal <strong style="color:var(--text-main);">@item.Sentiment.ToLower()</strong> en este artículo. Puede impactar activos relacionados en las próximas 24h.</span>
@@ -525,7 +568,6 @@
                     }
                     else
                     {
-                        <!-- STANDARD -->
                         <article class="card-news" data-category="@cat">
                             <div class="card-accent-bar"></div>
 
@@ -586,20 +628,21 @@
     <script>
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        // ── Fade inicial ──
+        // ── Fade inicial y Veredicto Kairós ──
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.k-fade').forEach((el, i) => {
                 setTimeout(() => el.classList.add('visible'), 60 + i * 80);
             });
 
-            // Sentiment bar animation
+            // Animación de las barras del veredicto
             setTimeout(() => {
-                const fill = document.getElementById('sentimentFill');
-                const val  = document.getElementById('sentimentVal');
-                if (fill) fill.style.width = fill.dataset.target + '%';
-                // Color dinámico según valor
-                const v = parseInt(fill?.dataset.target || 50);
-                if (val) val.style.color = v >= 60 ? '#10b981' : v >= 40 ? '#f59e0b' : '#ef4444';
+                const fillPos = document.getElementById('fillPos');
+                const fillNeu = document.getElementById('fillNeu');
+                const fillNeg = document.getElementById('fillNeg');
+
+                if (fillPos) fillPos.style.width = fillPos.dataset.target + '%';
+                if (fillNeu) fillNeu.style.width = fillNeu.dataset.target + '%';
+                if (fillNeg) fillNeg.style.width = fillNeg.dataset.target + '%';
             }, 400);
         });
 

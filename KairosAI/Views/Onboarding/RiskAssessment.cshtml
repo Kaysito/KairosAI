@@ -10,24 +10,27 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calibración IA - Kairos</title>
+    <title>Calibración IA — KairósAI</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Space Grotesk', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Syne', 'sans-serif'],
+                        mono: ['DM Mono', 'monospace'],
                     },
                     colors: {
-                        'kairos-purple': '#7c3aed',
-                        'kairos-dark': '#0b0b15',
-                        'kairos-card': '#1a1a2e',
+                        'k-purple': '#7c3aed',
+                        'k-cyan':   '#06b6d4',
+                        'k-pink':   '#ec4899',
+                        'k-dark':   '#080811',
+                        'k-card':   '#10101e',
                     }
                 }
             }
@@ -35,9 +38,15 @@
     </script>
 
     <style>
+        /* ── Base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
-            background: #0b0b15;
-            background-image: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+            background: #080811;
+            background-image: radial-gradient(ellipse 60% 40% at 20% 60%, rgba(124,58,237,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 35% at 80% 20%, rgba(6,182,212,0.10) 0%, transparent 60%);
+            min-height: 100vh;
         }
 
         html {
@@ -48,376 +57,936 @@
             display: none;
         }
 
-        /* ── Tarjetas de Opción ── */
-        .risk-card {
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(30,30,46,0.5);
-            backdrop-filter: blur(10px);
+        /* ── Noise overlay ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
         }
 
-            .risk-card:hover {
-                transform: translateY(-3px);
-                border-color: rgba(124, 58, 237, 0.4);
-                background: rgba(124, 58, 237, 0.05);
-                box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
-            }
-
-        /* ── Transiciones del Wizard ── */
+        /* ── Step system ── */
         .step-container {
             display: none;
-            opacity: 0;
-            transform: translateX(20px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            animation: none;
         }
 
             .step-container.active {
                 display: block;
+                animation: slideIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+            }
+
+            .step-container.exit {
+                display: block;
+                animation: slideOut 0.25s ease-in both;
+            }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(28px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @@keyframes slideOut {
+            from {
                 opacity: 1;
                 transform: translateX(0);
             }
 
-        /* ── Animación de "Procesando IA" ── */
+            to {
+                opacity: 0;
+                transform: translateX(-28px);
+            }
+        }
+
+        /* ── Option cards ── */
+        .opt-card {
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(16,16,30,0.7);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+        }
+
+            .opt-card:hover {
+                transform: translateY(-2px);
+                border-color: rgba(124,58,237,0.45);
+                background: rgba(124,58,237,0.06);
+                box-shadow: 0 8px 24px rgba(124,58,237,0.12);
+            }
+
+            .opt-card.selected {
+                border-color: #7c3aed;
+                background: rgba(124,58,237,0.12);
+                box-shadow: 0 0 0 1px #7c3aed, 0 8px 24px rgba(124,58,237,0.15);
+            }
+
+        /* Crypto chips */
+        .crypto-chip {
+            transition: all 0.18s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .crypto-chip:hover {
+                border-color: rgba(6,182,212,0.5);
+                background: rgba(6,182,212,0.08);
+            }
+
+            .crypto-chip.active {
+                border-color: #06b6d4;
+                background: rgba(6,182,212,0.15);
+                color: #06b6d4;
+            }
+
+        /* ── Progress track ── */
+        #progress-bar {
+            transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            background: linear-gradient(90deg, #06b6d4, #7c3aed);
+        }
+
+        /* ── AI Pulse ── */
         .ai-pulse {
-            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
-            animation: pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+            animation: pulse-ring 2s infinite cubic-bezier(0.215,0.61,0.355,1);
         }
         @@keyframes pulse-ring {
             0% {
-                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+                box-shadow: 0 0 0 0 rgba(124,58,237,0.5);
             }
 
             70% {
-                box-shadow: 0 0 0 20px rgba(124, 58, 237, 0);
+                box-shadow: 0 0 0 22px rgba(124,58,237,0);
             }
 
             100% {
-                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+                box-shadow: 0 0 0 0 rgba(124,58,237,0);
             }
         }
 
-        /* Barra de progreso superior */
-        #progress-bar {
-            transition: width 0.4s ease;
+        /* ── Result badge ── */
+        .result-badge {
+            animation: fadeScale 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @@keyframes fadeScale {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ── Dot indicator ── */
+        .dot {
+            transition: all 0.3s ease;
+        }
+
+        /* ── Tooltip for chart ── */
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(16,16,30,0.95);
+            border: 1px solid rgba(124,58,237,0.4);
+            color: #e2e8f0;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            pointer-events: none;
+            white-space: nowrap;
+            display: none;
+        }
+
+        /* Candlestick colors */
+        .candle-green {
+            fill: #10b981;
+        }
+
+        .candle-red {
+            fill: #ef4444;
+        }
+
+        .wick-green {
+            stroke: #10b981;
+        }
+
+        .wick-red {
+            stroke: #ef4444;
+        }
+
+        /* Axis bar animation */
+        .axis-bar {
+            transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1);
         }
     </style>
 </head>
 
-<body class="h-full text-gray-100 antialiased flex flex-col">
+<body class="text-gray-100 antialiased relative">
 
-    <header class="p-6 flex items-center justify-between z-10">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-kairos-purple to-cyan-500 flex items-center justify-center">
-                <i data-lucide="brain-circuit" class="text-white" size="18"></i>
+    <!-- ── Header ── -->
+    <header class="relative z-10 px-6 py-5 flex items-center justify-between max-w-3xl mx-auto">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-k-purple to-k-cyan flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <i data-lucide="brain-circuit" class="text-white" style="width:18px;height:18px"></i>
             </div>
-            <span class="font-bold text-xl tracking-tight">KairosAI</span>
+            <span class="font-bold text-xl tracking-tight">KairósAI</span>
         </div>
-        <div class="text-sm text-gray-400 font-mono" id="step-counter">01 / 04</div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-gray-500">CALIBRACIÓN</span>
+            <span class="font-mono text-sm text-gray-400" id="step-counter">01/06</span>
+        </div>
     </header>
 
-    <div class="w-full h-1 bg-gray-800 absolute top-20 left-0">
-        <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-kairos-purple w-1/4"></div>
+    <!-- ── Progress bar ── -->
+    <div class="relative z-10 w-full h-[2px] bg-gray-800/80">
+        <div id="progress-bar" class="h-full w-[16.66%]"></div>
     </div>
 
-    <main class="flex-1 flex flex-col justify-center py-8 px-4 sm:px-6 max-w-2xl mx-auto w-full relative z-10">
+    <!-- ── Step dots ── -->
+    <div class="relative z-10 flex justify-center gap-2 mt-4">
+        <script>
+            // Rendered by JS after load
+        </script>
+        <div id="dots-container" class="flex gap-2"></div>
+    </div>
+
+    <!-- ── Main content ── -->
+    <main class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 py-8">
 
         <form asp-controller="Onboarding" asp-action="RiskAssessment" method="post" id="riskForm">
 
+            <!-- ══ STEP 1 — Comportamiento en caída ══ -->
             <div class="step-container active" data-step="1">
-                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">MÓDULO DE CONDUCTA</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
-                    Tu inversión principal acaba de caer un 25% tras una mala noticia global. ¿Qué pasa por tu cabeza?
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="font-mono text-xs text-k-purple font-medium tracking-widest uppercase">Eje A · Comportamiento</span>
+                    <div class="flex-1 h-px bg-gradient-to-r from-k-purple/40 to-transparent"></div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
+                    Tu inversión cae un 25% en una hora.<br>
+                    <span class="text-gray-400 font-normal text-xl">¿Qué pasa primero por tu cabeza?</span>
                 </h2>
+                <p class="text-xs text-gray-600 font-mono mb-6">Esta respuesta mide tu reacción emocional ante la volatilidad.</p>
 
-                <div class="space-y-3">
-                    <label class="cursor-pointer block relative group">
-                        <input type="radio" name="Behavior1" value="Panico" class="peer sr-only" required />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 shrink-0">
-                                <i data-lucide="alert-triangle" size="20"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-200">"Sácame de aquí"</p>
-                                <p class="text-sm text-gray-500">Vendo para evitar perder lo poco que queda. No tolero la angustia.</p>
-                            </div>
-                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                <div class="space-y-3" id="opts-s1">
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s1" data-value="Panico" data-axis-a="1" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 shrink-0">
+                            <i data-lucide="alert-triangle" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">"Sácame de aquí ahora"</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Vendo todo para cortar las pérdidas. No tolero esta angustia.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
 
-                    <label class="cursor-pointer block relative group">
-                        <input type="radio" name="Behavior1" value="Espera" class="peer sr-only" />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400 shrink-0">
-                                <i data-lucide="eye" size="20"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-200">"Cierro la app y respiro"</p>
-                                <p class="text-sm text-gray-500">Me frustra, pero entiendo que el mercado fluctúa. Prefiero esperar.</p>
-                            </div>
-                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s1" data-value="Espera" data-axis-a="2" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 shrink-0">
+                            <i data-lucide="coffee" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">"Cierro la app y respiro"</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Me incomoda, pero entiendo que el mercado es así. Espero.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
 
-                    <label class="cursor-pointer block relative group">
-                        <input type="radio" name="Behavior1" value="Oportunidad" class="peer sr-only" />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
-                                <i data-lucide="shopping-cart" size="20"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-200">"Rebajas de temporada"</p>
-                                <p class="text-sm text-gray-500">Busco liquidez inmediatamente para comprar más barato. Es mi momento.</p>
-                            </div>
-                            <i data-lucide="check-circle-2" class="ml-auto opacity-0 peer-checked:opacity-100 text-kairos-purple transition-opacity"></i>
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s1" data-value="Oportunidad" data-axis-a="3" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
+                            <i data-lucide="trending-down" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">"Rebajas de temporada"</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Busco liquidez para comprar más barato. Es mi momento.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
                 </div>
             </div>
 
+            <!-- ══ STEP 2 — Comportamiento con bono ══ -->
             <div class="step-container" data-step="2">
-                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">ANÁLISIS DE LIQUIDEZ</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
-                    Recibes un bono inesperado equivalente a 3 meses de tu sueldo. ¿Cuál es tu primer instinto real?
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="font-mono text-xs text-k-cyan font-medium tracking-widest uppercase">Eje A · Liquidez</span>
+                    <div class="flex-1 h-px bg-gradient-to-r from-k-cyan/40 to-transparent"></div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
+                    Recibes un bono de 3 meses de sueldo.<br>
+                    <span class="text-gray-400 font-normal text-xl">¿Cuál es tu primer instinto?</span>
                 </h2>
+                <p class="text-xs text-gray-600 font-mono mb-6">Esta respuesta mide tu apetito real por el riesgo.</p>
 
-                <div class="space-y-3">
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" name="Behavior2" value="Seguridad" class="peer sr-only" />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <i data-lucide="piggy-bank" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
-                            <div>
-                                <p class="font-bold text-gray-200">Asegurar el futuro</p>
-                                <p class="text-sm text-gray-500">Pagar deudas, fondo de emergencia o guardarlo en el banco.</p>
-                            </div>
+                <div class="space-y-3" id="opts-s2">
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s2" data-value="Seguridad" data-axis-a="1" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                            <i data-lucide="shield" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">Asegurar el futuro</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Pagar deudas, fondo de emergencia o depósito bancario.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
 
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" name="Behavior2" value="Balance" class="peer sr-only" />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <i data-lucide="pie-chart" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
-                            <div>
-                                <p class="font-bold text-gray-200">Regla del 50/50</p>
-                                <p class="text-sm text-gray-500">La mitad a un ETF seguro, la otra mitad para disfrutar o viajar.</p>
-                            </div>
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s2" data-value="Balance" data-axis-a="2" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0">
+                            <i data-lucide="scale" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">Regla 50/50</p>
+                            <p class="text-sm text-gray-500 mt-0.5">La mitad a un ETF seguro, la otra para disfrutar o viajar.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
 
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" name="Behavior2" value="Riesgo" class="peer sr-only" />
-                        <div class="risk-card p-4 rounded-xl flex items-center gap-4 peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <i data-lucide="rocket" class="text-gray-400 peer-checked:text-kairos-purple w-6 h-6"></i>
-                            <div>
-                                <p class="font-bold text-gray-200">Multiplicarlo rápido</p>
-                                <p class="text-sm text-gray-500">Crypto, startups, o ese activo volátil del que todos hablan.</p>
-                            </div>
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s2" data-value="Riesgo" data-axis-a="3" onclick="selectOption(this)">
+                        <div class="w-11 h-11 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 shrink-0">
+                            <i data-lucide="rocket" style="width:20px;height:20px"></i>
                         </div>
-                    </label>
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-100">Multiplicarlo rápido</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Crypto, startups o ese activo volátil del que todos hablan.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple transition-opacity"><i data-lucide="check-circle-2" style="width:20px;height:20px"></i></div>
+                    </div>
                 </div>
             </div>
 
+            <!-- ══ STEP 3 — Conocimiento: Lectura de gráfico ══ -->
             <div class="step-container" data-step="3">
-                <span class="text-kairos-purple font-mono text-sm font-bold tracking-widest mb-2 block">HORIZONTE TEMPORAL</span>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 leading-tight">
-                    Sé honesto: ¿Cuánto tiempo estás dispuesto a inmovilizar este capital sin tocarlo bajo ninguna circunstancia?
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="font-mono text-xs text-k-pink font-medium tracking-widest uppercase">Eje B · Conocimiento técnico</span>
+                    <div class="flex-1 h-px bg-gradient-to-r from-k-pink/40 to-transparent"></div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-1 leading-tight">
+                    Analiza este gráfico de velas.<br>
+                    <span class="text-gray-400 font-normal text-xl">¿Qué está pasando en el mercado?</span>
                 </h2>
+                <p class="text-xs text-gray-600 font-mono mb-4">Sin presión — si no lo sabes, es información útil para nosotros.</p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" asp-for="TimeHorizon" value="Corto" class="peer sr-only" />
-                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <span class="text-3xl font-bold text-white mb-1">‹ 1</span>
-                            <span class="text-sm text-gray-400">Año</span>
-                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Alta liquidez requerida</span>
-                        </div>
-                    </label>
+                <!-- Mini candlestick chart -->
+                <div class="bg-k-card rounded-2xl p-4 border border-white/5 mb-5 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-mono text-xs text-gray-500">BTC/USDT · 4H · Demo</span>
+                        <span class="font-mono text-xs text-green-400">↑ Tendencia activa</span>
+                    </div>
+                    <svg id="candle-chart" viewBox="0 0 420 140" class="w-full" style="height:140px"></svg>
+                    <div class="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
+                        <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-green-500"></div><span class="text-xs text-gray-500 font-mono">Vela alcista (cierre &gt; apertura)</span></div>
+                        <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-red-500"></div><span class="text-xs text-gray-500 font-mono">Vela bajista (cierre &lt; apertura)</span></div>
+                    </div>
+                </div>
 
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" asp-for="TimeHorizon" value="Medio" class="peer sr-only" />
-                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <span class="text-3xl font-bold text-white mb-1">1-4</span>
-                            <span class="text-sm text-gray-400">Años</span>
-                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Objetivos a mediano plazo</span>
-                        </div>
-                    </label>
+                <div class="space-y-3" id="opts-s3">
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s3" data-value="A" data-axis-b="3" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">A</div>
+                        <p class="text-gray-200">El precio subió progresivamente con correcciones menores. Tendencia alcista.</p>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
+                    </div>
 
-                    <label class="cursor-pointer block relative">
-                        <input type="radio" asp-for="TimeHorizon" value="Largo" class="peer sr-only" />
-                        <div class="risk-card p-6 rounded-xl text-center h-full flex flex-col justify-center peer-checked:border-kairos-purple peer-checked:bg-purple-900/20 peer-checked:ring-1 peer-checked:ring-kairos-purple">
-                            <span class="text-3xl font-bold text-white mb-1">5+</span>
-                            <span class="text-sm text-gray-400">Años</span>
-                            <span class="text-xs text-gray-500 mt-3 border-t border-gray-700 pt-2">Retiro o creación de riqueza</span>
-                        </div>
-                    </label>
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s3" data-value="B" data-axis-b="1" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">B</div>
+                        <p class="text-gray-200">El mercado está lateral, sin dirección clara. Rango de consolidación.</p>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
+                    </div>
+
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s3" data-value="C" data-axis-b="2" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">C</div>
+                        <p class="text-gray-200">No estoy seguro de cómo leer esto todavía.</p>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="step-container text-center" data-step="4">
+            <!-- ══ STEP 4 — Conocimiento: Concepto ══ -->
+            <div class="step-container" data-step="4">
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="font-mono text-xs text-k-pink font-medium tracking-widest uppercase">Eje B · Conceptos clave</span>
+                    <div class="flex-1 h-px bg-gradient-to-r from-k-pink/40 to-transparent"></div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-1 leading-tight">
+                    ¿Qué diferencia a un ETF de una acción individual?
+                </h2>
+                <p class="text-xs text-gray-600 font-mono mb-6">Elige la opción que más se acerca a lo que sabes.</p>
 
-                <div id="loading-state" class="py-12">
-                    <div class="w-24 h-24 mx-auto bg-kairos-purple rounded-full flex items-center justify-center ai-pulse mb-8">
-                        <i data-lucide="cpu" class="text-white" size="40"></i>
+                <div class="space-y-3" id="opts-s4">
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s4" data-value="Correcto" data-axis-b="3" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">A</div>
+                        <div>
+                            <p class="text-gray-200">Un ETF es una canasta de activos diversificados que cotiza en bolsa, reduciendo el riesgo concentrado de una sola empresa.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
                     </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Kairos está analizando tu perfil...</h2>
-                    <p class="text-gray-400 font-mono text-sm" id="loading-text">Evaluando tolerancia al riesgo conductual...</p>
+
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s4" data-value="Parcial" data-axis-b="2" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">B</div>
+                        <div>
+                            <p class="text-gray-200">Un ETF es un fondo de inversión administrado que el banco te vende directamente.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
+                    </div>
+
+                    <div class="opt-card rounded-2xl p-4 flex items-center gap-4" data-group="s4" data-value="Incorrecto" data-axis-b="1" onclick="selectOption(this)">
+                        <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center font-bold text-k-purple text-sm shrink-0">C</div>
+                        <div>
+                            <p class="text-gray-200">Nunca he escuchado ese término o no estoy seguro qué significa.</p>
+                        </div>
+                        <div class="check-icon opacity-0 text-k-purple ml-auto transition-opacity shrink-0"><i data-lucide="check-circle-2" style="width:18px;height:18px"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ STEP 5 — Preferencias de monedas ══ -->
+            <div class="step-container" data-step="5">
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="font-mono text-xs text-k-cyan font-medium tracking-widest uppercase">Personalización · Dashboard</span>
+                    <div class="flex-1 h-px bg-gradient-to-r from-k-cyan/40 to-transparent"></div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-1 leading-tight">
+                    ¿Qué activos quieres seguir?
+                </h2>
+                <p class="text-sm text-gray-400 mb-1">Tu dashboard mostrará <strong class="text-white">solo lo que selecciones</strong> para eliminar el ruido visual.</p>
+                <p class="text-xs text-gray-600 font-mono mb-6">Selecciona mínimo 2. Puedes cambiar esto después en Configuración.</p>
+
+                <div class="flex flex-wrap gap-2.5 mb-8" id="crypto-chips">
+                    <!-- Renderizado por JS -->
                 </div>
 
-                <div id="result-state" class="hidden py-8">
-                    <span class="inline-block px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold font-mono rounded-full mb-6 border border-green-500/20">
-                        PERFIL CALIBRADO
-                    </span>
+                <p class="text-xs text-gray-600 font-mono mb-2">TAMBIÉN SEGUIRÉ EL MERCADO GENERAL DE:</p>
+                <div class="space-y-2" id="opts-s5-market">
+                    <div class="opt-card rounded-xl p-3 flex items-center gap-3" data-group="s5m" data-value="Cripto" onclick="toggleMarket(this)">
+                        <div class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 shrink-0 text-xs font-bold">₿</div>
+                        <p class="text-sm text-gray-200">Criptomonedas (Bitcoin, Ethereum, Altcoins)</p>
+                        <div class="ml-auto w-5 h-5 rounded-full border border-gray-600 flex items-center justify-center check-market"><i data-lucide="check" style="width:12px;height:12px" class="hidden text-k-cyan"></i></div>
+                    </div>
+                    <div class="opt-card rounded-xl p-3 flex items-center gap-3" data-group="s5m" data-value="Acciones" onclick="toggleMarket(this)">
+                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0 text-xs font-bold">📈</div>
+                        <p class="text-sm text-gray-200">Acciones (S&P 500, NASDAQ, empresas tech)</p>
+                        <div class="ml-auto w-5 h-5 rounded-full border border-gray-600 flex items-center justify-center check-market"><i data-lucide="check" style="width:12px;height:12px" class="hidden text-k-cyan"></i></div>
+                    </div>
+                    <div class="opt-card rounded-xl p-3 flex items-center gap-3" data-group="s5m" data-value="Commodities" onclick="toggleMarket(this)">
+                        <div class="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-400 shrink-0 text-xs font-bold">⚡</div>
+                        <p class="text-sm text-gray-200">Commodities (Oro, Petróleo, Plata)</p>
+                        <div class="ml-auto w-5 h-5 rounded-full border border-gray-600 flex items-center justify-center check-market"><i data-lucide="check" style="width:12px;height:12px" class="hidden text-k-cyan"></i></div>
+                    </div>
+                </div>
 
-                    <div class="bg-gradient-to-b from-gray-800/50 to-transparent border border-gray-700 rounded-2xl p-8 mb-8 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-10">
-                            <i data-lucide="fingerprint" size="100"></i>
-                        </div>
-                        <p class="text-gray-400 text-sm mb-1 uppercase tracking-widest">Nivel de Riesgo Asignado</p>
-                        <h1 id="risk-result-title" class="text-4xl sm:text-5xl font-bold text-white mb-4">Calculando...</h1>
-                        <p id="risk-result-desc" class="text-gray-300 text-sm max-w-md mx-auto"></p>
+                <input type="hidden" id="selectedCryptos" name="SelectedCryptos" value="">
+                <input type="hidden" id="selectedMarkets" name="SelectedMarkets" value="">
+            </div>
+
+            <!-- ══ STEP 6 — Resultado ══ -->
+            <div class="step-container" data-step="6">
+
+                <!-- Estado: Procesando -->
+                <div id="loading-state" class="py-10 text-center">
+                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-k-purple to-k-cyan rounded-full flex items-center justify-center ai-pulse mb-6">
+                        <i data-lucide="cpu" class="text-white" style="width:40px;height:40px"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Kairós está calibrando tu perfil...</h2>
+                    <p class="text-gray-500 font-mono text-sm" id="loading-text">Procesando eje conductual...</p>
+                    <div class="mt-6 w-48 mx-auto h-1 bg-gray-800 rounded-full overflow-hidden">
+                        <div id="loading-bar" class="h-full bg-gradient-to-r from-k-cyan to-k-purple rounded-full" style="width:0%;transition:width 3.2s linear"></div>
+                    </div>
+                </div>
+
+                <!-- Estado: Resultado -->
+                <div id="result-state" class="hidden py-4">
+
+                    <div class="text-center mb-8">
+                        <span class="inline-block px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold font-mono rounded-full border border-green-500/20 mb-4">
+                            ✓ PERFIL CALIBRADO
+                        </span>
+                        <h1 id="result-title" class="text-4xl sm:text-5xl font-extrabold text-white mb-1">—</h1>
+                        <p id="result-subtitle" class="text-gray-400 font-mono text-sm"></p>
                     </div>
 
-                    <button type="submit" class="w-full sm:w-auto mx-auto flex items-center justify-center gap-2 py-4 px-8 rounded-xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition backdrop-blur-sm">
-                        Confirmar e ir al Dashboard
-                        <i data-lucide="arrow-right" size="18"></i>
+                    <!-- Dual axis bars -->
+                    <div class="bg-k-card border border-white/5 rounded-2xl p-6 mb-5 space-y-5 result-badge">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-mono text-xs text-gray-400 uppercase tracking-wider">Eje A — Agresividad</span>
+                                <span id="axis-a-label" class="font-mono text-xs text-k-purple font-bold"></span>
+                            </div>
+                            <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                                <div id="axis-a-bar" class="axis-bar h-full rounded-full bg-gradient-to-r from-blue-500 via-k-purple to-k-pink" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-700 mt-1 font-mono">
+                                <span>Pasivo</span><span>Moderado</span><span>Agresivo</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-mono text-xs text-gray-400 uppercase tracking-wider">Eje B — Conocimiento</span>
+                                <span id="axis-b-label" class="font-mono text-xs text-k-cyan font-bold"></span>
+                            </div>
+                            <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                                <div id="axis-b-bar" class="axis-bar h-full rounded-full bg-gradient-to-r from-gray-500 via-k-cyan to-green-400" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-700 mt-1 font-mono">
+                                <span>Principiante</span><span>Intermedio</span><span>Experto</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-white/5">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-mono text-xs text-gray-400 uppercase tracking-wider">Nivel de Riesgo Asignado</span>
+                                <span id="risk-label" class="font-mono text-xs font-bold"></span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-800 rounded-full overflow-hidden">
+                                <div id="risk-bar" class="axis-bar h-full rounded-full" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-700 mt-1 font-mono">
+                                <span>Controlado</span><span>Moderado</span><span>Elevado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descripción de la IA -->
+                    <div id="result-desc-box" class="bg-gradient-to-br from-k-purple/10 to-transparent border border-k-purple/20 rounded-2xl p-5 mb-6 result-badge">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <i data-lucide="sparkles" style="width:16px;height:16px" class="text-k-purple"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-mono text-k-purple mb-1.5">KAIRÓS DICE:</p>
+                                <p id="result-desc" class="text-gray-300 text-sm leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full flex items-center justify-center gap-2.5 py-4 px-8 rounded-xl font-bold text-white bg-gradient-to-r from-k-purple to-k-cyan hover:opacity-90 shadow-xl shadow-purple-500/20 transition-opacity text-lg">
+                        Ir al Dashboard
+                        <i data-lucide="arrow-right" style="width:20px;height:20px"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="mt-10 flex justify-between items-center" id="nav-buttons">
-                <button type="button" id="btn-prev" class="hidden px-6 py-3 rounded-xl font-medium text-gray-400 hover:text-white transition" onclick="changeStep(-1)">
-                    Atrás
+            <!-- Hidden inputs para el backend -->
+            <input type="hidden" name="Behavior1" id="h-b1" />
+            <input type="hidden" name="Behavior2" id="h-b2" />
+            <input type="hidden" name="KnowledgeChart" id="h-b3" />
+            <input type="hidden" name="KnowledgeConcept" id="h-b4" />
+            <input type="hidden" name="TimeHorizon" id="h-horizon" value="Medio" />
+            <input type="hidden" asp-for="InvestmentGoal" id="FinalRiskLevel" />
+            <input type="hidden" name="AggressionScore" id="h-agg" />
+            <input type="hidden" name="KnowledgeScore" id="h-know" />
+
+            <!-- ── Navigation buttons ── -->
+            <div class="mt-8 flex justify-between items-center" id="nav-buttons">
+                <button type="button" id="btn-prev"
+                        class="hidden px-5 py-3 rounded-xl font-medium text-gray-500 hover:text-white transition"
+                        onclick="changeStep(-1)">
+                    ← Atrás
                 </button>
-                <button type="button" id="btn-next" class="ml-auto flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-white bg-kairos-purple hover:bg-purple-500 shadow-lg shadow-purple-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed" onclick="changeStep(1)" disabled>
-                    Siguiente <i data-lucide="arrow-right" size="18"></i>
+                <button type="button" id="btn-next"
+                        class="ml-auto flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white bg-k-purple hover:bg-purple-500 shadow-lg shadow-purple-500/25 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        onclick="changeStep(1)" disabled>
+                    Siguiente <i data-lucide="arrow-right" style="width:18px;height:18px"></i>
                 </button>
             </div>
 
-            <input type="hidden" asp-for="InvestmentGoal" id="FinalRiskLevel" />
         </form>
-
     </main>
 
+    <!-- ── Scripts ── -->
     <script>
+        // ════════════════════════════════════════════════
+        //  ESTADO GLOBAL
+        // ════════════════════════════════════════════════
+        let currentStep = 1;
+        const TOTAL_STEPS = 6;
+
+        // Puntajes acumulados
+        const scores = {
+            axisA: 0,   // Agresividad (2-6)
+            axisB: 0,   // Conocimiento (2-6)
+        };
+
+        // Cryptos disponibles para selección
+        const CRYPTOS = [
+            { id:'bitcoin',       sym:'BTC', label:'Bitcoin',    color:'#f97316' },
+            { id:'ethereum',      sym:'ETH', label:'Ethereum',   color:'#818cf8' },
+            { id:'solana',        sym:'SOL', label:'Solana',     color:'#10b981' },
+            { id:'cardano',       sym:'ADA', label:'Cardano',    color:'#3b82f6' },
+            { id:'dogecoin',      sym:'DOGE', label:'Dogecoin',  color:'#eab308' },
+            { id:'ripple',        sym:'XRP', label:'Ripple',     color:'#06b6d4' },
+            { id:'polkadot',      sym:'DOT', label:'Polkadot',   color:'#ec4899' },
+            { id:'avalanche-2',   sym:'AVAX', label:'Avalanche', color:'#ef4444' },
+            { id:'chainlink',     sym:'LINK', label:'Chainlink', color:'#3b82f6' },
+            { id:'matic-network', sym:'MATIC', label:'Polygon', color:'#8b5cf6' },
+            { id:'litecoin',      sym:'LTC', label:'Litecoin',  color:'#94a3b8' },
+            { id:'shiba-inu',     sym:'SHIB', label:'Shiba Inu',color:'#f59e0b' },
+        ];
+
+        let selectedCryptos = new Set();
+        let selectedMarkets = new Set();
+
+        // ════════════════════════════════════════════════
+        //  INIT
+        // ════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-
-            // Lógica para habilitar botón "Siguiente" al seleccionar opción
-            const radios = document.querySelectorAll('input[type="radio"]');
-            radios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    document.getElementById('btn-next').disabled = false;
-                });
-            });
+            renderDots();
+            renderCandleChart();
+            renderCryptoChips();
         });
 
-        let currentStep = 1;
-        const totalSteps = 4;
+        // ════════════════════════════════════════════════
+        //  DOTS
+        // ════════════════════════════════════════════════
+        function renderDots() {
+            const container = document.getElementById('dots-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= TOTAL_STEPS; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot w-2 h-2 rounded-full ${i === 1 ? 'bg-k-purple scale-125' : 'bg-gray-700'}`;
+                dot.id = `dot-${i}`;
+                container.appendChild(dot);
+            }
+        }
 
+        function updateDots() {
+            for (let i = 1; i <= TOTAL_STEPS; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i < currentStep) {
+                    dot.className = 'dot w-2 h-2 rounded-full bg-green-500';
+                } else if (i === currentStep) {
+                    dot.className = 'dot w-2 h-2 rounded-full bg-k-purple scale-125';
+                } else {
+                    dot.className = 'dot w-2 h-2 rounded-full bg-gray-700';
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        //  CANDLESTICK CHART (SVG generado)
+        // ════════════════════════════════════════════════
+        function renderCandleChart() {
+            const svg = document.getElementById('candle-chart');
+            // Datos de velas: [open, high, low, close]
+            const candles = [
+                [60,75,50,70],   // alcista
+                [70,78,62,65],   // bajista
+                [65,80,60,78],   // alcista
+                [78,85,72,82],   // alcista
+                [82,88,75,76],   // bajista
+                [76,84,70,83],   // alcista
+                [83,92,80,90],   // alcista (tendencia evidente)
+            ];
+
+            const W = 420, H = 140, PAD = 15;
+            const maxP = 95, minP = 48;
+            const range = maxP - minP;
+            const scaleY = (p) => PAD + ((maxP - p) / range) * (H - PAD * 2);
+
+            const candleW = 32;
+            const spacing = (W - PAD * 2) / candles.length;
+
+            let svgContent = '';
+
+            candles.forEach((c, i) => {
+                const [o, h, l, cl] = c;
+                const x = PAD + i * spacing + spacing / 2;
+                const isGreen = cl >= o;
+
+                const top  = scaleY(Math.max(o, cl));
+                const bot  = scaleY(Math.min(o, cl));
+                const bodyH = Math.max(bot - top, 2);
+
+                // Wick
+                svgContent += `<line x1="${x}" y1="${scaleY(h)}" x2="${x}" y2="${scaleY(l)}"
+                    stroke="${isGreen ? '#10b981' : '#ef4444'}" stroke-width="1.5" opacity="0.8"/>`;
+
+                // Body
+                svgContent += `<rect x="${x - candleW/2 + 2}" y="${top}" width="${candleW - 4}" height="${bodyH}"
+                    fill="${isGreen ? '#10b981' : '#ef4444'}" rx="2" opacity="0.9"/>`;
+            });
+
+            // Moving average line (just visual)
+            const maPoints = candles.map((c, i) => {
+                const x = PAD + i * spacing + spacing / 2;
+                const avg = (c[0] + c[3]) / 2;
+                return `${x},${scaleY(avg)}`;
+            }).join(' ');
+            svgContent += `<polyline points="${maPoints}" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>`;
+
+            // Grid lines
+            for (let p = 60; p <= 90; p += 10) {
+                const y = scaleY(p);
+                svgContent += `<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}"
+                    stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
+                svgContent += `<text x="${PAD - 2}" y="${y + 4}" fill="rgba(255,255,255,0.2)" font-size="9" text-anchor="end" font-family="DM Mono">${p}K</text>`;
+            }
+
+            svg.innerHTML = svgContent;
+        }
+
+        // ════════════════════════════════════════════════
+        //  CRYPTO CHIPS
+        // ════════════════════════════════════════════════
+        function renderCryptoChips() {
+            const container = document.getElementById('crypto-chips');
+            container.innerHTML = '';
+            CRYPTOS.forEach(c => {
+                const chip = document.createElement('div');
+                chip.className = 'crypto-chip rounded-xl px-3 py-2 flex items-center gap-2 text-sm font-mono';
+                chip.dataset.id = c.id;
+                chip.innerHTML = `
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:${c.color}22;color:${c.color}">${c.sym[0]}</div>
+                    <span class="text-gray-300">${c.sym}</span>
+                    <span class="text-gray-600 text-xs hidden sm:inline">${c.label}</span>
+                `;
+                chip.addEventListener('click', () => toggleCrypto(chip, c.id));
+                container.appendChild(chip);
+            });
+            updateCryptoCount();
+        }
+
+        function toggleCrypto(el, id) {
+            if (selectedCryptos.has(id)) {
+                selectedCryptos.delete(id);
+                el.classList.remove('active');
+            } else {
+                selectedCryptos.add(id);
+                el.classList.add('active');
+            }
+            document.getElementById('selectedCryptos').value = [...selectedCryptos].join(',');
+            updateCryptoCount();
+            checkStep5Valid();
+        }
+
+        function toggleMarket(el) {
+            const val = el.dataset.value;
+            const icon = el.querySelector('.check-market i');
+            if (selectedMarkets.has(val)) {
+                selectedMarkets.delete(val);
+                el.classList.remove('selected');
+                icon.classList.add('hidden');
+            } else {
+                selectedMarkets.add(val);
+                el.classList.add('selected');
+                icon.classList.remove('hidden');
+            }
+            document.getElementById('selectedMarkets').value = [...selectedMarkets].join(',');
+            lucide.createIcons();
+        }
+
+        function updateCryptoCount() {
+            const btn = document.getElementById('btn-next');
+            if (currentStep === 5) {
+                btn.disabled = selectedCryptos.size < 2;
+            }
+        }
+
+        function checkStep5Valid() {
+            document.getElementById('btn-next').disabled = selectedCryptos.size < 2;
+        }
+
+        // ════════════════════════════════════════════════
+        //  OPTION SELECTION
+        // ════════════════════════════════════════════════
+        function selectOption(el) {
+            const group = el.dataset.group;
+            // Deselect siblings
+            document.querySelectorAll(`[data-group="${group}"]`).forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.check-icon').style.opacity = '0';
+            });
+            // Select this
+            el.classList.add('selected');
+            el.querySelector('.check-icon').style.opacity = '1';
+
+            // Store score
+            const axisA = parseInt(el.dataset.axisA || 0);
+            const axisB = parseInt(el.dataset.axisB || 0);
+
+            if (['s1','s2'].includes(group)) {
+                scores['axisA'] = (scores['axisA'] || 0);
+                // We accumulate per step
+                if (group === 's1') { scores.s1a = axisA; document.getElementById('h-b1').value = el.dataset.value; }
+                if (group === 's2') { scores.s2a = axisA; document.getElementById('h-b2').value = el.dataset.value; }
+            }
+            if (group === 's3') { scores.s3b = axisB; document.getElementById('h-b3').value = el.dataset.value; }
+            if (group === 's4') { scores.s4b = axisB; document.getElementById('h-b4').value = el.dataset.value; }
+
+            // Recalc totals
+            scores.axisA = (scores.s1a || 0) + (scores.s2a || 0);
+            scores.axisB = (scores.s3b || 0) + (scores.s4b || 0);
+
+            document.getElementById('btn-next').disabled = false;
+        }
+
+        // ════════════════════════════════════════════════
+        //  STEP NAVIGATION
+        // ════════════════════════════════════════════════
         function changeStep(direction) {
-            // Ocultar paso actual
-            const currentEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
-            currentEl.classList.remove('active');
+            if (direction === 1 && !canProceed()) return;
+
+            const current = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+            current.classList.remove('active');
 
             currentStep += direction;
 
-            // Actualizar UI
-            document.getElementById('step-counter').textContent = `0${currentStep} / 04`;
-            document.getElementById('progress-bar').style.width = `${(currentStep / totalSteps) * 100}%`;
+            const next = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+            setTimeout(() => { next.classList.add('active'); lucide.createIcons(); }, 80);
 
-            // Mostrar nuevo paso
-            const nextEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
-            setTimeout(() => { nextEl.classList.add('active'); }, 100);
+            // Update header
+            document.getElementById('step-counter').textContent =
+                `0${currentStep < 10 ? currentStep : currentStep}/0${TOTAL_STEPS}`;
+            document.getElementById('progress-bar').style.width =
+                `${(currentStep / TOTAL_STEPS) * 100}%`;
 
-            // Manejo de botones
-            const btnPrev = document.getElementById('btn-prev');
+            updateDots();
+
+            // Prev/Next button visibility
+            document.getElementById('btn-prev').classList.toggle('hidden', currentStep === 1);
+
             const btnNext = document.getElementById('btn-next');
 
-            if (currentStep === 1) {
-                btnPrev.classList.add('hidden');
-            } else {
-                btnPrev.classList.remove('hidden');
-            }
-
-            // Deshabilitar botón "siguiente" si el nuevo paso no tiene respuesta seleccionada
-            if(currentStep < 4) {
-                const checkedInStep = nextEl.querySelector('input[type="radio"]:checked');
-                btnNext.disabled = !checkedInStep;
-                btnNext.innerHTML = 'Siguiente <i data-lucide="arrow-right" size="18"></i>';
-                lucide.createIcons();
-            }
-
-            // Si llegamos al paso 4, iniciamos la simulación de IA
-            if (currentStep === 4) {
+            if (currentStep === 6) {
                 document.getElementById('nav-buttons').classList.add('hidden');
-                simulateAIAnalysis();
+                startAIAnalysis();
+            } else if (currentStep === 5) {
+                btnNext.disabled = selectedCryptos.size < 2;
+                btnNext.innerHTML = 'Finalizar <i data-lucide="check" style="width:18px;height:18px"></i>';
+                lucide.createIcons();
+            } else {
+                // Check if step already has answer
+                const stepEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+                const checked = stepEl ? stepEl.querySelector('.opt-card.selected') : null;
+                btnNext.disabled = !checked;
+                btnNext.innerHTML = 'Siguiente <i data-lucide="arrow-right" style="width:18px;height:18px"></i>';
+                lucide.createIcons();
             }
         }
 
-        function simulateAIAnalysis() {
+        function canProceed() {
+            if (currentStep === 5) return selectedCryptos.size >= 2;
+            const stepEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
+            return stepEl ? !!stepEl.querySelector('.opt-card.selected') : true;
+        }
+
+        // ════════════════════════════════════════════════
+        //  AI ANALYSIS SIMULATION
+        // ════════════════════════════════════════════════
+        function startAIAnalysis() {
             const texts = [
-                "Cruzando datos de comportamiento...",
-                "Analizando historial de liquidez...",
-                "Evaluando matriz de volatilidad...",
-                "Calibrando perfil final..."
+                "Procesando eje conductual...",
+                "Cruzando respuestas con matrices de riesgo...",
+                "Evaluando nivel de conocimiento técnico...",
+                "Calibrando personalidad de la IA...",
+                "Generando perfil final...",
             ];
+
+            const loadingBar = document.getElementById('loading-bar');
+            loadingBar.style.width = '100%';
 
             let i = 0;
             const textEl = document.getElementById('loading-text');
-
             const interval = setInterval(() => {
                 i++;
-                if(i < texts.length) {
+                if (i < texts.length) {
                     textEl.textContent = texts[i];
                 } else {
                     clearInterval(interval);
-                    showFinalResult();
+                    showResult();
                 }
-            }, 800);
+            }, 640);
         }
 
-        function showFinalResult() {
-            // Lógica simple para calcular el riesgo basado en respuestas
-            // En la vida real, el backend podría hacer esto, pero aquí lo calculamos para el UI.
-            let score = 0;
+        // ════════════════════════════════════════════════
+        //  RESULT CALCULATION
+        // ════════════════════════════════════════════════
+        function showResult() {
+            // Axis A: 2 (min) – 6 (max)
+            const axisA = scores.axisA || 2;
+            // Axis B: 2 (min) – 6 (max)
+            const axisB = scores.axisB || 2;
 
-            const b1 = document.querySelector('input[name="Behavior1"]:checked').value; // Panico(1), Espera(2), Oportunidad(3)
-            const b2 = document.querySelector('input[name="Behavior2"]:checked').value; // Seguridad(1), Balance(2), Riesgo(3)
-            const t3 = document.querySelector('input[name="TimeHorizon"]:checked').value; // Corto(1), Medio(2), Largo(3)
+            // Normalize to %
+            const percA = ((axisA - 2) / 4) * 100;  // 0% = Pasivo, 100% = Agresivo
+            const percB = ((axisB - 2) / 4) * 100;  // 0% = Principiante, 100% = Experto
 
-            if(b1 === 'Oportunidad') score += 3; else if(b1 === 'Espera') score += 2; else score += 1;
-            if(b2 === 'Riesgo') score += 3; else if(b2 === 'Balance') score += 2; else score += 1;
-            if(t3 === 'Largo') score += 3; else if(t3 === 'Medio') score += 2; else score += 1;
+            // Labels
+            const labelA = axisA <= 2 ? 'Pasivo' : axisA <= 4 ? 'Moderado' : 'Agresivo';
+            const labelB = axisB <= 2 ? 'Principiante' : axisB <= 4 ? 'Intermedio' : 'Experto';
 
-            let resultTitle = "";
-            let resultDesc = "";
-            let colorClass = "";
+            // ── Matriz de riesgo ──
+            //           Pasivo    Moderado   Agresivo
+            // Principiante: Bajo, Moderado,  Alto⚠️
+            // Intermedio:   Bajo, Moderado,  Alto
+            // Experto:      Bajo, Moderado,  Elevado
+            let riskTitle, riskPerc, riskColor, riskBarColor, aiMessage, riskLabel;
 
-            if (score <= 4) {
-                resultTitle = "Controlado";
-                resultDesc = "La IA priorizará activos de renta fija, ETFs de baja volatilidad y estrategias de preservación de capital para proteger tu salud financiera y tranquilidad.";
-                colorClass = "text-blue-400";
-            } else if (score >= 5 && score <= 7) {
-                resultTitle = "Moderado";
-                resultDesc = "Kairos buscará un punto óptimo entre acciones sólidas y renta fija, permitiendo crecimiento a largo plazo sin exponerte a caídas drásticas de capital.";
-                colorClass = "text-kairos-purple";
+            if (axisA <= 2) {
+                // Pasivo
+                riskTitle = "Inversor Cauteloso"; riskPerc = 20; riskColor = "text-blue-400";
+                riskBarColor = "bg-blue-500"; riskLabel = "BAJO";
+                aiMessage = `Eres ${labelB === 'Principiante' ? 'nuevo en el mundo de las inversiones y' : 'alguien que'} prefiere la seguridad sobre el rendimiento. Te hablaré con calma, protegeré tu capital de decisiones impulsivas y te guiaré paso a paso. Activo el Escudo Anti-Pánico en modo máximo.`;
+            } else if (axisA <= 4) {
+                // Moderado
+                if (axisB <= 2) {
+                    riskTitle = "Explorador Prudente"; riskPerc = 45; riskColor = "text-k-purple";
+                    riskBarColor = "from-blue-500 to-k-purple bg-gradient-to-r"; riskLabel = "MODERADO";
+                    aiMessage = `Tienes curiosidad e instinto, pero aún estás construyendo tu base de conocimiento. Te daré contexto educativo en cada recomendación y te protegeré de los sesgos más comunes como el FOMO. El camino correcto es aprender mientras inviertes.`;
+                } else {
+                    riskTitle = "Estratega Equilibrado"; riskPerc = 55; riskColor = "text-k-purple";
+                    riskBarColor = "from-k-purple to-k-cyan bg-gradient-to-r"; riskLabel = "MODERADO-ALTO";
+                    aiMessage = `Tienes base sólida y control emocional. Te presentaré análisis balanceados, sin sobreprotección pero sí con alertas precisas cuando el mercado muestre señales de peligro. Trabajaremos como socios estratégicos.`;
+                }
             } else {
-                resultTitle = "Elevado";
-                resultDesc = "Detecto una fuerte tolerancia a la volatilidad. Tus estrategias incluirán criptoactivos, acciones growth y operaciones especulativas buscando retornos agresivos.";
-                colorClass = "text-pink-500";
+                // Agresivo
+                if (axisB <= 2) {
+                    riskTitle = "Principiante Agresivo"; riskPerc = 80; riskColor = "text-red-400";
+                    riskBarColor = "from-k-pink to-red-500 bg-gradient-to-r"; riskLabel = "ALTO ⚠️";
+                    aiMessage = `Tu energía es admirable, pero tu conocimiento aún está en construcción — y eso en mercados volátiles puede costar caro. Activaré el Escudo Anti-Pánico con Fricción Positiva reforzada para protegerte de ti mismo mientras aprendes. Serás agresivo con inteligencia.`;
+                } else {
+                    riskTitle = "Operador de Alto Vuelo"; riskPerc = 90; riskColor = "text-k-pink";
+                    riskBarColor = "from-k-purple via-k-pink to-red-500 bg-gradient-to-r"; riskLabel = "ELEVADO";
+                    aiMessage = `Sé lo que buscas. Te hablaré directo, con jerga técnica, datos duros y sin filtros paternalistas. Conoces el juego y sus reglas. Mis intervenciones serán quirúrgicas, solo cuando el riesgo sistémico lo justifique. De tú a tú.`;
+                }
             }
 
-            // Asignar al input oculto para mandar al backend
-            document.getElementById('FinalRiskLevel').value = resultTitle;
+            // Save to hidden inputs
+            document.getElementById('FinalRiskLevel').value = riskTitle;
+            document.getElementById('h-agg').value = axisA;
+            document.getElementById('h-know').value = axisB;
 
-            // Actualizar UI
-            const titleEl = document.getElementById('risk-result-title');
-            titleEl.textContent = resultTitle;
-            titleEl.className = `text-4xl sm:text-5xl font-bold mb-4 ${colorClass}`;
-            document.getElementById('risk-result-desc').textContent = resultDesc;
+            // Update UI
+            document.getElementById('result-title').textContent = riskTitle;
+            document.getElementById('result-title').className = `text-3xl sm:text-4xl font-extrabold mb-1 ${riskColor}`;
+            document.getElementById('result-subtitle').textContent = `${labelA} · ${labelB} · Riesgo ${riskLabel}`;
+            document.getElementById('axis-a-label').textContent = `${labelA} (${Math.round(percA)}%)`;
+            document.getElementById('axis-b-label').textContent = `${labelB} (${Math.round(percB)}%)`;
+            document.getElementById('risk-label').textContent = riskLabel;
+            document.getElementById('risk-label').className = `font-mono text-xs font-bold ${riskColor}`;
+            document.getElementById('risk-bar').className = `axis-bar h-full rounded-full ${riskBarColor}`;
+            document.getElementById('result-desc').textContent = aiMessage;
 
+            // Transition
             document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('result-state').classList.remove('hidden');
-            document.getElementById('result-state').classList.add('fade-slide-in');
+            const resultState = document.getElementById('result-state');
+            resultState.classList.remove('hidden');
+            lucide.createIcons();
+
+            // Animate bars after a small delay
+            setTimeout(() => {
+                document.getElementById('axis-a-bar').style.width = `${Math.max(percA, 5)}%`;
+                document.getElementById('axis-b-bar').style.width = `${Math.max(percB, 5)}%`;
+                document.getElementById('risk-bar').style.width   = `${riskPerc}%`;
+            }, 200);
         }
     </script>
 </body>
