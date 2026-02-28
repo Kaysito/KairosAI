@@ -33,39 +33,8 @@
         }
     </script>
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
-        }
+    <link rel="stylesheet" href="~/css/Account/Register.css" asp-append-version="true" />
 
-        html {
-            scrollbar-width: none;
-        }
-
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        .loader {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Escape para Razor */
-        @@keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
 </head>
 
 <body class="h-full font-sans text-gray-100 antialiased selection:bg-purple-500 selection:text-white">
@@ -217,43 +186,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
-
-            // Función genérica para alternar visibilidad de contraseña
-            // Acepta el ID del input y el ID del icono como parámetros
-            window.togglePass = function(inputId, iconId) {
-                const input = document.getElementById(inputId);
-                const icon = document.getElementById(iconId);
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.setAttribute('data-lucide', 'eye-off');
-                } else {
-                    input.type = 'password';
-                    icon.setAttribute('data-lucide', 'eye');
-                }
-                lucide.createIcons();
-            };
-
-            // Efecto de carga
-            const form = document.getElementById('registerForm');
-            const btn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
-            const btnIcon = document.getElementById('btnIcon');
-
-            form.addEventListener('submit', function() {
-                if ($(this).valid()) {
-                    btn.disabled = true;
-                    btnText.innerText = 'Creando cuenta...';
-                    btnLoader.classList.remove('hidden');
-                    btnIcon.classList.add('hidden');
-                    btn.classList.add('opacity-75');
-                }
-            });
-        });
-    </script>
+    <script src="~/js/Account/Register.js" asp-append-version="true"></script>
 </body>
 </html>

@@ -1,0 +1,356 @@
+﻿
+/* ── Variables locales ── */
+.news-page {
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+/* ── Fade orquestado ── */
+.k-fade {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+
+    .k-fade.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+/* ── Header ── */
+.news-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 14px 0 12px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: linear-gradient(to bottom, var(--bg-main) 80%, transparent);
+}
+
+/* ── Pill filter tabs ── */
+.filter-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+}
+
+    .filter-pill:hover {
+        border-color: rgba(124,58,237,0.45);
+        color: var(--text-main);
+    }
+
+    .filter-pill.active {
+        background: #7c3aed;
+        border-color: #7c3aed;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+
+/* ── Live ticker ── */
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.25);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #10b981;
+    letter-spacing: 0.1em;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: livePulse 1.8s ease infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(16,185,129,0.4);
+    }
+
+    50% {
+        opacity: .7;
+        box-shadow: 0 0 0 4px rgba(16,185,129,0);
+    }
+}
+
+/* ── NUEVO: Kairós Market Verdict (Reemplazo de Fear/Greed) ── */
+.kairos-verdict-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    min-width: 240px;
+}
+
+.verdict-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.verdict-title {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--kairos-purple);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.verdict-track-container {
+    display: flex;
+    height: 6px;
+    border-radius: 99px;
+    overflow: hidden;
+    background: var(--border-color); /* Fallback */
+}
+
+/* Las barras crecerán con JS para dar el efecto */
+.verdict-fill-pos {
+    background: #10b981;
+    transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    width: 0%;
+}
+
+.verdict-fill-neu {
+    background: #9ca3af;
+    transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    width: 0%;
+    opacity: 0.5;
+}
+
+.verdict-fill-neg {
+    background: #ef4444;
+    transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    width: 0%;
+}
+
+/* ── FEATURED card (primera noticia grande) ── */
+.card-featured {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    text-decoration: none;
+    position: relative;
+}
+
+@media (max-width: 900px) {
+    .card-featured {
+        grid-column: span 1;
+    }
+}
+
+.card-featured:hover {
+    border-color: rgba(124,58,237,0.5);
+    box-shadow: 0 16px 40px rgba(124,58,237,0.1);
+    transform: translateY(-2px);
+}
+
+/* ── STANDARD card ── */
+.card-news {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    text-decoration: none;
+    position: relative;
+}
+
+    .card-news:hover {
+        border-color: rgba(124,58,237,0.45);
+        box-shadow: 0 10px 30px rgba(124,58,237,0.08);
+        transform: translateY(-2px);
+    }
+
+/* Accent bar top */
+.card-accent-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card-news:hover .card-accent-bar,
+.card-featured:hover .card-accent-bar {
+    opacity: 1;
+}
+
+/* Video embed */
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #000;
+}
+
+    .video-wrapper iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+/* ── Sentiment badge ── */
+.s-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border: 1px solid;
+}
+
+    .s-badge.pos {
+        background: rgba(16,185,129,0.1);
+        border-color: rgba(16,185,129,0.25);
+        color: #10b981;
+    }
+
+    .s-badge.neg {
+        background: rgba(239,68,68,0.1);
+        border-color: rgba(239,68,68,0.25);
+        color: #ef4444;
+    }
+
+    .s-badge.neu {
+        background: rgba(107,114,128,0.1);
+        border-color: rgba(107,114,128,0.2);
+        color: #9ca3af;
+    }
+
+/* ── Source chip ── */
+.source-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.source-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+}
+
+/* ── Category color map ── */
+.tag-cripto {
+    background: rgba(245,158,11,0.1);
+    color: #f59e0b;
+}
+
+.tag-forex {
+    background: rgba(59,130,246,0.1);
+    color: #3b82f6;
+}
+
+.tag-acciones {
+    background: rgba(16,185,129,0.1);
+    color: #10b981;
+}
+
+.tag-macro {
+    background: rgba(124,58,237,0.1);
+    color: #7c3aed;
+}
+
+.tag-default {
+    background: rgba(107,114,128,0.1);
+    color: #9ca3af;
+}
+
+.category-tag {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ── Empty state ── */
+.empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+/* ── Kairos insight chip ── */
+.kairos-insight {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.15);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-top: 10px;
+}
+
+    .kairos-insight i {
+        flex-shrink: 0;
+        margin-top: 1px;
+        color: #7c3aed;
+    }
+
+

@@ -42,80 +42,7 @@
         }
     </script>
 
-    <style>
-        @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #0b0b14 inset !important;
-            -webkit-text-fill-color: white !important;
-            caret-color: white !important;
-            transition: background-color 5000s ease-in-out 0s;
-        }
-
-        .loader {
-            border: 2px solid rgba(255,255,255,0.1);
-            border-left-color: #fff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-
-        @@keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* --- CORRECCIÓN DE LA ANIMACIÓN NEÓN --- */
-        .neon-border {
-            position: relative;
-            /* Importante: Esto crea un contexto de apilamiento */
-            z-index: 0;
-        }
-
-            .neon-border::before,
-            .neon-border::after {
-                content: '';
-                position: absolute;
-                inset: -2px;
-                border-radius: 18px; /* Un poco más que la tarjeta para que se vea bien */
-                padding: 2px;
-                background: linear-gradient(90deg, transparent, transparent, #7c3aed, #a855f7, #7c3aed, transparent, transparent);
-                background-size: 200% 100%;
-                /* SOLUCIÓN AL BLOQUEO DE BOTONES: */
-                z-index: -1; /* Se envía detrás del contenido */
-                pointer-events: none; /* Asegura que los clics traspasen la luz si algo falla */
-                /* SOLUCIÓN A LA VELOCIDAD: Cambiado de 3s a 10s */
-                animation: neonFlow 10s linear infinite;
-            }
-
-            .neon-border::before {
-                filter: blur(2px); /* Brillo concentrado */
-            }
-
-            .neon-border::after {
-                filter: blur(10px); /* Brillo difuso (Glow) */
-                opacity: 0.6;
-            }
-
-        @@keyframes neonFlow {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/Account/Login.css" asp-append-version="true" />
 </head>
 
 <body class="bg-kairos-bg h-screen w-screen overflow-hidden flex flex-col relative font-sans text-gray-200 selection:bg-kairos-primary selection:text-white">
@@ -258,54 +185,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
-
-            const form = document.getElementById('loginForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
-
-            window.togglePassword = function() {
-                const input = document.getElementById('passwordInput');
-                const icon = document.getElementById('eyeIcon');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.setAttribute('data-lucide', 'eye-off');
-                } else {
-                    input.type = 'password';
-                    icon.setAttribute('data-lucide', 'eye');
-                }
-                lucide.createIcons();
-            };
-
-            form.addEventListener('submit', function(e) {
-                if ($(form).valid()) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                    btnText.classList.add('invisible');
-                    btnLoader.classList.remove('hidden');
-                }
-            });
-
-            const validator = $(form).data('validator');
-            if (validator) {
-                 const originalHighlight = validator.settings.highlight;
-                 const originalUnhighlight = validator.settings.unhighlight;
-
-                 validator.settings.highlight = function (element, errorClass, validClass) {
-                     originalHighlight.call(this, element, errorClass, validClass);
-                     $(element).addClass('border-red-500/50 focus:ring-red-500 bg-red-900/10').removeClass('border-[#2d2d42] focus:ring-kairos-primary');
-                 };
-
-                 validator.settings.unhighlight = function (element, errorClass, validClass) {
-                     originalUnhighlight.call(this, element, errorClass, validClass);
-                     $(element).removeClass('border-red-500/50 focus:ring-red-500 bg-red-900/10').addClass('border-[#2d2d42] focus:ring-kairos-primary');
-                 };
-            }
-        });
-    </script>
+    <script src="~/js/Account/Login.js" asp-append-version="true"></script>
 </body>
 </html>

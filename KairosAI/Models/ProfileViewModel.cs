@@ -25,7 +25,12 @@ namespace KairosAI.Models.ViewModels
         [Display(Name = "Notificaciones por Correo")]
         public bool EmailNotifications { get; set; }
 
-        // --- ESTADO KAIROS (Solo lectura) ---
+        [Display(Name = "Intervención de IA (Escudo Kairós)")]
+        public bool IsAiInterventionEnabled { get; set; } // Para habilitar/deshabilitar la fricción positiva
+
+        // --- ESTADO KAIROS (Solo lectura en el perfil) ---
+        public int TotalPoints { get; set; } // <--- ESTA ES LA VARIABLE QUE FALTABA (KP Ganados)
+
         public string RiskProfileLabel { get; set; }
         public int RiskScore { get; set; }
         public string MemberSince { get; set; }

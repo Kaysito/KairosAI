@@ -1,0 +1,75 @@
+﻿
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0b0b14 inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.loader {
+    border: 2px solid rgba(255,255,255,0.1);
+    border-left-color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- CORRECCIÓN DE LA ANIMACIÓN NEÓN --- */
+.neon-border {
+    position: relative;
+    /* Importante: Esto crea un contexto de apilamiento */
+    z-index: 0;
+}
+
+    .neon-border::before,
+    .neon-border::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 18px; /* Un poco más que la tarjeta para que se vea bien */
+        padding: 2px;
+        background: linear-gradient(90deg, transparent, transparent, #7c3aed, #a855f7, #7c3aed, transparent, transparent);
+        background-size: 200% 100%;
+        /* SOLUCIÓN AL BLOQUEO DE BOTONES: */
+        z-index: -1; /* Se envía detrás del contenido */
+        pointer-events: none; /* Asegura que los clics traspasen la luz si algo falla */
+        /* SOLUCIÓN A LA VELOCIDAD: Cambiado de 3s a 10s */
+        animation: neonFlow 10s linear infinite;
+    }
+
+    .neon-border::before {
+        filter: blur(2px); /* Brillo concentrado */
+    }
+
+    .neon-border::after {
+        filter: blur(10px); /* Brillo difuso (Glow) */
+        opacity: 0.6;
+    }
+
+@keyframes neonFlow {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+

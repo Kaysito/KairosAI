@@ -3,23 +3,23 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. [CRÍTICO] Habilitar HttpClient para las llamadas a CoinGecko y Github Models
+// 1. [CRï¿½TICO] Habilitar HttpClient para las llamadas a CoinGecko y Github Models
 builder.Services.AddHttpClient();
 
-// 2. [VITAL] Memoria Caché para el motor de la IA (Rate Limiting y Sesiones Aisladas)
-// Esta línea es crucial para que el KairosController reconozca el IMemoryCache
+// 2. [VITAL] Memoria Cachï¿½ para el motor de la IA (Rate Limiting y Sesiones Aisladas)
+// Esta lï¿½nea es crucial para que el KairosController reconozca el IMemoryCache
 builder.Services.AddMemoryCache();
 
-// 3. [VITAL] Configuración para Autenticación (Preparando Google/Facebook)
+// 3. [VITAL] Configuraciï¿½n para Autenticaciï¿½n (Preparando Google/Facebook)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    // Aquí es donde en el futuro podrías agregar:
+    // Aquï¿½ es donde en el futuro podrï¿½as agregar:
     // options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Dónde mandar al usuario si no ha iniciado sesión
+    options.LoginPath = "/Account/Login"; // Dï¿½nde mandar al usuario si no ha iniciado sesiï¿½n
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
@@ -37,7 +37,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configuración del pipeline (Middleware)
+// Configuraciï¿½n del pipeline (Middleware)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -49,12 +49,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 5. [ORDEN CRÍTICO] Sesiones y Seguridad
-app.UseSession(); // Debe ir ANTES de la Autenticación/Autorización en muchos casos, o justo aquí.
-app.UseAuthentication(); // Authentication: ¿Quién eres? 
-app.UseAuthorization();  // Authorization: ¿Tienes permiso de estar aquí?
+// 5. [ORDEN CRï¿½TICO] Sesiones y Seguridad
+app.UseSession(); // Debe ir ANTES de la Autenticaciï¿½n/Autorizaciï¿½n en muchos casos, o justo aquï¿½.
+app.UseAuthentication(); // Authentication: ï¿½Quiï¿½n eres? 
+app.UseAuthorization();  // Authorization: ï¿½Tienes permiso de estar aquï¿½?
 
-// Configuración de rutas
+// Configuraciï¿½n de rutas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}"); // Inicia en el Login por defecto
