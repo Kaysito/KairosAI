@@ -1,5 +1,8 @@
 ﻿using KairosAI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Text.Json; // Esencial para guardar listas de forma segura
 
 namespace KairosAI.Controllers
 {
@@ -20,23 +23,24 @@ namespace KairosAI.Controllers
         [HttpPost]
         public IActionResult RiskAssessment(RiskAssessmentViewModel model)
         {
+            // 1. Verificación de errores en el formulario
             if (!ModelState.IsValid)
             {
+                // Si la pantalla se queda aquí, falta algún dato obligatorio del modelo en tu HTML
                 return View(model);
             }
 
             // ══════════════════════════════════════════════════════════════
-            //  EJE A — AGRESIVIDAD / PASIVIDAD  (puntaje 2-6, re-calculado
-            //  en backend para no depender solo del frontend)
+            //  EJE A — AGRESIVIDAD / PASIVIDAD 
             // ══════════════════════════════════════════════════════════════
             int axisA = 0;
 
             // Pregunta 1: Reacción ante caída
             axisA += model.Behavior1 switch
             {
-                "Panico" => 1,   // Pasivo extremo
-                "Espera" => 2,   // Moderado
-                "Oportunidad" => 3,   // Agresivo
+                "Panico" => 1,
+                "Espera" => 2,
+                "Oportunidad" => 3,
                 _ => 1
             };
 
@@ -48,20 +52,18 @@ namespace KairosAI.Controllers
                 "Riesgo" => 3,
                 _ => 1
             };
-            // axisA: 2 (muy pasivo) → 6 (muy agresivo)
 
             // ══════════════════════════════════════════════════════════════
-            //  EJE B — CONOCIMIENTO / NIVEL  (puntaje 2-6)
+            //  EJE B — CONOCIMIENTO / NIVEL
             // ══════════════════════════════════════════════════════════════
             int axisB = 0;
 
             // Pregunta 3: Lectura de gráfico de velas
-            // La respuesta correcta es "A" (tendencia alcista)
             axisB += model.KnowledgeChart switch
             {
-                "A" => 3,   // Correcto — sabe leer velas
-                "B" => 2,   // Parcialmente correcto
-                "C" => 1,   // No sabe
+                "A" => 3,
+                "B" => 2,
+                "C" => 1,
                 _ => 1
             };
 
@@ -73,23 +75,13 @@ namespace KairosAI.Controllers
                 "Incorrecto" => 1,
                 _ => 1
             };
-            // axisB: 2 (principiante) → 6 (experto)
 
             // ══════════════════════════════════════════════════════════════
             //  MATRIZ DE RIESGO  f(axisA, axisB)
-            //
-            //                 Pasivo(2)  Mod(3-4)  Agresivo(5-6)
-            //  Principiante:  Bajo 20%   Mod 45%   Alto 80% ⚠️
-            //  Intermedio:    Bajo 25%   Mod 55%   Alto 75%
-            //  Experto:       Bajo 30%   Mod 60%   Elevado 90%
-            //
-            //  Nota: el experto agresivo recibe MENOS fricción positiva
-            //  que el principiante agresivo, aunque su riesgo sea mayor,
-            //  porque entiende las consecuencias.
             // ══════════════════════════════════════════════════════════════
             int riskScore;
             string riskProfile;
-            int frictionLevel; // 1=bajo, 2=medio, 3=alto — para la IA
+            int frictionLevel;
 
             bool isAggressive = axisA >= 5;
             bool isModerate = axisA >= 3 && axisA <= 4;
@@ -103,7 +95,7 @@ namespace KairosAI.Controllers
             {
                 riskScore = 20;
                 riskProfile = "Inversor Cauteloso";
-                frictionLevel = 3; // Máxima protección
+                frictionLevel = 3;
             }
             else if (isModerate && isBeginner)
             {
@@ -127,7 +119,7 @@ namespace KairosAI.Controllers
             {
                 riskScore = 80;
                 riskProfile = "Principiante Agresivo";
-                frictionLevel = 3; // Máxima fricción positiva — sabe poco, arriesga mucho
+                frictionLevel = 3;
             }
             else if (isAggressive && isIntermediate)
             {
@@ -135,11 +127,11 @@ namespace KairosAI.Controllers
                 riskProfile = "Operador de Alto Vuelo";
                 frictionLevel = 2;
             }
-            else // isAggressive && isExpert
+            else
             {
                 riskScore = 90;
                 riskProfile = "Operador de Alto Vuelo";
-                frictionLevel = 1; // Fricción mínima — sabe lo que hace
+                frictionLevel = 1;
             }
 
             // Bonus: horizonte temporal largo suma 5 puntos al riesgo permitido
@@ -147,26 +139,21 @@ namespace KairosAI.Controllers
                 riskScore = Math.Min(riskScore + 5, 100);
 
             // ══════════════════════════════════════════════════════════════
-            //  GUARDAR EN SESSION / TempData (BD en fases futuras)
+            //  GUARDAR EN TEMPDATA (Con serialización segura para listas)
             // ══════════════════════════════════════════════════════════════
             TempData["UserRiskScore"] = riskScore;
             TempData["UserRiskProfile"] = riskProfile;
             TempData["UserAggressionAxis"] = axisA;
             TempData["UserKnowledgeAxis"] = axisB;
             TempData["FrictionLevel"] = frictionLevel;
-            TempData["SelectedCryptos"] = model.SelectedCryptos;
-            TempData["SelectedMarkets"] = model.SelectedMarkets;
 
-            // En producción se persistiría así:
-            // var user = await _userManager.GetUserAsync(User);
-            // user.RiskScore      = riskScore;
-            // user.RiskProfile    = riskProfile;
-            // user.AggressionAxis = axisA;
-            // user.KnowledgeAxis  = axisB;
-            // user.FrictionLevel  = frictionLevel;
-            // user.WatchedCryptos = model.SelectedCryptos;
-            // await _userManager.UpdateAsync(user);
+            // 🔥 SOLUCIÓN DEL BUG: Convertir a JSON las listas para que TempData no crashee
+            TempData["SelectedCryptos"] = model.SelectedCryptos ?? string.Empty;
+            TempData["SelectedMarkets"] = model.SelectedMarkets ?? string.Empty;
 
+            // ══════════════════════════════════════════════════════════════
+            //  REDIRECCIÓN AL DASHBOARD
+            // ══════════════════════════════════════════════════════════════
             return RedirectToAction("Index", "Dashboard");
         }
     }

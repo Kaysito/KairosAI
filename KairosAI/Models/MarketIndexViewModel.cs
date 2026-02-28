@@ -2,46 +2,52 @@
 
 namespace KairosAI.Models.ViewModels
 {
-    // --- VISTA GENERAL (TABLA) ---
-    public class MarketIndexViewModel
+    // 1. EL MODELO DEL DETALLE DEL ACTIVO
+    public class AssetDetailViewModel
     {
-        public string SearchTerm { get; set; }
-        public string Filter { get; set; } // "Cripto", "Acciones", "Todos"
-        public List<MarketAsset> Assets { get; set; } = new();
-    }
-
-    public class MarketAsset
-    {
-        public string Symbol { get; set; } // BTC
-        public string Name { get; set; } // Bitcoin
+        public string Symbol { get; set; }
+        public string Name { get; set; }
         public decimal Price { get; set; }
         public double Change24h { get; set; }
-        public string Type { get; set; } // "Cripto", "Accion", "ETF"
-        public string RiskLevel { get; set; } // "Alto", "Medio", "Bajo"
-        public bool IsTrending { get; set; } // Para ponerle un fueguito 🔥
-
-        // ¡NUEVO! Para que la tabla se vea igual de profesional que el dashboard
+        public string RiskLevel { get; set; }
+        public bool IsTrending { get; set; }
+        public string Type { get; set; }
         public string ImageUrl { get; set; }
-    }
 
-    // --- VISTA DETALLADA (GRÁFICA Y COMPRA) ---
-    public class AssetDetailViewModel : MarketAsset
-    {
-        // Datos para la gráfica
-        public List<decimal> ChartData { get; set; } = new();
-        public List<string> ChartLabels { get; set; } = new();
-
-        // Datos fundamentales
         public string MarketCap { get; set; }
         public string Volume24h { get; set; }
         public decimal High24h { get; set; }
         public decimal Low24h { get; set; }
 
-        // El cerebro de la app: Análisis de IA
-        public string KairosAnalysis { get; set; }
-        public string KairosSentiment { get; set; } // "Alcista", "Bajista", "Neutral"
+        public List<string> ChartLabels { get; set; }
+        public List<decimal> ChartData { get; set; }
 
-        // Para el formulario de compra
+        public string KairosSentiment { get; set; }
+        public string KairosAnalysis { get; set; }
         public decimal AmountToInvest { get; set; }
+
+        // Aquí está la variable que fallaba. Al estar MarketAsset en el mismo namespace, ya no habrá error CS0246.
+        public List<MarketAsset> TopAssets { get; set; } = new List<MarketAsset>();
+    }
+
+    // 2. EL MODELO DE LA VISTA PRINCIPAL DEL MERCADO
+    public class MarketIndexViewModel
+    {
+        public string SearchTerm { get; set; }
+        public string Filter { get; set; }
+        public List<MarketAsset> Assets { get; set; } = new List<MarketAsset>();
+    }
+
+    // 3. LA CLASE MARKET ASSET (El objeto que C# no encontraba)
+    public class MarketAsset
+    {
+        public string Symbol { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public double Change24h { get; set; }
+        public string RiskLevel { get; set; }
+        public bool IsTrending { get; set; }
+        public string Type { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

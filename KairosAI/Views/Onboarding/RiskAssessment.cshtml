@@ -15,15 +15,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Syne', 'sans-serif'],
-                        mono: ['DM Mono', 'monospace'],
+                        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
                         'k-purple': '#7c3aed',
@@ -94,6 +94,7 @@
                 transform: translateX(0);
             }
         }
+
         @@keyframes slideOut {
             from {
                 opacity: 1;
@@ -157,6 +158,7 @@
         .ai-pulse {
             animation: pulse-ring 2s infinite cubic-bezier(0.215,0.61,0.355,1);
         }
+
         @@keyframes pulse-ring {
             0% {
                 box-shadow: 0 0 0 0 rgba(124,58,237,0.5);
@@ -175,6 +177,7 @@
         .result-badge {
             animation: fadeScale 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
         }
+
         @@keyframes fadeScale {
             from {
                 opacity: 0;
@@ -190,21 +193,6 @@
         /* ── Dot indicator ── */
         .dot {
             transition: all 0.3s ease;
-        }
-
-        /* ── Tooltip for chart ── */
-        .chart-tooltip {
-            position: absolute;
-            background: rgba(16,16,30,0.95);
-            border: 1px solid rgba(124,58,237,0.4);
-            color: #e2e8f0;
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            pointer-events: none;
-            white-space: nowrap;
-            display: none;
         }
 
         /* Candlestick colors */
@@ -228,18 +216,23 @@
         .axis-bar {
             transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1);
         }
+
+        /* Sincronización del texto del Logo con el Layout */
+        .logo-text {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 
 <body class="text-gray-100 antialiased relative">
 
-    <!-- ── Header ── -->
     <header class="relative z-10 px-6 py-5 flex items-center justify-between max-w-3xl mx-auto">
         <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-k-purple to-k-cyan flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <i data-lucide="brain-circuit" class="text-white" style="width:18px;height:18px"></i>
-            </div>
-            <span class="font-bold text-xl tracking-tight">KairósAI</span>
+            <img src="~/images/brand/kairos-icon.png" alt="KairosAI Icon" class="w-8 h-8 rounded-lg object-cover shadow-lg shadow-purple-500/20" />
+            <span class="font-bold text-xl tracking-tight logo-text">KairósAI</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs font-mono text-gray-500">CALIBRACIÓN</span>
@@ -247,25 +240,18 @@
         </div>
     </header>
 
-    <!-- ── Progress bar ── -->
     <div class="relative z-10 w-full h-[2px] bg-gray-800/80">
         <div id="progress-bar" class="h-full w-[16.66%]"></div>
     </div>
 
-    <!-- ── Step dots ── -->
     <div class="relative z-10 flex justify-center gap-2 mt-4">
-        <script>
-            // Rendered by JS after load
-        </script>
         <div id="dots-container" class="flex gap-2"></div>
     </div>
 
-    <!-- ── Main content ── -->
     <main class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 py-8">
 
-        <form asp-controller="Onboarding" asp-action="RiskAssessment" method="post" id="riskForm">
+        <form asp-controller="Onboarding" asp-action="RiskAssessment" method="post" id="riskForm" novalidate>
 
-            <!-- ══ STEP 1 — Comportamiento en caída ══ -->
             <div class="step-container active" data-step="1">
                 <div class="mb-2 flex items-center gap-2">
                     <span class="font-mono text-xs text-k-purple font-medium tracking-widest uppercase">Eje A · Comportamiento</span>
@@ -313,7 +299,6 @@
                 </div>
             </div>
 
-            <!-- ══ STEP 2 — Comportamiento con bono ══ -->
             <div class="step-container" data-step="2">
                 <div class="mb-2 flex items-center gap-2">
                     <span class="font-mono text-xs text-k-cyan font-medium tracking-widest uppercase">Eje A · Liquidez</span>
@@ -361,7 +346,6 @@
                 </div>
             </div>
 
-            <!-- ══ STEP 3 — Conocimiento: Lectura de gráfico ══ -->
             <div class="step-container" data-step="3">
                 <div class="mb-2 flex items-center gap-2">
                     <span class="font-mono text-xs text-k-pink font-medium tracking-widest uppercase">Eje B · Conocimiento técnico</span>
@@ -373,7 +357,6 @@
                 </h2>
                 <p class="text-xs text-gray-600 font-mono mb-4">Sin presión — si no lo sabes, es información útil para nosotros.</p>
 
-                <!-- Mini candlestick chart -->
                 <div class="bg-k-card rounded-2xl p-4 border border-white/5 mb-5 relative overflow-hidden">
                     <div class="flex items-center justify-between mb-3">
                         <span class="font-mono text-xs text-gray-500">BTC/USDT · 4H · Demo</span>
@@ -407,7 +390,6 @@
                 </div>
             </div>
 
-            <!-- ══ STEP 4 — Conocimiento: Concepto ══ -->
             <div class="step-container" data-step="4">
                 <div class="mb-2 flex items-center gap-2">
                     <span class="font-mono text-xs text-k-pink font-medium tracking-widest uppercase">Eje B · Conceptos clave</span>
@@ -445,7 +427,6 @@
                 </div>
             </div>
 
-            <!-- ══ STEP 5 — Preferencias de monedas ══ -->
             <div class="step-container" data-step="5">
                 <div class="mb-2 flex items-center gap-2">
                     <span class="font-mono text-xs text-k-cyan font-medium tracking-widest uppercase">Personalización · Dashboard</span>
@@ -458,7 +439,6 @@
                 <p class="text-xs text-gray-600 font-mono mb-6">Selecciona mínimo 2. Puedes cambiar esto después en Configuración.</p>
 
                 <div class="flex flex-wrap gap-2.5 mb-8" id="crypto-chips">
-                    <!-- Renderizado por JS -->
                 </div>
 
                 <p class="text-xs text-gray-600 font-mono mb-2">TAMBIÉN SEGUIRÉ EL MERCADO GENERAL DE:</p>
@@ -479,15 +459,10 @@
                         <div class="ml-auto w-5 h-5 rounded-full border border-gray-600 flex items-center justify-center check-market"><i data-lucide="check" style="width:12px;height:12px" class="hidden text-k-cyan"></i></div>
                     </div>
                 </div>
-
-                <input type="hidden" id="selectedCryptos" name="SelectedCryptos" value="">
-                <input type="hidden" id="selectedMarkets" name="SelectedMarkets" value="">
             </div>
 
-            <!-- ══ STEP 6 — Resultado ══ -->
             <div class="step-container" data-step="6">
 
-                <!-- Estado: Procesando -->
                 <div id="loading-state" class="py-10 text-center">
                     <div class="w-24 h-24 mx-auto bg-gradient-to-br from-k-purple to-k-cyan rounded-full flex items-center justify-center ai-pulse mb-6">
                         <i data-lucide="cpu" class="text-white" style="width:40px;height:40px"></i>
@@ -499,7 +474,6 @@
                     </div>
                 </div>
 
-                <!-- Estado: Resultado -->
                 <div id="result-state" class="hidden py-4">
 
                     <div class="text-center mb-8">
@@ -510,7 +484,6 @@
                         <p id="result-subtitle" class="text-gray-400 font-mono text-sm"></p>
                     </div>
 
-                    <!-- Dual axis bars -->
                     <div class="bg-k-card border border-white/5 rounded-2xl p-6 mb-5 space-y-5 result-badge">
                         <div>
                             <div class="flex justify-between items-center mb-2">
@@ -552,7 +525,6 @@
                         </div>
                     </div>
 
-                    <!-- Descripción de la IA -->
                     <div id="result-desc-box" class="bg-gradient-to-br from-k-purple/10 to-transparent border border-k-purple/20 rounded-2xl p-5 mb-6 result-badge">
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-lg bg-k-purple/20 flex items-center justify-center shrink-0 mt-0.5">
@@ -565,25 +537,23 @@
                         </div>
                     </div>
 
-                    <button type="submit"
-                            class="w-full flex items-center justify-center gap-2.5 py-4 px-8 rounded-xl font-bold text-white bg-gradient-to-r from-k-purple to-k-cyan hover:opacity-90 shadow-xl shadow-purple-500/20 transition-opacity text-lg">
+                    <button type="submit" onclick="submitAssessmentForm(event)"
+                            class="w-full flex items-center justify-center gap-2.5 py-4 px-8 rounded-xl font-bold text-white bg-gradient-to-r from-k-purple to-k-cyan hover:opacity-90 shadow-xl shadow-purple-500/20 transition-opacity text-lg relative z-50 cursor-pointer">
                         Ir al Dashboard
                         <i data-lucide="arrow-right" style="width:20px;height:20px"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Hidden inputs para el backend -->
-            <input type="hidden" name="Behavior1" id="h-b1" />
-            <input type="hidden" name="Behavior2" id="h-b2" />
-            <input type="hidden" name="KnowledgeChart" id="h-b3" />
-            <input type="hidden" name="KnowledgeConcept" id="h-b4" />
+            <input type="hidden" name="Behavior1" id="h-b1" value="Espera" />
+            <input type="hidden" name="Behavior2" id="h-b2" value="Balance" />
+            <input type="hidden" name="KnowledgeChart" id="h-b3" value="C" />
+            <input type="hidden" name="KnowledgeConcept" id="h-b4" value="Parcial" />
             <input type="hidden" name="TimeHorizon" id="h-horizon" value="Medio" />
-            <input type="hidden" asp-for="InvestmentGoal" id="FinalRiskLevel" />
-            <input type="hidden" name="AggressionScore" id="h-agg" />
-            <input type="hidden" name="KnowledgeScore" id="h-know" />
 
-            <!-- ── Navigation buttons ── -->
+            <input type="hidden" name="SelectedCryptos" id="selectedCryptosInput" value="BTC,ETH" />
+            <input type="hidden" name="SelectedMarkets" id="selectedMarketsInput" value="Cripto" />
+
             <div class="mt-8 flex justify-between items-center" id="nav-buttons">
                 <button type="button" id="btn-prev"
                         class="hidden px-5 py-3 rounded-xl font-medium text-gray-500 hover:text-white transition"
@@ -600,42 +570,30 @@
         </form>
     </main>
 
-    <!-- ── Scripts ── -->
     <script>
-        // ════════════════════════════════════════════════
-        //  ESTADO GLOBAL
-        // ════════════════════════════════════════════════
         let currentStep = 1;
         const TOTAL_STEPS = 6;
 
-        // Puntajes acumulados
-        const scores = {
-            axisA: 0,   // Agresividad (2-6)
-            axisB: 0,   // Conocimiento (2-6)
-        };
+        const scores = { axisA: 0, axisB: 0 };
 
-        // Cryptos disponibles para selección
         const CRYPTOS = [
-            { id:'bitcoin',       sym:'BTC', label:'Bitcoin',    color:'#f97316' },
-            { id:'ethereum',      sym:'ETH', label:'Ethereum',   color:'#818cf8' },
-            { id:'solana',        sym:'SOL', label:'Solana',     color:'#10b981' },
-            { id:'cardano',       sym:'ADA', label:'Cardano',    color:'#3b82f6' },
-            { id:'dogecoin',      sym:'DOGE', label:'Dogecoin',  color:'#eab308' },
-            { id:'ripple',        sym:'XRP', label:'Ripple',     color:'#06b6d4' },
-            { id:'polkadot',      sym:'DOT', label:'Polkadot',   color:'#ec4899' },
-            { id:'avalanche-2',   sym:'AVAX', label:'Avalanche', color:'#ef4444' },
-            { id:'chainlink',     sym:'LINK', label:'Chainlink', color:'#3b82f6' },
-            { id:'matic-network', sym:'MATIC', label:'Polygon', color:'#8b5cf6' },
-            { id:'litecoin',      sym:'LTC', label:'Litecoin',  color:'#94a3b8' },
-            { id:'shiba-inu',     sym:'SHIB', label:'Shiba Inu',color:'#f59e0b' },
+            { id:'BTC', sym:'BTC', label:'Bitcoin', color:'#f97316' },
+            { id:'ETH', sym:'ETH', label:'Ethereum', color:'#818cf8' },
+            { id:'SOL', sym:'SOL', label:'Solana', color:'#10b981' },
+            { id:'ADA', sym:'ADA', label:'Cardano', color:'#3b82f6' },
+            { id:'DOGE', sym:'DOGE', label:'Dogecoin', color:'#eab308' },
+            { id:'XRP', sym:'XRP', label:'Ripple', color:'#06b6d4' },
+            { id:'DOT', sym:'DOT', label:'Polkadot', color:'#ec4899' },
+            { id:'AVAX', sym:'AVAX', label:'Avalanche', color:'#ef4444' },
+            { id:'LINK', sym:'LINK', label:'Chainlink', color:'#3b82f6' },
+            { id:'MATIC', sym:'MATIC', label:'Polygon', color:'#8b5cf6' },
+            { id:'LTC', sym:'LTC', label:'Litecoin', color:'#94a3b8' },
+            { id:'SHIB', sym:'SHIB', label:'Shiba Inu',color:'#f59e0b' },
         ];
 
-        let selectedCryptos = new Set();
-        let selectedMarkets = new Set();
+        let selectedCryptos = new Set(['BTC', 'ETH']);
+        let selectedMarkets = new Set(['Cripto']);
 
-        // ════════════════════════════════════════════════
-        //  INIT
-        // ════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             renderDots();
@@ -643,9 +601,13 @@
             renderCryptoChips();
         });
 
-        // ════════════════════════════════════════════════
-        //  DOTS
-        // ════════════════════════════════════════════════
+        // ── Función para asegurar el envío del form ──
+        function submitAssessmentForm(e) {
+            e.preventDefault(); // Detenemos el comportamiento default
+            const form = document.getElementById('riskForm');
+            form.submit(); // Disparamos el submit explícitamente por Javascript
+        }
+
         function renderDots() {
             const container = document.getElementById('dots-container');
             container.innerHTML = '';
@@ -670,72 +632,39 @@
             }
         }
 
-        // ════════════════════════════════════════════════
-        //  CANDLESTICK CHART (SVG generado)
-        // ════════════════════════════════════════════════
         function renderCandleChart() {
             const svg = document.getElementById('candle-chart');
-            // Datos de velas: [open, high, low, close]
             const candles = [
-                [60,75,50,70],   // alcista
-                [70,78,62,65],   // bajista
-                [65,80,60,78],   // alcista
-                [78,85,72,82],   // alcista
-                [82,88,75,76],   // bajista
-                [76,84,70,83],   // alcista
-                [83,92,80,90],   // alcista (tendencia evidente)
+                [60,75,50,70], [70,78,62,65], [65,80,60,78], [78,85,72,82],
+                [82,88,75,76], [76,84,70,83], [83,92,80,90],
             ];
-
             const W = 420, H = 140, PAD = 15;
-            const maxP = 95, minP = 48;
-            const range = maxP - minP;
+            const maxP = 95, minP = 48, range = maxP - minP;
             const scaleY = (p) => PAD + ((maxP - p) / range) * (H - PAD * 2);
-
-            const candleW = 32;
-            const spacing = (W - PAD * 2) / candles.length;
-
+            const candleW = 32, spacing = (W - PAD * 2) / candles.length;
             let svgContent = '';
 
             candles.forEach((c, i) => {
                 const [o, h, l, cl] = c;
                 const x = PAD + i * spacing + spacing / 2;
                 const isGreen = cl >= o;
-
-                const top  = scaleY(Math.max(o, cl));
-                const bot  = scaleY(Math.min(o, cl));
+                const top  = scaleY(Math.max(o, cl)), bot  = scaleY(Math.min(o, cl));
                 const bodyH = Math.max(bot - top, 2);
-
-                // Wick
-                svgContent += `<line x1="${x}" y1="${scaleY(h)}" x2="${x}" y2="${scaleY(l)}"
-                    stroke="${isGreen ? '#10b981' : '#ef4444'}" stroke-width="1.5" opacity="0.8"/>`;
-
-                // Body
-                svgContent += `<rect x="${x - candleW/2 + 2}" y="${top}" width="${candleW - 4}" height="${bodyH}"
-                    fill="${isGreen ? '#10b981' : '#ef4444'}" rx="2" opacity="0.9"/>`;
+                svgContent += `<line x1="${x}" y1="${scaleY(h)}" x2="${x}" y2="${scaleY(l)}" stroke="${isGreen ? '#10b981' : '#ef4444'}" stroke-width="1.5" opacity="0.8"/>`;
+                svgContent += `<rect x="${x - candleW/2 + 2}" y="${top}" width="${candleW - 4}" height="${bodyH}" fill="${isGreen ? '#10b981' : '#ef4444'}" rx="2" opacity="0.9"/>`;
             });
 
-            // Moving average line (just visual)
-            const maPoints = candles.map((c, i) => {
-                const x = PAD + i * spacing + spacing / 2;
-                const avg = (c[0] + c[3]) / 2;
-                return `${x},${scaleY(avg)}`;
-            }).join(' ');
+            const maPoints = candles.map((c, i) => `${PAD + i * spacing + spacing / 2},${scaleY((c[0] + c[3]) / 2)}`).join(' ');
             svgContent += `<polyline points="${maPoints}" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>`;
 
-            // Grid lines
             for (let p = 60; p <= 90; p += 10) {
                 const y = scaleY(p);
-                svgContent += `<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}"
-                    stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
+                svgContent += `<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
                 svgContent += `<text x="${PAD - 2}" y="${y + 4}" fill="rgba(255,255,255,0.2)" font-size="9" text-anchor="end" font-family="DM Mono">${p}K</text>`;
             }
-
             svg.innerHTML = svgContent;
         }
 
-        // ════════════════════════════════════════════════
-        //  CRYPTO CHIPS
-        // ════════════════════════════════════════════════
         function renderCryptoChips() {
             const container = document.getElementById('crypto-chips');
             container.innerHTML = '';
@@ -743,11 +672,10 @@
                 const chip = document.createElement('div');
                 chip.className = 'crypto-chip rounded-xl px-3 py-2 flex items-center gap-2 text-sm font-mono';
                 chip.dataset.id = c.id;
-                chip.innerHTML = `
-                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:${c.color}22;color:${c.color}">${c.sym[0]}</div>
-                    <span class="text-gray-300">${c.sym}</span>
-                    <span class="text-gray-600 text-xs hidden sm:inline">${c.label}</span>
-                `;
+                chip.innerHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:${c.color}22;color:${c.color}">${c.sym[0]}</div><span class="text-gray-300">${c.sym}</span><span class="text-gray-600 text-xs hidden sm:inline">${c.label}</span>`;
+
+                if(c.id === 'BTC' || c.id === 'ETH') chip.classList.add('active');
+
                 chip.addEventListener('click', () => toggleCrypto(chip, c.id));
                 container.appendChild(chip);
             });
@@ -762,7 +690,7 @@
                 selectedCryptos.add(id);
                 el.classList.add('active');
             }
-            document.getElementById('selectedCryptos').value = [...selectedCryptos].join(',');
+            document.getElementById('selectedCryptosInput').value = [...selectedCryptos].join(',');
             updateCryptoCount();
             checkStep5Valid();
         }
@@ -779,58 +707,45 @@
                 el.classList.add('selected');
                 icon.classList.remove('hidden');
             }
-            document.getElementById('selectedMarkets').value = [...selectedMarkets].join(',');
+            document.getElementById('selectedMarketsInput').value = [...selectedMarkets].join(',');
             lucide.createIcons();
         }
 
         function updateCryptoCount() {
             const btn = document.getElementById('btn-next');
-            if (currentStep === 5) {
-                btn.disabled = selectedCryptos.size < 2;
-            }
+            if (currentStep === 5) btn.disabled = selectedCryptos.size < 2;
         }
 
         function checkStep5Valid() {
             document.getElementById('btn-next').disabled = selectedCryptos.size < 2;
         }
 
-        // ════════════════════════════════════════════════
-        //  OPTION SELECTION
-        // ════════════════════════════════════════════════
         function selectOption(el) {
             const group = el.dataset.group;
-            // Deselect siblings
             document.querySelectorAll(`[data-group="${group}"]`).forEach(card => {
                 card.classList.remove('selected');
                 card.querySelector('.check-icon').style.opacity = '0';
             });
-            // Select this
             el.classList.add('selected');
             el.querySelector('.check-icon').style.opacity = '1';
 
-            // Store score
             const axisA = parseInt(el.dataset.axisA || 0);
             const axisB = parseInt(el.dataset.axisB || 0);
 
             if (['s1','s2'].includes(group)) {
                 scores['axisA'] = (scores['axisA'] || 0);
-                // We accumulate per step
                 if (group === 's1') { scores.s1a = axisA; document.getElementById('h-b1').value = el.dataset.value; }
                 if (group === 's2') { scores.s2a = axisA; document.getElementById('h-b2').value = el.dataset.value; }
             }
             if (group === 's3') { scores.s3b = axisB; document.getElementById('h-b3').value = el.dataset.value; }
             if (group === 's4') { scores.s4b = axisB; document.getElementById('h-b4').value = el.dataset.value; }
 
-            // Recalc totals
             scores.axisA = (scores.s1a || 0) + (scores.s2a || 0);
             scores.axisB = (scores.s3b || 0) + (scores.s4b || 0);
 
             document.getElementById('btn-next').disabled = false;
         }
 
-        // ════════════════════════════════════════════════
-        //  STEP NAVIGATION
-        // ════════════════════════════════════════════════
         function changeStep(direction) {
             if (direction === 1 && !canProceed()) return;
 
@@ -842,15 +757,11 @@
             const next = document.querySelector(`.step-container[data-step="${currentStep}"]`);
             setTimeout(() => { next.classList.add('active'); lucide.createIcons(); }, 80);
 
-            // Update header
-            document.getElementById('step-counter').textContent =
-                `0${currentStep < 10 ? currentStep : currentStep}/0${TOTAL_STEPS}`;
-            document.getElementById('progress-bar').style.width =
-                `${(currentStep / TOTAL_STEPS) * 100}%`;
+            document.getElementById('step-counter').textContent = `0${currentStep < 10 ? currentStep : currentStep}/0${TOTAL_STEPS}`;
+            document.getElementById('progress-bar').style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
 
             updateDots();
 
-            // Prev/Next button visibility
             document.getElementById('btn-prev').classList.toggle('hidden', currentStep === 1);
 
             const btnNext = document.getElementById('btn-next');
@@ -863,7 +774,6 @@
                 btnNext.innerHTML = 'Finalizar <i data-lucide="check" style="width:18px;height:18px"></i>';
                 lucide.createIcons();
             } else {
-                // Check if step already has answer
                 const stepEl = document.querySelector(`.step-container[data-step="${currentStep}"]`);
                 const checked = stepEl ? stepEl.querySelector('.opt-card.selected') : null;
                 btnNext.disabled = !checked;
@@ -878,18 +788,8 @@
             return stepEl ? !!stepEl.querySelector('.opt-card.selected') : true;
         }
 
-        // ════════════════════════════════════════════════
-        //  AI ANALYSIS SIMULATION
-        // ════════════════════════════════════════════════
         function startAIAnalysis() {
-            const texts = [
-                "Procesando eje conductual...",
-                "Cruzando respuestas con matrices de riesgo...",
-                "Evaluando nivel de conocimiento técnico...",
-                "Calibrando personalidad de la IA...",
-                "Generando perfil final...",
-            ];
-
+            const texts = ["Procesando eje conductual...", "Cruzando respuestas con matrices de riesgo...", "Evaluando nivel de conocimiento técnico...", "Calibrando personalidad de la IA...", "Generando perfil final..."];
             const loadingBar = document.getElementById('loading-bar');
             loadingBar.style.width = '100%';
 
@@ -906,37 +806,19 @@
             }, 640);
         }
 
-        // ════════════════════════════════════════════════
-        //  RESULT CALCULATION
-        // ════════════════════════════════════════════════
         function showResult() {
-            // Axis A: 2 (min) – 6 (max)
-            const axisA = scores.axisA || 2;
-            // Axis B: 2 (min) – 6 (max)
-            const axisB = scores.axisB || 2;
-
-            // Normalize to %
-            const percA = ((axisA - 2) / 4) * 100;  // 0% = Pasivo, 100% = Agresivo
-            const percB = ((axisB - 2) / 4) * 100;  // 0% = Principiante, 100% = Experto
-
-            // Labels
+            const axisA = scores.axisA || 2, axisB = scores.axisB || 2;
+            const percA = ((axisA - 2) / 4) * 100, percB = ((axisB - 2) / 4) * 100;
             const labelA = axisA <= 2 ? 'Pasivo' : axisA <= 4 ? 'Moderado' : 'Agresivo';
             const labelB = axisB <= 2 ? 'Principiante' : axisB <= 4 ? 'Intermedio' : 'Experto';
 
-            // ── Matriz de riesgo ──
-            //           Pasivo    Moderado   Agresivo
-            // Principiante: Bajo, Moderado,  Alto⚠️
-            // Intermedio:   Bajo, Moderado,  Alto
-            // Experto:      Bajo, Moderado,  Elevado
             let riskTitle, riskPerc, riskColor, riskBarColor, aiMessage, riskLabel;
 
             if (axisA <= 2) {
-                // Pasivo
                 riskTitle = "Inversor Cauteloso"; riskPerc = 20; riskColor = "text-blue-400";
                 riskBarColor = "bg-blue-500"; riskLabel = "BAJO";
                 aiMessage = `Eres ${labelB === 'Principiante' ? 'nuevo en el mundo de las inversiones y' : 'alguien que'} prefiere la seguridad sobre el rendimiento. Te hablaré con calma, protegeré tu capital de decisiones impulsivas y te guiaré paso a paso. Activo el Escudo Anti-Pánico en modo máximo.`;
             } else if (axisA <= 4) {
-                // Moderado
                 if (axisB <= 2) {
                     riskTitle = "Explorador Prudente"; riskPerc = 45; riskColor = "text-k-purple";
                     riskBarColor = "from-blue-500 to-k-purple bg-gradient-to-r"; riskLabel = "MODERADO";
@@ -947,7 +829,6 @@
                     aiMessage = `Tienes base sólida y control emocional. Te presentaré análisis balanceados, sin sobreprotección pero sí con alertas precisas cuando el mercado muestre señales de peligro. Trabajaremos como socios estratégicos.`;
                 }
             } else {
-                // Agresivo
                 if (axisB <= 2) {
                     riskTitle = "Principiante Agresivo"; riskPerc = 80; riskColor = "text-red-400";
                     riskBarColor = "from-k-pink to-red-500 bg-gradient-to-r"; riskLabel = "ALTO ⚠️";
@@ -959,12 +840,6 @@
                 }
             }
 
-            // Save to hidden inputs
-            document.getElementById('FinalRiskLevel').value = riskTitle;
-            document.getElementById('h-agg').value = axisA;
-            document.getElementById('h-know').value = axisB;
-
-            // Update UI
             document.getElementById('result-title').textContent = riskTitle;
             document.getElementById('result-title').className = `text-3xl sm:text-4xl font-extrabold mb-1 ${riskColor}`;
             document.getElementById('result-subtitle').textContent = `${labelA} · ${labelB} · Riesgo ${riskLabel}`;
@@ -975,13 +850,10 @@
             document.getElementById('risk-bar').className = `axis-bar h-full rounded-full ${riskBarColor}`;
             document.getElementById('result-desc').textContent = aiMessage;
 
-            // Transition
             document.getElementById('loading-state').classList.add('hidden');
-            const resultState = document.getElementById('result-state');
-            resultState.classList.remove('hidden');
+            document.getElementById('result-state').classList.remove('hidden');
             lucide.createIcons();
 
-            // Animate bars after a small delay
             setTimeout(() => {
                 document.getElementById('axis-a-bar').style.width = `${Math.max(percA, 5)}%`;
                 document.getElementById('axis-b-bar').style.width = `${Math.max(percB, 5)}%`;

@@ -8,8 +8,6 @@
     int axisA = Model.AggressionAxis;
     int axisB = Model.KnowledgeAxis;
     int friction = Model.FrictionLevel;
-
-    // Eliminamos la redundancia de la palabra "Inversor "
     string riskProfile = (Model.RiskProfile ?? "En calibración").Replace("Inversor ", "");
 
     int percA = Math.Clamp((int)(((double)(axisA - 2) / 4.0) * 100), 0, 100);
@@ -18,25 +16,12 @@
     string labelA = axisA <= 2 ? "Pasivo" : axisA <= 4 ? "Moderado" : "Agresivo";
     string labelB = axisB <= 2 ? "Principiante" : axisB <= 4 ? "Intermedio" : "Experto";
 
-    string colorA = axisA <= 2
-        ? "linear-gradient(90deg,#3b82f6,#06b6d4)"
-        : axisA <= 4
-            ? "linear-gradient(90deg,#06b6d4,#7c3aed)"
-            : "linear-gradient(90deg,#7c3aed,#ec4899,#ef4444)";
+    string colorA = axisA <= 2 ? "linear-gradient(90deg,#3b82f6,#06b6d4)" : axisA <= 4 ? "linear-gradient(90deg,#06b6d4,#7c3aed)" : "linear-gradient(90deg,#7c3aed,#ec4899,#ef4444)";
+    string colorB = axisB <= 2 ? "linear-gradient(90deg,#6b7280,#9ca3af)" : axisB <= 4 ? "linear-gradient(90deg,#9ca3af,#06b6d4)" : "linear-gradient(90deg,#06b6d4,#10b981)";
 
-    string colorB = axisB <= 2
-        ? "linear-gradient(90deg,#6b7280,#9ca3af)"
-        : axisB <= 4
-            ? "linear-gradient(90deg,#9ca3af,#06b6d4)"
-            : "linear-gradient(90deg,#06b6d4,#10b981)";
+    string profileColor = riskProfile.Contains("Cauteloso") ? "#3b82f6" : riskProfile.Contains("Explorador") ? "#06b6d4" : riskProfile.Contains("Equilibrado") ? "#7c3aed" : riskProfile.Contains("Principiante Agresivo") ? "#ef4444" : "#ec4899";
 
-    string profileColor = riskProfile.Contains("Cauteloso") ? "#3b82f6"
-        : riskProfile.Contains("Explorador") ? "#06b6d4"
-        : riskProfile.Contains("Equilibrado") ? "#7c3aed"
-        : riskProfile.Contains("Principiante Agresivo") ? "#ef4444"
-        : "#ec4899";
-
-    string frictionClass = friction == 3 ? "friction-3" : friction == 2 ? "friction-2" : "friction-1";
+    string frictionClass = friction == 3 ? "bg-red-500/10 text-red-500 border-red-500/20" : friction == 2 ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     string frictionText = friction == 3 ? "Escudo: máximo" : friction == 2 ? "Escudo: moderado" : "Escudo: mínimo";
     string frictionIcon = friction == 3 ? "shield-alert" : friction == 2 ? "shield-check" : "shield";
 }
@@ -45,15 +30,15 @@
     :root {
         --kairos-purple: #7c3aed;
         --kairos-purple-soft: rgba(124, 58, 237, 0.85);
-        --kairos-purple-glow: rgba(124, 58, 237, 0.12);
         --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    /* Clases Core UI */
     .glass-panel {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
-        transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        transition: all 0.3s;
     }
 
     .hover-lift {
@@ -76,22 +61,14 @@
             transform: translateY(0);
         }
 
-    .greeting-time {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.62rem;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        opacity: 0.7;
-    }
-
-    /* ── Switch Dinámico y Vistoso ── */
+    /* Switch Simulado/Real */
     .mode-switch-wrapper {
         display: flex;
         align-items: center;
         gap: 9px;
         padding: 5px 12px 5px 8px;
         border-radius: 99px;
-        border: 1px solid rgba(124, 58, 237, 0.35); /* Borde morado por defecto */
+        border: 1px solid rgba(124, 58, 237, 0.35);
         background: rgba(124, 58, 237, 0.04);
         cursor: pointer;
         user-select: none;
@@ -110,8 +87,8 @@
         height: 19px;
         border-radius: 99px;
         background: rgba(124, 58, 237, 0.4);
-        transition: background 0.3s ease;
         flex-shrink: 0;
+        transition: background 0.3s ease;
     }
 
     .mode-switch-wrapper.is-real .switch-track {
@@ -134,21 +111,21 @@
         transform: translateX(15px);
     }
 
-    .switch-label-sim, .switch-label-real {
+    .switch-label-sim {
         font-size: 0.68rem;
         font-weight: 800;
-        letter-spacing: 0.07em;
-        transition: color 0.2s, opacity 0.2s;
-    }
-
-    .switch-label-sim {
         color: var(--kairos-purple);
-        opacity: 1;
+        letter-spacing: 0.07em;
+        transition: 0.2s;
     }
 
     .switch-label-real {
+        font-size: 0.68rem;
+        font-weight: 800;
         color: var(--text-muted);
         opacity: 0.4;
+        letter-spacing: 0.07em;
+        transition: 0.2s;
     }
 
     .mode-switch-wrapper.is-real .switch-label-sim {
@@ -169,7 +146,6 @@
         box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
         animation: modePingSim 2.2s ease infinite;
         flex-shrink: 0;
-        transition: all 0.3s ease;
     }
 
     .mode-switch-wrapper.is-real .mode-dot {
@@ -198,18 +174,7 @@
         }
     }
 
-    @@media (max-width: 480px) {
-        .switch-label-sim, .switch-label-real, .mode-dot {
-            display: none;
-        }
-
-        .mode-switch-wrapper {
-            padding: 4px;
-            gap: 0;
-        }
-    }
-
-    /* ── Notificación Flotante (Toast) ── */
+    /* Modales y Toasts */
     #kairos-toast {
         position: fixed;
         bottom: 24px;
@@ -236,7 +201,6 @@
             opacity: 1;
         }
 
-    /* ── Modal de Optimización Concepto ── */
     .modal-overlay {
         background: rgba(0, 0, 0, 0.65);
         backdrop-filter: blur(8px);
@@ -252,165 +216,7 @@
         opacity: 0;
     }
 
-    /* ── KPI ── */
-    .kpi-card {
-        position: relative;
-        overflow: hidden;
-    }
-
-        .kpi-card .bg-icon {
-            position: absolute;
-            right: -10px;
-            top: -10px;
-            opacity: 0.028;
-            transition: opacity 0.3s, transform 0.35s var(--ease-out);
-            pointer-events: none;
-        }
-
-        .kpi-card:hover .bg-icon {
-            opacity: 0.055;
-            transform: scale(1.08) rotate(-4deg);
-        }
-
-    .balance-value {
-        font-variant-numeric: tabular-nums;
-        font-feature-settings: "tnum";
-        font-size: 2.2rem;
-        line-height: 1.1;
-    }
-
-    @@media (min-width: 640px) {
-        .balance-value {
-            font-size: 2.8rem;
-            line-height: 1;
-        }
-    }
-
-    .stat-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 11px;
-        border-radius: 99px;
-        font-size: 0.82rem;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-        .stat-pill.up {
-            background: rgba(16,185,129,0.14);
-            color: #10b981;
-        }
-
-        .stat-pill.down {
-            background: rgba(239,68,68,0.14);
-            color: #ef4444;
-        }
-
-    /* ── Quick cards ── */
-    .quick-card {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 13px 15px;
-        border-radius: 14px;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
-        text-decoration: none;
-        transition: border-color 0.2s, background 0.2s, transform 0.22s var(--ease-spring), box-shadow 0.22s ease;
-        border-left: 3px solid transparent;
-        min-width: 0;
-    }
-
-        .quick-card:hover {
-            background: var(--hover-bg);
-            transform: translateX(4px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        }
-
-        .quick-card.primary-action {
-            background: rgba(124,58,237,0.07);
-            border: 1px solid rgba(124,58,237,0.35);
-            border-left-width: 3px;
-        }
-
-            .quick-card.primary-action:hover {
-                background: rgba(124,58,237,0.13);
-            }
-
-        .quick-card.secondary-action {
-            opacity: 0.72;
-        }
-
-            .quick-card.secondary-action:hover {
-                opacity: 1;
-            }
-
-        .quick-card .qc-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: background 0.2s, color 0.2s, transform 0.2s var(--ease-spring);
-        }
-
-        .quick-card:hover .qc-icon {
-            transform: scale(1.08);
-        }
-
-        .quick-card div p {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-    /* ── CTA ── */
-    .cta-btn {
-        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        padding: 11px 22px;
-        font-weight: 700;
-        font-size: 0.88rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        cursor: pointer;
-        transition: transform 0.22s var(--ease-spring), box-shadow 0.22s ease;
-        box-shadow: 0 4px 16px rgba(124,58,237,0.28);
-        letter-spacing: 0.01em;
-    }
-
-        .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(124,58,237,0.4);
-        }
-
-        .cta-btn:active {
-            transform: translateY(0);
-        }
-
-    .btn-secondary {
-        background: var(--hover-bg);
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 11px 22px;
-        font-weight: 600;
-        font-size: 0.88rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-    /* ── Barras de Perfil de Riesgo ── */
+    /* Barras de Perfil (Animación) */
     .risk-bar-track {
         height: 5px;
         border-radius: 99px;
@@ -463,37 +269,7 @@
         }
     }
 
-    .friction-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 10px;
-        border-radius: 99px;
-        font-size: 0.6rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    .friction-3 {
-        background: rgba(239,68,68,0.12);
-        color: #ef4444;
-        border: 1px solid rgba(239,68,68,0.2);
-    }
-
-    .friction-2 {
-        background: rgba(245,158,11,0.12);
-        color: #f59e0b;
-        border: 1px solid rgba(245,158,11,0.2);
-    }
-
-    .friction-1 {
-        background: rgba(16,185,129,0.12);
-        color: #10b981;
-        border: 1px solid rgba(16,185,129,0.2);
-    }
-
-    /* ── Chart & Others ── */
+    /* Chart */
     .chart-tooltip {
         position: absolute;
         background: var(--bg-card);
@@ -507,7 +283,6 @@
         z-index: 1000;
         box-shadow: 0 8px 28px rgba(0,0,0,0.16);
         min-width: 155px;
-        max-width: 88vw;
     }
 
         .chart-tooltip.visible {
@@ -545,307 +320,173 @@
         opacity: 0;
         transition: opacity 0.1s;
     }
-
-    .period-btn {
-        transition: all 0.2s ease;
-        background: transparent;
-        border: 1px solid transparent;
-        color: var(--text-muted);
-        border-radius: 8px;
-        padding: 5px 14px;
-        font-size: 0.73rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-        .period-btn:hover {
-            color: var(--text-main);
-        }
-
-        .period-btn.active {
-            background: var(--bg-card);
-            color: var(--text-main);
-            border-color: rgba(124,58,237,0.3);
-        }
-
-    .asset-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 9px 11px;
-        border-radius: 10px;
-        transition: background 0.15s;
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-        .asset-row:hover {
-            background: var(--hover-bg);
-        }
-
-    .asset-symbol-badge {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.68rem;
-        border: 1px solid var(--border-color);
-        background: var(--bg-panel);
-        color: var(--text-main);
-        font-family: 'JetBrains Mono', monospace;
-    }
-
-    .section-label {
-        font-size: 0.65rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.11em;
-        color: var(--text-muted);
-        opacity: 0.65;
-    }
-
-    .ambient-purple {
-        position: absolute;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%);
-        pointer-events: none;
-    }
-
-    .v-divider {
-        width: 1px;
-        height: 22px;
-        background: var(--border-color);
-    }
 </style>
 
 <div class="w-full min-h-full flex flex-col" style="background:var(--bg-main);color:var(--text-main);">
 
-    <header class="min-h-[3.75rem] py-2 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30"
-            style="background:var(--bg-main);border-bottom:1px solid var(--border-color);
-                   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);">
+    <header class="min-h-[3.75rem] py-2 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 border-b border-white/5 backdrop-blur-md bg-[var(--bg-main)]/90">
         <div class="flex flex-col justify-center gap-0.5">
-            <div class="greeting-time hidden md:block" style="color:var(--text-muted);" id="greeting-time">—</div>
-
+            <div class="hidden md:block text-[0.62rem] tracking-widest uppercase opacity-70 font-mono text-[var(--text-muted)]" id="greeting-time">—</div>
             <div class="flex items-center gap-3">
-                <h1 class="text-sm sm:text-[0.9rem] font-bold truncate" style="color:var(--text-main);line-height:1.25;">
-                    Tu portafolio, bajo control.
-                </h1>
-                <span id="globalModeBadge"
-                      style="font-size:0.55rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em; transition: all 0.3s ease;
-                             background: rgba(124, 58, 237, 0.15); color: #c4b5fd; border: 1px solid rgba(124, 58, 237, 0.4);">
+                <h1 class="text-sm sm:text-[0.9rem] font-bold truncate">Tu portafolio, bajo control.</h1>
+                <span id="globalModeBadge" class="text-[0.55rem] px-2 py-0.5 rounded font-extrabold tracking-wide transition-all border border-purple-500/40 bg-purple-500/15 text-purple-300">
                     MODO SIMULADO
                 </span>
             </div>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <div class="mode-switch-wrapper" id="modeSwitchWrapper" onclick="toggleMode()"
-                 role="switch" aria-checked="false" tabindex="0"
-                 title="Cambiar entre modo simulado y real" aria-label="Modo de operación">
+            <div class="mode-switch-wrapper" id="modeSwitchWrapper" onclick="toggleMode()" role="switch" aria-checked="false" title="Cambiar modo">
                 <div class="mode-dot"></div>
-                <span class="switch-label-sim" aria-hidden="true">SIM</span>
+                <span class="switch-label-sim">SIM</span>
                 <div class="switch-track"><div class="switch-thumb"></div></div>
-                <span class="switch-label-real" aria-hidden="true">REAL</span>
+                <span class="switch-label-real">REAL</span>
             </div>
 
-            <div class="v-divider hidden sm:block"></div>
+            <div class="hidden sm:block w-px h-5 bg-[var(--border-color)]"></div>
 
-            <button class="relative p-2 rounded-lg transition-colors" style="color:var(--text-muted);"
-                    aria-label="Notificaciones"
-                    onmouseover="this.style.color='var(--kairos-purple-soft)';this.style.background='rgba(124,58,237,0.09)'"
-                    onmouseout="this.style.color='var(--text-muted)';this.style.background='transparent'">
+            <button class="relative p-2 rounded-lg transition-colors hover:bg-purple-500/10 text-[var(--text-muted)] hover:text-purple-400">
                 <i data-lucide="bell" class="w-5 h-5"></i>
-                <span aria-hidden="true"
-                      style="position:absolute;top:7px;right:7px;width:6px;height:6px;
-                             border-radius:50%;background:#ef4444;" class="animate-pulse"></span>
+                <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
             </button>
-            <button aria-label="Perfil de usuario"
-                    style="width:32px;height:32px;border-radius:50%;
-                           background:linear-gradient(135deg,#7c3aed,#06b6d4);
-                           border:2px solid var(--border-color);
-                           transition:box-shadow 0.2s;flex-shrink:0;"
-                    onmouseover="this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.28)'"
-                    onmouseout="this.style.boxShadow='none'"></button>
+            <button class="w-8 h-8 rounded-full border-2 border-[var(--border-color)] hover:border-purple-500 transition-all bg-gradient-to-br from-purple-600 to-cyan-500"></button>
         </div>
     </header>
 
-    <main class="flex-1 p-4 sm:p-6 lg:p-8 relative overflow-x-hidden w-full">
-        <div class="ambient-purple hidden sm:block" id="ambientLeft"
-             style="width:520px;height:520px;top:-120px;left:-60px;opacity:0.55; transition: background 0.5s ease;"></div>
-        <div class="ambient-purple"
-             style="width:320px;height:320px;bottom:8%;right:4%;opacity:0.38;
-                    background:radial-gradient(circle,rgba(6,182,212,0.06) 0%,transparent 70%);"></div>
-        <div class="max-w-7xl mx-auto space-y-5 relative">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 relative overflow-x-hidden w-full max-w-7xl mx-auto">
 
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade" aria-label="Resumen principal">
+        <div class="absolute rounded-full pointer-events-none -top-[120px] -left-[60px] w-[520px] h-[520px] opacity-50 bg-[radial-gradient(circle,rgba(124,58,237,0.05)_0%,transparent_70%)]"></div>
+        <div class="absolute rounded-full pointer-events-none bottom-[8%] right-[4%] w-[320px] h-[320px] opacity-40 bg-[radial-gradient(circle,rgba(6,182,212,0.06)_0%,transparent_70%)]"></div>
 
-                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 lg:col-span-2 hover-lift flex flex-col justify-between h-full">
-                    <div class="bg-icon">
-                        <i data-lucide="trending-up" style="width:130px;height:130px;color:var(--kairos-purple,#7c3aed)"></i>
-                    </div>
+        <div class="space-y-5 relative">
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade">
+
+                <article class="glass-panel rounded-2xl p-5 sm:p-6 lg:col-span-2 hover-lift flex flex-col justify-between h-full relative overflow-hidden">
+                    <i data-lucide="trending-up" class="absolute -right-2 -top-2 w-32 h-32 text-purple-500 opacity-5 pointer-events-none"></i>
                     <div>
-                        <p class="section-label mb-2">Balance Total del Portafolio</p>
-                        <div class="flex flex-wrap items-baseline gap-2 mb-1">
-                            <span class="balance-value font-bold" style="color:var(--text-main);font-family:'JetBrains Mono',monospace;">
-                                $@Model.TotalBalance.ToString("N2")
-                            </span>
-                            <span style="color:var(--text-muted);font-size:0.95rem;font-weight:500;">USD</span>
+                        <p class="text-[0.65rem] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Balance Total del Portafolio</p>
+                        <div class="flex items-baseline gap-2 mb-1">
+                            <span class="text-4xl font-bold font-mono tracking-tight">$@Model.TotalBalance.ToString("N2")</span>
+                            <span class="text-sm font-medium text-[var(--text-muted)]">USD</span>
                         </div>
-                        <div class="flex items-center gap-3 mt-2 flex-wrap">
-                            <span class="stat-pill @(Model.MonthlyReturn >= 0 ? "up" : "down")">
-                                <i data-lucide="@(Model.MonthlyReturn >= 0 ? "trending-up" : "trending-down")" style="width:14px;height:14px;"></i>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold @(Model.MonthlyReturn >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500")">
+                                <i data-lucide="@(Model.MonthlyReturn >= 0 ? "trending-up" : "trending-down")" class="w-3.5 h-3.5"></i>
                                 @(Model.MonthlyReturn >= 0 ? "+" : "")@Model.MonthlyReturn%
                             </span>
-                            <span style="color:var(--text-muted);font-size:0.82rem;">vs mes anterior</span>
+                            <span class="text-[0.82rem] text-[var(--text-muted)]">vs mes anterior</span>
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-4 flex justify-between items-center" style="border-top:1px solid var(--border-color);">
-                        <span style="font-size:0.62rem;opacity:0.55;font-family:'JetBrains Mono',monospace;color:var(--text-muted);" id="last-update">
-                            Actualizado hace 2 min
-                        </span>
-                        <button id="btnOptimize" onclick="openOptimizationModal()" class="cta-btn w-full sm:w-auto justify-center z-10" type="button">
-                            <i data-lucide="sparkles" size="17" id="iconOptimize"></i>
-                            <span id="textOptimize">Optimizar Portafolio</span>
+                    <div class="mt-4 pt-4 flex justify-between items-center border-t border-white/5">
+                        <span class="text-[0.62rem] font-mono text-[var(--text-muted)] opacity-60">Actualizado hace 2 min</span>
+                        <button id="btnOptimize" onclick="openOptimizationModal()" class="bg-gradient-to-r from-purple-600 to-cyan-500 text-white rounded-xl px-5 py-2.5 font-bold text-sm shadow-lg shadow-purple-500/30 hover:-translate-y-0.5 transition-transform flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Optimizar Portafolio</span>
                         </button>
                     </div>
                 </article>
 
-                <article class="glass-panel kpi-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover-lift h-full" aria-labelledby="profile-title">
+                <article class="glass-panel rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover-lift h-full">
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <p class="section-label mb-1" id="profile-title">Perfil de Riesgo</p>
-                            <p class="text-[1.1rem] font-bold leading-tight" style="color:@profileColor">@riskProfile</p>
+                            <p class="text-[0.65rem] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Perfil de Riesgo</p>
+                            <p class="text-lg font-bold leading-tight" style="color:@profileColor">@riskProfile</p>
                         </div>
-                        <div style="padding:7px;background:rgba(124,58,237,0.1);border-radius:10px;color:#7c3aed;" aria-hidden="true">
-                            <i data-lucide="brain-circuit" style="width:16px;height:16px"></i>
-                        </div>
+                        <div class="p-2 bg-purple-500/10 rounded-xl text-purple-400"><i data-lucide="brain-circuit" class="w-4 h-4"></i></div>
                     </div>
 
                     <div class="space-y-3 flex-1 flex flex-col justify-center">
                         <div>
-                            <div class="flex justify-between items-center mb-1.5">
-                                <span style="font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Comportamiento</span>
-                                <span style="font-size:0.65rem;font-weight:700;color:var(--text-main);">@labelA</span>
+                            <div class="flex justify-between text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wide mb-1.5">
+                                <span>Comportamiento</span>
+                                <span class="text-[var(--text-main)]">@labelA</span>
                             </div>
-                            <div class="risk-bar-track" role="progressbar" aria-valuenow="@percA" aria-valuemin="0" aria-valuemax="100" aria-label="Comportamiento: @labelA">
-                                <div class="risk-bar-fill" id="barFillA" data-target="@percA" style="background:@colorA;box-shadow:0 2px 10px rgba(124,58,237,0.3);"></div>
-                            </div>
+                            <div class="risk-bar-track"><div class="risk-bar-fill" id="barFillA" data-target="@percA" style="background:@colorA"></div></div>
                         </div>
-
                         <div>
-                            <div class="flex justify-between items-center mb-1.5">
-                                <span style="font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Conocimiento</span>
-                                <span style="font-size:0.65rem;font-weight:700;color:var(--text-main);">@labelB</span>
+                            <div class="flex justify-between text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-wide mb-1.5">
+                                <span>Conocimiento</span>
+                                <span class="text-[var(--text-main)]">@labelB</span>
                             </div>
-                            <div class="risk-bar-track" role="progressbar" aria-valuenow="@percB" aria-valuemin="0" aria-valuemax="100" aria-label="Conocimiento: @labelB">
-                                <div class="risk-bar-fill" id="barFillB" data-target="@percB" style="background:@colorB;box-shadow:0 2px 10px rgba(6,182,212,0.25);"></div>
-                            </div>
+                            <div class="risk-bar-track"><div class="risk-bar-fill" id="barFillB" data-target="@percB" style="background:@colorB"></div></div>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between mt-3 pt-3" style="border-top:1px solid var(--border-color);">
-                        <span class="friction-badge @frictionClass">
-                            <i data-lucide="@frictionIcon" style="width:11px;height:11px;"></i>
-                            @frictionText
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6rem] font-bold uppercase tracking-wide border @frictionClass">
+                            <i data-lucide="@frictionIcon" class="w-3 h-3"></i> @frictionText
                         </span>
-
-                        <div style="display:flex; align-items:center; gap:4px; opacity:0.6; transition:opacity 0.2s; cursor:default;"
-                             onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"
-                             title="Análisis psicológico generado por el motor de KairósAI">
-                            <span style="font-size:0.55rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">Powered by</span>
-                            <span style="font-size:0.65rem; font-weight:700; color:var(--kairos-purple); font-family:'JetBrains Mono', monospace;">KairósAI</span>
+                        <div class="flex items-center gap-1 opacity-60 hover:opacity-100 transition cursor-default">
+                            <span class="text-[0.55rem] font-black uppercase text-[var(--text-muted)]">Powered by</span>
+                            <span class="text-[0.65rem] font-bold text-purple-400 font-mono">KairósAI</span>
                         </div>
                     </div>
                 </article>
             </section>
 
-            <section class="k-fade" style="transition-delay:0.08s;" aria-label="Accesos rápidos">
-                <p class="section-label mb-3">Navegación Rápida</p>
+            <section class="k-fade mt-6" style="transition-delay:0.08s;">
+                <p class="text-[0.65rem] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Navegación Rápida</p>
                 <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3">
-                    <a asp-controller="Kairos" asp-action="Index"
-                       class="quick-card primary-action" style="border-left-color:#7c3aed;"
-                       onmouseover="this.querySelector('.qc-icon').style.background='#7c3aed';this.querySelector('.qc-icon').style.color='#fff'"
-                       onmouseout="this.querySelector('.qc-icon').style.background='rgba(124,58,237,0.18)';this.querySelector('.qc-icon').style.color='#7c3aed'">
-                        <span class="qc-icon" style="background:rgba(124,58,237,0.18);color:#7c3aed;">
-                            <i data-lucide="message-square-plus" size="17"></i>
-                        </span>
+
+                    <a asp-controller="Kairos" asp-action="Index" class="flex items-center gap-3 p-3.5 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 hover:-translate-y-1 transition-all border-l-4 border-l-purple-500 group no-underline">
+                        <div class="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-500 flex items-center justify-center group-hover:scale-110 transition"><i data-lucide="message-square-plus" class="w-4 h-4"></i></div>
                         <div class="overflow-hidden">
-                            <p style="font-size:0.84rem;font-weight:800;color:var(--text-main);">Chat IA</p>
-                            <p style="font-size:0.68rem;color:var(--text-muted);">Pregunta ahora</p>
+                            <p class="text-sm font-extrabold text-[var(--text-main)]">Chat IA</p>
+                            <p class="text-[0.68rem] text-[var(--text-muted)] truncate">Asesoría 24/7</p>
                         </div>
                     </a>
-                    <a href="#market-section" class="quick-card" style="border-left-color:#10b981;"
-                       onmouseover="this.querySelector('.qc-icon').style.background='#10b981';this.querySelector('.qc-icon').style.color='#fff'"
-                       onmouseout="this.querySelector('.qc-icon').style.background='rgba(16,185,129,0.1)';this.querySelector('.qc-icon').style.color='#10b981'">
-                        <span class="qc-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
-                            <i data-lucide="candlestick-chart" size="16"></i>
-                        </span>
+
+                    <a href="#market-section" class="flex items-center gap-3 p-3.5 rounded-xl border border-transparent bg-[var(--bg-card)] hover:bg-white/5 hover:-translate-y-1 transition-all border-l-4 border-l-emerald-500 group no-underline">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition"><i data-lucide="candlestick-chart" class="w-4 h-4"></i></div>
                         <div class="overflow-hidden">
-                            <p style="font-size:0.82rem;font-weight:700;color:var(--text-main);">Mercado</p>
-                            <p style="font-size:0.68rem;color:var(--text-muted);">Ver oportunidades</p>
+                            <p class="text-sm font-bold text-[var(--text-main)]">Mercado</p>
+                            <p class="text-[0.68rem] text-[var(--text-muted)] truncate">Ver oportunidades</p>
                         </div>
                     </a>
-                    <a asp-controller="News" asp-action="Index" class="quick-card" style="border-left-color:#3b82f6;"
-                       onmouseover="this.querySelector('.qc-icon').style.background='#3b82f6';this.querySelector('.qc-icon').style.color='#fff'"
-                       onmouseout="this.querySelector('.qc-icon').style.background='rgba(59,130,246,0.1)';this.querySelector('.qc-icon').style.color='#3b82f6'">
-                        <span class="qc-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">
-                            <i data-lucide="newspaper" size="16"></i>
-                        </span>
+
+                    <a asp-controller="News" asp-action="Index" class="flex items-center gap-3 p-3.5 rounded-xl border border-transparent bg-[var(--bg-card)] hover:bg-white/5 hover:-translate-y-1 transition-all border-l-4 border-l-blue-500 group no-underline">
+                        <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:scale-110 transition"><i data-lucide="newspaper" class="w-4 h-4"></i></div>
                         <div class="overflow-hidden">
-                            <p style="font-size:0.82rem;font-weight:700;color:var(--text-main);">Noticias</p>
-                            <p style="font-size:0.68rem;color:var(--text-muted);">Feed en tiempo real</p>
+                            <p class="text-sm font-bold text-[var(--text-main)]">Noticias</p>
+                            <p class="text-[0.68rem] text-[var(--text-muted)] truncate">Feed en tiempo real</p>
                         </div>
                     </a>
-                    <a asp-controller="Education" asp-action="Index" class="quick-card secondary-action" style="border-left-color:#f59e0b;"
-                       onmouseover="this.querySelector('.qc-icon').style.background='#f59e0b';this.querySelector('.qc-icon').style.color='#fff'"
-                       onmouseout="this.querySelector('.qc-icon').style.background='rgba(245,158,11,0.1)';this.querySelector('.qc-icon').style.color='#f59e0b'">
-                        <span class="qc-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">
-                            <i data-lucide="graduation-cap" size="16"></i>
-                        </span>
+
+                    <a asp-controller="Education" asp-action="Index" class="flex items-center gap-3 p-3.5 rounded-xl border border-transparent bg-[var(--bg-card)] hover:bg-white/5 hover:-translate-y-1 transition-all border-l-4 border-l-orange-500 group no-underline opacity-80 hover:opacity-100">
+                        <div class="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center group-hover:scale-110 transition"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
                         <div class="overflow-hidden">
-                            <p style="font-size:0.82rem;font-weight:700;color:var(--text-main);">Academia</p>
-                            <p style="font-size:0.68rem;color:var(--text-muted);">Aprende a invertir</p>
+                            <p class="text-sm font-bold text-[var(--text-main)]">Academia</p>
+                            <p class="text-[0.68rem] text-[var(--text-muted)] truncate">Gana KP aprendiendo</p>
                         </div>
                     </a>
+
                 </div>
             </section>
 
-            <section class="k-fade" style="transition-delay:0.16s;" aria-labelledby="performance-heading">
+            <section class="k-fade mt-6" style="transition-delay:0.16s;">
                 <article class="glass-panel rounded-2xl p-5 sm:p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3">
                         <div>
-                            <p class="section-label mb-1">Rendimiento Histórico</p>
-                            <h2 id="performance-heading"
-                                style="font-size:0.93rem;font-weight:600;color:var(--text-main);
-                                       display:flex;align-items:center;gap:6px;">
-                                <i data-lucide="line-chart" style="width:15px;height:15px;color:#7c3aed;"></i>
-                                Evolución del portafolio
+                            <p class="text-[0.65rem] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Rendimiento Histórico</p>
+                            <h2 class="text-base font-bold text-[var(--text-main)] flex items-center gap-2">
+                                <i data-lucide="line-chart" class="w-4 h-4 text-purple-400"></i> Evolución del portafolio
                             </h2>
                         </div>
-                        <div style="display:flex;background:var(--bg-main);padding:3px;border-radius:11px;
-                                    border:1px solid var(--border-color);gap:3px;"
-                             role="group" aria-label="Selección de periodo de gráfico">
+                        <div class="flex bg-[var(--bg-main)] p-1 rounded-xl border border-white/5 gap-1">
                             @foreach (var period in new[] { "7D", "1M", "1A" })
                             {
-                                <button onclick="selectPeriod(this)" data-period="@period" type="button"
-                                        aria-pressed="@(period == "7D" ? "true" : "false")"
-                                        class="period-btn @(period == "7D" ? "active" : "")">
-                                    @period
-                                </button>
+                                <button onclick="selectPeriod(this)" class="px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition @(period == "7D" ? "bg-[var(--bg-card)] text-[var(--text-main)] border border-purple-500/30" : "")">@period</button>
                             }
                         </div>
                     </div>
-                    <div class="relative w-full" style="height:220px;">
+
+                    <div class="relative w-full h-[220px]">
                         <div id="chartTooltip" class="chart-tooltip">
-                            <div style="font-size:0.63rem;color:var(--text-muted);margin-bottom:4px;
-                                        font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;" id="tooltipDate"></div>
-                            <div style="font-size:1.05rem;font-weight:700;color:var(--text-main);
-                                        font-family:'JetBrains Mono',monospace;" id="tooltipValue"></div>
-                            <div style="font-size:0.73rem;font-weight:600;margin-top:5px;" id="tooltipChange"></div>
+                            <div class="text-[0.6rem] text-[var(--text-muted)] mb-1 font-mono tracking-wider" id="tooltipDate"></div>
+                            <div class="text-lg font-bold text-[var(--text-main)] font-mono" id="tooltipValue"></div>
+                            <div class="text-xs font-bold mt-1" id="tooltipChange"></div>
                         </div>
                         @{
                             var data = Model.PerformanceData;
@@ -872,9 +513,7 @@
                                 fillPoints = $"0,{svgH} " + points + $" {svgW},{svgH}";
                             }
                         }
-                        <svg viewBox="0 0 1000 180" preserveAspectRatio="none"
-                             class="w-full h-full overflow-visible" id="chartSvg"
-                             role="img" aria-label="Gráfico de rendimiento del portafolio">
+                        <svg viewBox="0 0 1000 180" preserveAspectRatio="none" class="w-full h-full overflow-visible" id="chartSvg">
                             <defs>
                                 <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
                                     <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.22" />
@@ -883,18 +522,14 @@
                             </defs>
                             @foreach (var yPos in new[] { 40, 90, 140 })
                             {
-                                <line x1="0" y1="@yPos" x2="1000" y2="@yPos"
-                                      stroke="var(--border-color)" stroke-width="1"
-                                      stroke-dasharray="5,6" opacity="0.45" />
+                                <line x1="0" y1="@yPos" x2="1000" y2="@yPos" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="5,6" opacity="0.45" />
                             }
                             <line id="crosshairLine" x1="0" y1="0" x2="0" y2="180" class="chart-crosshair-line" />
                             @if (data.Any())
                             {
                                 <polygon points="@fillPoints" fill="url(#chartGrad)" class="chart-area" />
-                                <polyline points="@points" fill="none" stroke="#7c3aed" stroke-width="2.5"
-                                          stroke-linecap="round" stroke-linejoin="round" class="chart-line" />
-                                <circle id="hoverCircle" r="5" fill="#7c3aed" stroke="#fff"
-                                        stroke-width="2.5" style="opacity:0;pointer-events:none;" />
+                                <polyline points="@points" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="chart-line" />
+                                <circle id="hoverCircle" r="5" fill="#7c3aed" stroke="#fff" stroke-width="2.5" style="opacity:0;pointer-events:none;" />
                                 @for (int i = 0; i < data.Count; i++)
                                 {
                                     double x = i * stepX;
@@ -909,11 +544,7 @@
                                     double rad = isMax || isMin ? 5 : 3.5;
 
                                     <g class="chart-point" data-index="@i">
-                                        <circle cx="@cx" cy="@cy" r="@rad"
-                                                fill="@dotClr" stroke="@stkClr" stroke-width="2"
-                                                data-date="@data[i].Date"
-                                                data-value="@data[i].Value.ToString("N2")"
-                                                data-x="@cx" data-y="@cy" />
+                                        <circle cx="@cx" cy="@cy" r="@rad" fill="@dotClr" stroke="@stkClr" stroke-width="2" data-date="@data[i].Date" data-value="@data[i].Value.ToString("N2")" data-x="@cx" data-y="@cy" />
                                         <circle cx="@cx" cy="@cy" r="14" fill="transparent" class="cursor-pointer" />
                                         @if (isMax)
                                         {
@@ -927,61 +558,36 @@
                                 }
                             }
                         </svg>
-                        <div class="chart-overlay absolute inset-0" id="chartOverlay"
-                             role="presentation" aria-hidden="true"></div>
+                        <div class="chart-overlay absolute inset-0 z-10" id="chartOverlay"></div>
                     </div>
                 </article>
             </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade"
-                 style="transition-delay:0.24s;" id="market-section">
-                <section aria-labelledby="news-heading" class="lg:col-span-2">
-                    <article class="glass-panel rounded-2xl p-5 h-full flex flex-col justify-start">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 k-fade mt-6" style="transition-delay:0.24s;" id="market-section">
+
+                <section class="lg:col-span-2">
+                    <article class="glass-panel rounded-2xl p-5 h-full flex flex-col">
                         <div class="flex justify-between items-center mb-5">
-                            <h2 id="news-heading"
-                                style="font-size:0.95rem;font-weight:700;color:var(--text-main);
-                                       display:flex;align-items:center;gap:7px;">
-                                <i data-lucide="zap" style="width:16px;height:16px;color:#f59e0b;"></i>
-                                Señales del Mercado
+                            <h2 class="text-sm font-bold flex items-center gap-2 text-[var(--text-main)]">
+                                <i data-lucide="zap" class="w-4 h-4 text-orange-500"></i> Señales del Mercado
                             </h2>
-                            <a asp-controller="News" asp-action="Index"
-                               style="font-size:0.75rem;color:#7c3aed;text-decoration:none;font-weight:600;
-                                      display:flex;align-items:center;gap:3px;opacity:0.85;transition:opacity 0.15s;"
-                               onmouseover="this.style.opacity='1';this.style.textDecoration='underline'"
-                               onmouseout="this.style.opacity='0.85';this.style.textDecoration='none'">
-                                Ver feed completo →
-                            </a>
+                            <a asp-controller="News" asp-action="Index" class="text-xs font-bold text-purple-400 hover:text-purple-300 transition no-underline">Ver feed completo →</a>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach (var news in Model.RecentNews.Take(4))
                             {
-                                var sColor = news.Sentiment == "Positivo" ? "#10b981" : news.Sentiment == "Negativo" ? "#ef4444" : "#9ca3af";
-                                var sBg = news.Sentiment == "Positivo" ? "rgba(16,185,129,0.12)" : news.Sentiment == "Negativo" ? "rgba(239,68,68,0.12)" : "rgba(156,163,175,0.12)";
+                                var sColor = news.Sentiment == "Positivo" ? "text-emerald-500 bg-emerald-500/10" : news.Sentiment == "Negativo" ? "text-red-500 bg-red-500/10" : "text-gray-400 bg-gray-500/10";
                                 var sIcon = news.Sentiment == "Positivo" ? "trending-up" : news.Sentiment == "Negativo" ? "trending-down" : "minus";
 
-                                <a href="#"
-                                   style="padding:16px;display:flex;flex-direction:column;justify-content:flex-start;
-                                              gap:12px;border-radius:12px;border:1px solid var(--border-color);
-                                              background:var(--bg-panel);text-decoration:none;
-                                              transition:transform 0.2s,box-shadow 0.2s;"
-                                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(124,58,237,0.1)'"
-                                   onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                                        <span style="font-size:0.65rem;font-weight:800;color:#7c3aed;
-                                                         text-transform:uppercase;letter-spacing:0.08em;">@news.Source</span>
-                                        <time style="font-size:0.65rem;color:var(--text-muted);
-                                                         font-family:'JetBrains Mono',monospace;">@news.TimeAgo</time>
+                                <a href="#" class="p-4 flex flex-col gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-panel)] no-underline transition-all duration-200 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-[0.65rem] font-extrabold text-purple-400 uppercase tracking-wider">@news.Source</span>
+                                        <time class="text-[0.65rem] text-[var(--text-muted)] font-mono">@news.TimeAgo</time>
                                     </div>
-                                    <h3 style="font-size:0.88rem;font-weight:600;color:var(--text-main);line-height:1.4;
-                                                   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
-                                        @news.Title
-                                    </h3>
-                                    <div style="margin-top:auto;display:flex;">
-                                        <span style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;
-                                                         border-radius:99px;font-size:0.7rem;font-weight:700;
-                                                         background:@sBg;color:@sColor;">
-                                            <i data-lucide="@sIcon" style="width:12px;height:12px;"></i>
-                                            @news.Sentiment
+                                    <h3 class="text-sm font-bold text-[var(--text-main)] leading-snug line-clamp-2">@news.Title</h3>
+                                    <div class="mt-auto pt-2">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.65rem] font-bold @sColor">
+                                            <i data-lucide="@sIcon" class="w-3 h-3"></i> @news.Sentiment
                                         </span>
                                     </div>
                                 </a>
@@ -989,61 +595,44 @@
                         </div>
                     </article>
                 </section>
-                <section aria-labelledby="market-heading">
+
+                <section>
                     <article class="glass-panel rounded-2xl p-5 h-full flex flex-col">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 id="market-heading"
-                                style="font-size:0.88rem;font-weight:700;color:var(--text-main);
-                                       display:flex;align-items:center;gap:7px;">
-                                <i data-lucide="layers" style="width:15px;height:15px;color:#3b82f6;"></i>
-                                Mercado Hoy
+                            <h2 class="text-sm font-bold flex items-center gap-2 text-[var(--text-main)]">
+                                <i data-lucide="layers" class="w-4 h-4 text-blue-500"></i> Mercado Hoy
                             </h2>
                         </div>
-                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
-                                   gap:4px;flex:1;max-height:380px;overflow-y:auto;padding-right:4px;"
-                            role="list">
+
+                        <div class="flex flex-col flex-1 overflow-y-auto pr-1" style="max-height: 340px;">
                             @foreach (var asset in Model.TopAssets)
                             {
-                                <li>
-                                    <a href="#" class="asset-row"
-                                       style="display:flex;align-items:center;justify-content:space-between;
-                                                  padding:10px 12px;border-radius:10px;text-decoration:none;
-                                                  transition:background 0.2s;"
-                                       onmouseover="this.style.background='var(--hover-bg)'"
-                                       onmouseout="this.style.background='transparent'">
-                                        <div style="display:flex;align-items:center;gap:12px;">
-                                            @if (!string.IsNullOrEmpty(asset.ImageUrl))
-                                            {
-                                                <img src="@asset.ImageUrl" alt="@asset.Name"
-                                                     style="width:34px;height:34px;border-radius:50%;
-                                                                    object-fit:cover;background-color:var(--bg-main);" />
-                                            }
-                                            else
-                                            {
-                                                <div class="asset-symbol-badge">@asset.Symbol.Substring(0, 1)</div>
-                                            }
-                                            <div>
-                                                <div style="font-size:0.83rem;font-weight:700;color:var(--text-main);">@asset.Symbol</div>
-                                                <div style="font-size:0.68rem;color:var(--text-muted);white-space:nowrap;
-                                                                overflow:hidden;text-overflow:ellipsis;max-width:85px;">
-                                                    @asset.Name
-                                                </div>
+                                <a href="#" class="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-[var(--hover-bg)] transition-colors border-b border-[var(--border-color)] last:border-0 no-underline">
+                                    <div class="flex items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(asset.ImageUrl))
+                                        {
+                                            <img src="@asset.ImageUrl" class="w-8 h-8 rounded-full object-cover bg-black/20" alt="@asset.Symbol" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-8 h-8 rounded-full border border-[var(--border-color)] flex items-center justify-center font-bold text-xs font-mono bg-[var(--bg-panel)] text-[var(--text-main)]">
+                                                @asset.Symbol.Substring(0, 1)
                                             </div>
+                                        }
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-bold text-[var(--text-main)] leading-tight">@asset.Symbol</span>
+                                            <span class="text-xs text-[var(--text-muted)] truncate w-20">@asset.Name</span>
                                         </div>
-                                        <div style="text-align:right;">
-                                            <div style="font-size:0.83rem;font-weight:600;color:var(--text-main);
-                                                            font-family:'JetBrains Mono',monospace;">
-                                                $@asset.Price.ToString("N2")
-                                            </div>
-                                            <div style="font-size:0.73rem;font-weight:700;
-                                                            color:@(asset.Change24h >= 0 ? "#10b981" : "#ef4444");">
-                                                @(asset.Change24h >= 0 ? "▲" : "▼") @Math.Abs(asset.Change24h).ToString("F2")%
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
+                                    </div>
+                                    <div class="text-right flex flex-col">
+                                        <span class="text-[0.85rem] font-bold text-[var(--text-main)] tabular-nums font-mono">$@asset.Price.ToString("N2")</span>
+                                        <span class="text-xs font-bold @(asset.Change24h >= 0 ? "text-emerald-500" : "text-red-500")">
+                                            @(asset.Change24h >= 0 ? "▲" : "▼") @Math.Abs(asset.Change24h).ToString("F2")%
+                                        </span>
+                                    </div>
+                                </a>
                             }
-                        </ul>
+                        </div>
                     </article>
                 </section>
             </div>
@@ -1051,42 +640,38 @@
     </main>
 
     <div id="kairos-toast" aria-live="polite">
-        <i id="toast-icon" data-lucide="info" style="width:18px;height:18px;"></i>
+        <i id="toast-icon" data-lucide="info" class="w-4 h-4"></i>
         <span id="toast-message">Notificación</span>
     </div>
 
-    <div id="optimizeModal" class="fixed inset-0 z-[100] flex items-center justify-center modal-overlay modal-hidden" style="opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
-        <div class="glass-panel modal-content rounded-2xl p-6 max-w-md w-full mx-4" style="border: 1px solid var(--kairos-purple);">
-
+    <div id="optimizeModal" class="fixed inset-0 z-[100] flex items-center justify-center modal-overlay modal-hidden" style="opacity: 0; pointer-events: none;">
+        <div class="glass-panel modal-content rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl" style="border: 1px solid rgba(124,58,237,0.4);">
             <div class="flex items-center gap-3 mb-4">
-                <div style="padding:8px; background:rgba(124,58,237,0.15); border-radius:10px; color:#c4b5fd;">
+                <div class="p-2 rounded-xl" style="background:rgba(124,58,237,0.15); color:#7c3aed;">
                     <i data-lucide="sparkles"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold" style="color:var(--text-main);">Sugerencia KairósAI</h3>
-                    <p class="text-xs" style="color:var(--text-muted); font-family:'JetBrains Mono', monospace;">Análisis en tiempo real</p>
+                    <h3 class="text-lg font-bold text-[var(--text-main)]">Sugerencia KairósAI</h3>
+                    <p class="text-[0.65rem] text-[var(--text-muted)] font-mono uppercase tracking-wider">Análisis en tiempo real</p>
                 </div>
             </div>
-
             <div class="space-y-4 mb-6">
-                <p class="text-sm" style="color:var(--text-main); line-height: 1.5;">
+                <p class="text-sm text-[var(--text-muted)] leading-relaxed">
                     He detectado una desviación en tu tolerancia al riesgo. Para mantener tu perfil <strong style="color:@profileColor">@riskProfile</strong> en un mercado volátil, sugiero la siguiente acción de balanceo:
                 </p>
-
-                <div class="p-4 rounded-xl" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2);">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider" style="color:#10b981;">Rebalanceo Recomendado</span>
-                        <i data-lucide="arrow-right-left" size="14" style="color:#10b981;"></i>
+                <div class="p-4 rounded-xl" style="background:rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);">
+                    <div class="flex items-center justify-between mb-2 text-emerald-500">
+                        <span class="text-xs font-bold uppercase tracking-wider">Rebalanceo Recomendado</span>
+                        <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
                     </div>
-                    <p class="text-sm font-medium" style="color:var(--text-main);">Asegurar ganancias: Mover 5% de activos de alto riesgo hacia Stablecoins (USDT).</p>
+                    <p class="text-sm font-medium text-[var(--text-main)]">Asegurar ganancias: Mover 5% de activos de alto riesgo hacia Stablecoins (USDT).</p>
                 </div>
             </div>
-
             <div class="flex gap-3 justify-end">
-                <button onclick="closeOptimizationModal()" class="btn-secondary">
+                <button onclick="closeOptimizationModal()" class="px-5 py-2 rounded-xl font-bold text-sm transition" style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);">
                     Ignorar
                 </button>
-                <button onclick="applyOptimization()" class="cta-btn text-sm px-5 py-2">
+                <button onclick="applyOptimization()" class="px-5 py-2 rounded-xl text-white font-bold text-sm shadow-lg transition" style="background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%); border:none;">
                     Aplicar Cambios
                 </button>
             </div>
@@ -1102,9 +687,7 @@
     (function () {
         try {
             const h = new Date().getHours();
-            const label = h >= 5 && h < 12 ? 'Buenos días'
-                        : h >= 12 && h < 19 ? 'Buenas tardes'
-                        : 'Buenas noches';
+            const label = h >= 5 && h < 12 ? 'Buenos días' : h >= 12 && h < 19 ? 'Buenas tardes' : 'Buenas noches';
             const now = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             const el = document.getElementById('greeting-time');
             if (el) el.textContent = `${label}, Kevin · ${now}`;
@@ -1112,7 +695,6 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Fade-in escalonado
         document.querySelectorAll('.k-fade').forEach((el, i) => {
             setTimeout(() => el.classList.add('visible'), 70 + i * 85);
         });
@@ -1123,21 +705,14 @@
                 if (!el) return;
                 const target = parseInt(el.dataset.target, 10);
                 const overshoot = Math.min(target + 7, 100);
-
-                // Fase 1: spring con overshoot
                 el.style.transition = 'width 0.85s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 el.style.width = overshoot + '%';
-
-                // Fase 2: settle
                 setTimeout(() => {
                     el.style.transition = 'width 0.32s cubic-bezier(0.22, 1, 0.36, 1)';
                     el.style.width = target + '%';
                 }, 880);
-
-                // Fase 3: dot pulsante
                 setTimeout(() => el.classList.add('played'), 1240);
             }
-
             animateBar(document.getElementById('barFillA'));
             setTimeout(() => animateBar(document.getElementById('barFillB')), 160);
         }, 400);
@@ -1155,112 +730,85 @@
         }, 280);
     });
 
-    // ── Utilidad para mostrar Toast Notificacions ──
+    // ── Toast Utility ──
     let toastTimeout;
     function showToast(message, mode) {
         const toast = document.getElementById('kairos-toast');
-        const msgEl = document.getElementById('toast-message');
+        document.getElementById('toast-message').textContent = message;
         const iconEl = document.getElementById('toast-icon');
 
-        msgEl.textContent = message;
-
         if (mode === 'real') {
-            toast.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-            toast.style.color = '#10b981';
-            iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'; // Check
+            toast.style.borderColor = 'rgba(16, 185, 129, 0.4)'; toast.style.color = '#10b981';
+            iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
         } else if (mode === 'sim') {
-            toast.style.borderColor = 'rgba(124, 58, 237, 0.4)';
-            toast.style.color = '#c4b5fd';
-            iconEl.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'; // Info
+            toast.style.borderColor = 'rgba(124, 58, 237, 0.4)'; toast.style.color = '#7c3aed';
+            iconEl.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>';
         } else {
-            toast.style.borderColor = 'var(--border-color)';
-            toast.style.color = 'var(--text-main)';
+            toast.style.borderColor = 'var(--border-color)'; toast.style.color = 'var(--text-main)';
             iconEl.innerHTML = '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path>';
         }
 
         lucide.createIcons({ root: toast });
         toast.classList.add('show');
-
         clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 4000);
+        toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 4000);
     }
 
-    // ── Switch Simulado / Real (Con Lógica de Diseño Vistosa) ──
+    // ── Switch Simulado / Real ──
     let isRealMode = false;
     function toggleMode() {
         isRealMode = !isRealMode;
-
-        // Elementos UI a cambiar
         const wrapper = document.getElementById('modeSwitchWrapper');
-        const globalBadge = document.getElementById('globalModeBadge');
+        const badge = document.getElementById('globalModeBadge');
         const ambientGlow = document.getElementById('ambientLeft');
 
-        // Toggle clases
         wrapper.classList.toggle('is-real', isRealMode);
         wrapper.setAttribute('aria-checked', String(isRealMode));
 
-        // Efecto físico del botón
-        wrapper.style.transition = 'none';
+        // Efecto click
         wrapper.style.transform = 'scale(0.95)';
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            wrapper.style.transition = 'transform 0.28s var(--ease-spring)';
-            wrapper.style.transform = 'scale(1)';
-        }));
+        setTimeout(() => wrapper.style.transform = 'scale(1)', 150);
 
-        // Cambio global de aspecto
         if (isRealMode) {
-            globalBadge.textContent = 'MODO REAL';
-            globalBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-            globalBadge.style.color = '#10b981';
-            globalBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-
+            badge.textContent = 'MODO REAL';
+            badge.style.background = 'rgba(16, 185, 129, 0.15)'; badge.style.color = '#10b981'; badge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
             if (ambientGlow) ambientGlow.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)';
-
-            showToast('Has cambiado al Modo Real. Las operaciones usarán saldo real.', 'real');
+            showToast('Estás operando con saldo real.', 'real');
         } else {
-            globalBadge.textContent = 'MODO SIMULADO';
-            globalBadge.style.background = 'rgba(124, 58, 237, 0.15)';
-            globalBadge.style.color = '#c4b5fd';
-            globalBadge.style.borderColor = 'rgba(124, 58, 237, 0.4)';
-
+            badge.textContent = 'MODO SIMULADO';
+            badge.style.background = 'rgba(124, 58, 237, 0.15)'; badge.style.color = '#c4b5fd'; badge.style.borderColor = 'rgba(124, 58, 237, 0.4)';
             if (ambientGlow) ambientGlow.style.background = 'radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%)';
-
-            showToast('Has cambiado al Modo Simulado. Tus operaciones no tienen riesgo.', 'sim');
+            showToast('Modo simulado activado.', 'sim');
         }
     }
 
-    document.getElementById('modeSwitchWrapper').addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMode(); }
-    });
-
-    // ── Lógica del Botón Conceptual "Optimizar Portafolio" ──
+    // ── Lógica del Botón Conceptual "Optimizar Portafolio" REPARADA ──
     function openOptimizationModal() {
-        const btnText = document.getElementById('textOptimize');
-        const btnIcon = document.getElementById('iconOptimize');
-        const originalText = btnText.innerText;
+        const btn = document.getElementById('btnOptimize');
 
-        // Estado de "Carga / Pensando" de la IA
-        btnText.innerText = "Analizando...";
-        btnIcon.setAttribute('data-lucide', 'loader-2');
-        btnIcon.classList.add('animate-spin');
-        lucide.createIcons();
+        // Guardamos el estado actual (SVG y Texto)
+        const originalHTML = btn.innerHTML;
+
+        // Deshabilitamos el botón temporalmente
+        btn.style.pointerEvents = 'none';
+
+        // Reemplazamos el interior con una etiqueta <i> nueva que lucide pueda convertir
+        btn.innerHTML = '<i data-lucide="loader-2" style="width:17px;height:17px;" class="animate-spin"></i> <span>Analizando...</span>';
+
+        // Renderizamos SOLO los iconos dentro del botón
+        lucide.createIcons({ root: btn });
 
         // Simular tiempo de respuesta de IA (1.5s)
         setTimeout(() => {
-            // Restaurar botón
-            btnText.innerText = originalText;
-            btnIcon.setAttribute('data-lucide', 'sparkles');
-            btnIcon.classList.remove('animate-spin');
-            lucide.createIcons();
+            // Restaurar HTML original para recuperar el icono de destellos
+            btn.innerHTML = originalHTML;
+            btn.style.pointerEvents = 'auto';
 
-            // Mostrar Modal
+            // Mostrar el Modal
             const modal = document.getElementById('optimizeModal');
             modal.classList.remove('modal-hidden');
             modal.style.opacity = '1';
             modal.style.pointerEvents = 'auto';
-            lucide.createIcons({ root: modal });
         }, 1500);
     }
 
@@ -1273,24 +821,19 @@
 
     function applyOptimization() {
         closeOptimizationModal();
-        showToast('Rebalanceo aplicado. Portafolio asegurado.', 'real'); // Usa el estilo verde de éxito
+        showToast('Rebalanceo aplicado. Portafolio asegurado.', 'real');
     }
 
     // ── Period selector ──
     function selectPeriod(btn) {
-        document.querySelectorAll('.period-btn').forEach(b => {
-            b.classList.remove('active');
-            b.style.cssText = '';
-            b.setAttribute('aria-pressed', 'false');
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+            b.className = 'px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition';
         });
-        btn.classList.add('active');
-        btn.setAttribute('aria-pressed', 'true');
+        btn.className = 'px-3 py-1 rounded-lg text-xs font-bold text-[var(--text-main)] bg-[var(--bg-card)] border border-purple-500/30 transition';
     }
 
     // ── Chart data ──
-    const chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
-                                                                Model.PerformanceData.Select(d => new { date = d.Date, value = d.Value }).ToList()
-                                                ));
+    const chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.PerformanceData.Select(d => new { date = d.Date, value = d.Value }).ToList()));
 
     function initChart() {
         const overlay = document.getElementById('chartOverlay');
@@ -1311,8 +854,7 @@
 
         function closest(mx) {
             const svgX = (mx / svg.getBoundingClientRect().width) * 1000;
-            return pts.reduce((best, p) =>
-                Math.abs(p.x - svgX) < Math.abs(best.x - svgX) ? p : best, pts[0]);
+            return pts.reduce((best, p) => Math.abs(p.x - svgX) < Math.abs(best.x - svgX) ? p : best, pts[0]);
         }
 
         function handleMove(clientX, clientY) {
@@ -1329,47 +871,30 @@
             if (idx > 0) {
                 const pct = ((pt.value - pts[idx - 1].value) / pts[idx - 1].value) * 100;
                 const col = pct >= 0 ? '#10b981' : '#ef4444';
-                changeEl.innerHTML = `<span style="color:${col};display:flex;align-items:center;gap:4px;">
-                    ${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}% vs periodo ant.</span>`;
+                changeEl.innerHTML = `<span style="color:${col};display:flex;align-items:center;gap:4px;">${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}% vs periodo ant.</span>`;
             } else {
-                changeEl.textContent = 'Punto de inicio';
-                changeEl.style.color = 'var(--text-muted)';
+                changeEl.textContent = 'Punto de inicio'; changeEl.style.color = 'var(--text-muted)';
             }
 
-            const tooltipW = 162;
             let tx = mx + 16, ty = my - 72;
-            if (tx + tooltipW > r.width) tx = mx - tooltipW - 10;
+            if (tx + 162 > r.width) tx = mx - 172;
             if (tx < 4) tx = 4;
             if (ty < 4) ty = my + 18;
 
-            tooltip.style.left = tx + 'px';
-            tooltip.style.top = ty + 'px';
+            tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px';
             tooltip.classList.add('visible');
 
-            crosshair.setAttribute('x1', pt.x);
-            crosshair.setAttribute('x2', pt.x);
+            crosshair.setAttribute('x1', pt.x); crosshair.setAttribute('x2', pt.x);
             crosshair.style.opacity = '0.55';
-            hoverCircle.setAttribute('cx', pt.x);
-            hoverCircle.setAttribute('cy', pt.y);
+            hoverCircle.setAttribute('cx', pt.x); hoverCircle.setAttribute('cy', pt.y);
             hoverCircle.style.opacity = '1';
         }
 
         overlay.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
         overlay.addEventListener('mouseleave', () => {
-            tooltip.classList.remove('visible');
-            crosshair.style.opacity = '0';
-            hoverCircle.style.opacity = '0';
+            tooltip.classList.remove('visible'); crosshair.style.opacity = '0'; hoverCircle.style.opacity = '0';
         });
-        overlay.addEventListener('touchmove', e => {
-            e.preventDefault();
-            handleMove(e.touches[0].clientX, e.touches[0].clientY);
-        }, { passive: false });
-        overlay.addEventListener('touchend', () => {
-            setTimeout(() => {
-                tooltip.classList.remove('visible');
-                crosshair.style.opacity = '0';
-                hoverCircle.style.opacity = '0';
-            }, 1200);
-        });
+        overlay.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        overlay.addEventListener('touchend', () => { setTimeout(() => { tooltip.classList.remove('visible'); crosshair.style.opacity = '0'; hoverCircle.style.opacity = '0'; }, 1200); });
     }
 </script>

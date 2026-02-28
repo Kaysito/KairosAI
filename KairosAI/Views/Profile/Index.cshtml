@@ -5,11 +5,13 @@
 }
 
 <style>
-    /* ── Fade orquestado ── */
+    /* ═══════════════════════════════════════════════════
+       FADE ORCHESTRATION
+    ═══════════════════════════════════════════════════ */
     .k-fade {
         opacity: 0;
-        transform: translateY(12px);
-        transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+        transform: translateY(10px);
+        transition: opacity 0.42s cubic-bezier(0.22,1,0.36,1), transform 0.42s cubic-bezier(0.22,1,0.36,1);
     }
 
         .k-fade.visible {
@@ -17,25 +19,12 @@
             transform: translateY(0);
         }
 
-    /* ── Scroll ── */
-    .scroll-h {
-        scrollbar-width: thin;
-        scrollbar-color: var(--border-color) transparent;
-    }
-
-        .scroll-h::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .scroll-h::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-    /* ── Tabs ── */
+    /* ═══════════════════════════════════════════════════
+       TABS
+    ═══════════════════════════════════════════════════ */
     .profile-tabs {
         display: flex;
-        gap: 4px;
+        gap: 3px;
         overflow-x: auto;
         padding-bottom: 2px;
         scrollbar-width: none;
@@ -49,8 +38,8 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 16px;
-        border-radius: 10px;
+        padding: 8px 15px;
+        border-radius: 9px;
         white-space: nowrap;
         font-size: 0.78rem;
         font-weight: 600;
@@ -58,7 +47,7 @@
         border: 1px solid transparent;
         background: transparent;
         color: var(--text-muted);
-        transition: all 0.18s ease;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
         .tab-btn:hover {
@@ -70,10 +59,9 @@
             background: var(--bg-card);
             border-color: var(--border-color);
             color: var(--text-main);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
         }
 
-    /* Tab panels */
     .tab-panel {
         display: none;
     }
@@ -82,9 +70,11 @@
             display: block;
         }
 
-    /* ── Section cards ── */
+    /* ═══════════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════════ */
     .profile-card {
-        border-radius: 18px;
+        border-radius: 16px;
         border: 1px solid var(--border-color);
         background: var(--bg-card);
         overflow: hidden;
@@ -94,14 +84,14 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 18px 20px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--border-color);
     }
 
     .profile-card-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -109,21 +99,23 @@
     }
 
     .profile-card-body {
-        padding: 20px;
+        padding: 18px 20px;
     }
 
-    /* ── Form inputs ── */
+    /* ═══════════════════════════════════════════════════
+       INPUTS
+    ═══════════════════════════════════════════════════ */
     .k-input {
         width: 100%;
-        padding: 11px 14px;
-        border-radius: 10px;
+        padding: 10px 13px;
+        border-radius: 9px;
         border: 1px solid var(--border-color);
         background: var(--bg-panel);
         color: var(--text-main);
         font-size: 0.875rem;
-        transition: border-color 0.18s, box-shadow 0.18s;
         outline: none;
         font-family: inherit;
+        transition: border-color 0.16s, box-shadow 0.16s;
     }
 
         .k-input:focus {
@@ -132,12 +124,12 @@
         }
 
         .k-input:hover {
-            border-color: rgba(124,58,237,0.3);
+            border-color: rgba(124,58,237,0.28);
         }
 
         .k-input::placeholder {
             color: var(--text-muted);
-            opacity: 0.6;
+            opacity: .55;
         }
 
     select.k-input {
@@ -150,12 +142,12 @@
     }
 
         .input-icon-wrap .k-input {
-            padding-left: 40px;
+            padding-left: 38px;
         }
 
         .input-icon-wrap .icon-left {
             position: absolute;
-            left: 13px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
@@ -164,36 +156,36 @@
 
         .input-icon-wrap .icon-right {
             position: absolute;
-            right: 13px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             pointer-events: none;
         }
 
-    /* Label */
     .k-label {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.07em;
+        letter-spacing: 0.08em;
         margin-bottom: 6px;
     }
 
-    /* Required asterisk */
     .req {
         color: #ef4444;
     }
 
-    /* ── Buttons ── */
+    /* ═══════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════ */
     .btn-primary {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 11px 22px;
-        border-radius: 11px;
+        padding: 10px 20px;
+        border-radius: 10px;
         background: #7c3aed;
         color: #fff;
         font-size: 0.82rem;
@@ -201,32 +193,39 @@
         border: none;
         cursor: pointer;
         box-shadow: 0 4px 14px rgba(124,58,237,0.25);
-        transition: background 0.18s, box-shadow 0.18s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+        transition: background .18s, box-shadow .18s, transform .2s cubic-bezier(0.34,1.56,0.64,1);
     }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: #6d28d9;
             box-shadow: 0 6px 20px rgba(124,58,237,0.35);
             transform: scale(1.02);
         }
 
-        .btn-primary:active {
+        .btn-primary:active:not(:disabled) {
             transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: var(--border-color);
         }
 
     .btn-secondary {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 11px 18px;
-        border-radius: 11px;
+        padding: 10px 16px;
+        border-radius: 10px;
         background: transparent;
         color: var(--text-main);
         font-size: 0.82rem;
         font-weight: 600;
         border: 1px solid var(--border-color);
         cursor: pointer;
-        transition: border-color 0.18s, background 0.18s;
+        transition: border-color .16s, background .16s;
     }
 
         .btn-secondary:hover {
@@ -238,15 +237,15 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 10px 18px;
-        border-radius: 11px;
+        padding: 9px 16px;
+        border-radius: 10px;
         background: rgba(239,68,68,0.08);
         color: #ef4444;
         font-size: 0.8rem;
         font-weight: 700;
         border: 1px solid rgba(239,68,68,0.2);
         cursor: pointer;
-        transition: background 0.18s, border-color 0.18s;
+        transition: background .16s, border-color .16s;
     }
 
         .btn-danger:hover {
@@ -254,7 +253,9 @@
             border-color: rgba(239,68,68,0.4);
         }
 
-    /* ── Toggle switch ── */
+    /* ═══════════════════════════════════════════════════
+       TOGGLE
+    ═══════════════════════════════════════════════════ */
     .toggle-wrap {
         display: flex;
         align-items: center;
@@ -263,8 +264,8 @@
         border-radius: 12px;
         border: 1px solid var(--border-color);
         background: var(--bg-panel);
-        transition: border-color 0.18s;
         cursor: pointer;
+        transition: border-color .16s;
     }
 
         .toggle-wrap:hover {
@@ -272,12 +273,12 @@
         }
 
     .toggle-track {
-        width: 40px;
-        height: 22px;
+        width: 38px;
+        height: 21px;
         border-radius: 99px;
         background: var(--border-color);
         position: relative;
-        transition: background 0.25s;
+        transition: background .24s;
         flex-shrink: 0;
     }
 
@@ -287,31 +288,25 @@
 
     .toggle-thumb {
         position: absolute;
-        top: 3px;
-        left: 3px;
+        top: 2.5px;
+        left: 2.5px;
         width: 16px;
         height: 16px;
         border-radius: 50%;
         background: #fff;
         box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-        transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+        transition: transform .26s cubic-bezier(0.34,1.56,0.64,1);
     }
 
     .toggle-track.on .toggle-thumb {
-        transform: translateX(18px);
+        transform: translateX(17px);
     }
 
-    /* Hidden real checkbox */
-    .toggle-check {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    /* ── Risk bar ── */
+    /* ═══════════════════════════════════════════════════
+       RISK BAR
+    ═══════════════════════════════════════════════════ */
     .risk-track {
-        height: 8px;
+        height: 7px;
         border-radius: 99px;
         background: var(--border-color);
         overflow: hidden;
@@ -320,28 +315,35 @@
     .risk-fill {
         height: 100%;
         border-radius: 99px;
-        background: linear-gradient(90deg, #3b82f6, #7c3aed, #ec4899);
+        background: linear-gradient(90deg,#3b82f6,#7c3aed,#ec4899);
         transition: width 1.3s cubic-bezier(0.22,1,0.36,1);
     }
 
-    /* ── Avatar upload ── */
+    /* ═══════════════════════════════════════════════════
+       AVATAR
+    ═══════════════════════════════════════════════════ */
     .avatar-ring {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #7c3aed, #06b6d4);
+        background: linear-gradient(135deg,#7c3aed,#06b6d4);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.6rem;
+        font-size: 1.55rem;
         font-weight: 800;
         color: #fff;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'JetBrains Mono',monospace;
         position: relative;
         flex-shrink: 0;
         border: 3px solid var(--bg-card);
         box-shadow: 0 0 0 2px rgba(124,58,237,0.3);
+        transition: box-shadow .2s;
     }
+
+        .avatar-ring:hover {
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.5);
+        }
 
     .avatar-edit-btn {
         position: absolute;
@@ -356,64 +358,74 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+        transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
     }
 
     .avatar-ring:hover .avatar-edit-btn {
         transform: scale(1.15);
     }
 
-    /* ── Stats strip ── */
+    /* ═══════════════════════════════════════════════════
+       STAT STRIP
+    ═══════════════════════════════════════════════════ */
     .stat-strip {
         display: flex;
         gap: 1px;
-        overflow: hidden;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
+        border-top: 1px solid var(--border-color);
     }
 
     .stat-cell {
         flex: 1;
-        padding: 12px 14px;
+        padding: 12px 10px;
         background: var(--bg-panel);
         text-align: center;
-        min-width: 80px;
+        min-width: 70px;
+        transition: background .14s;
     }
 
         .stat-cell:not(:last-child) {
             border-right: 1px solid var(--border-color);
         }
 
-    /* ── Notification item ── */
+        .stat-cell:hover {
+            background: var(--hover-bg);
+        }
+
+    /* ═══════════════════════════════════════════════════
+       NOTIF ITEM
+    ═══════════════════════════════════════════════════ */
     .notif-item {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 12px;
-        padding: 14px 16px;
-        border-radius: 12px;
+        padding: 12px 14px;
+        border-radius: 11px;
         border: 1px solid var(--border-color);
         background: var(--bg-panel);
-        margin-bottom: 8px;
-        transition: border-color 0.18s;
+        margin-bottom: 7px;
         cursor: pointer;
+        transition: border-color .16s, background .14s;
     }
 
         .notif-item:hover {
-            border-color: rgba(124,58,237,0.3);
+            border-color: rgba(124,58,237,0.28);
+            background: var(--hover-bg);
         }
 
         .notif-item:last-child {
             margin-bottom: 0;
         }
 
-    /* ── Kairos AI insight block ── */
+    /* ═══════════════════════════════════════════════════
+       AI INSIGHT
+    ═══════════════════════════════════════════════════ */
     .ai-insight {
-        padding: 14px 16px;
-        border-radius: 14px;
-        background: rgba(124,58,237,0.06);
-        border: 1px solid rgba(124,58,237,0.16);
-        font-size: 0.8rem;
-        line-height: 1.6;
+        padding: 13px 15px;
+        border-radius: 12px;
+        background: rgba(124,58,237,0.05);
+        border: 1px solid rgba(124,58,237,0.13);
+        font-size: 0.79rem;
+        line-height: 1.65;
         color: var(--text-muted);
     }
 
@@ -421,62 +433,29 @@
             color: var(--text-main);
         }
 
-    /* ── Activity timeline ── */
-    .timeline-item {
-        display: flex;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--border-color);
-        position: relative;
-    }
-
-        .timeline-item:last-child {
-            border-bottom: none;
-        }
-
-    .timeline-dot {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.65rem;
-        margin-top: 1px;
-    }
-
-    /* ── Plan badge ── */
+    /* ═══════════════════════════════════════════════════
+       PLAN BADGE
+    ═══════════════════════════════════════════════════ */
     .plan-badge {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        padding: 4px 11px;
+        padding: 3px 10px;
         border-radius: 99px;
-        font-size: 0.68rem;
+        font-size: 0.66rem;
         font-weight: 800;
         letter-spacing: 0.06em;
     }
 
-    .plan-free {
-        background: rgba(107,114,128,0.1);
-        color: #9ca3af;
-        border: 1px solid rgba(107,114,128,0.2);
-    }
-
     .plan-pro {
-        background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));
+        background: linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.08));
         color: #7c3aed;
-        border: 1px solid rgba(124,58,237,0.2);
+        border: 1px solid rgba(124,58,237,0.22);
     }
 
-    .plan-elite {
-        background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.06));
-        color: #f59e0b;
-        border: 1px solid rgba(245,158,11,0.25);
-    }
-
-    /* ── Security indicator ── */
+    /* ═══════════════════════════════════════════════════
+       SECURITY BARS
+    ═══════════════════════════════════════════════════ */
     .security-level {
         display: flex;
         gap: 3px;
@@ -485,31 +464,24 @@
 
     .sec-bar {
         height: 5px;
-        width: 28px;
+        width: 26px;
         border-radius: 3px;
         background: var(--border-color);
-        transition: background 0.3s;
     }
 
         .sec-bar.filled {
             background: #10b981;
         }
 
-            .sec-bar.filled.med {
-                background: #f59e0b;
-            }
-
-            .sec-bar.filled.low {
-                background: #ef4444;
-            }
-
-    /* ── Alert banners ── */
+    /* ═══════════════════════════════════════════════════
+       ALERT BANNERS
+    ═══════════════════════════════════════════════════ */
     .alert {
         display: flex;
         align-items: flex-start;
         gap: 10px;
-        padding: 12px 14px;
-        border-radius: 12px;
+        padding: 11px 14px;
+        border-radius: 11px;
         font-size: 0.82rem;
         font-weight: 500;
         margin-bottom: 14px;
@@ -533,90 +505,425 @@
         color: #3b82f6;
     }
 
-    /* ── Responsive grid ── */
-    @@media (max-width: 768px) {
-        .profile-main-grid {
-            grid-template-columns: 1fr !important;
-        }
-    }
-
-    /* ── Section label ── */
+    /* ═══════════════════════════════════════════════════
+       SECTION LABEL
+    ═══════════════════════════════════════════════════ */
     .section-label {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: var(--text-muted);
-        opacity: 0.7;
+        opacity: .6;
         margin-bottom: 10px;
     }
+
+    /* ═══════════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════════ */
+    .k-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main);
+        z-index: 2000;
+        max-width: 340px;
+        transform: translateY(16px);
+        opacity: 0;
+        transition: transform .3s cubic-bezier(0.34,1.56,0.64,1), opacity .22s ease;
+        pointer-events: none;
+    }
+
+        .k-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+    /* ═══════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════ */
+    @@media (max-width: 768px) {
+        .profile-main-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .notif-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SHIELD MODAL  — redesigned
+       Filosofía: serio como un aviso bancario,
+       moderno como un sistema de diseño 2025
+    ═══════════════════════════════════════════════════ */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(5,5,14,0.82);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        display: none;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+    @@keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.94) translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .shield-modal {
+        background: var(--bg-card);
+        border-radius: 20px;
+        max-width: 460px;
+        width: 100%;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(239,68,68,0.22), 0 32px 72px rgba(0,0,0,0.55), 0 0 100px rgba(239,68,68,0.05);
+        animation: modalIn .3s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* Animated gradient top stripe — thin, serious */
+    .shield-stripe {
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #ef4444 20%, #f97316 50%, #ef4444 80%, transparent 100% );
+        background-size: 200% 100%;
+        animation: stripeMove 2.4s linear infinite;
+    }
+
+    @@keyframes stripeMove {
+        0% {
+            background-position: 100% center;
+        }
+
+        100% {
+            background-position: -100% center;
+        }
+    }
+
+    .shield-modal-body {
+        padding: 28px 28px 20px;
+    }
+
+    /* ── Header row: icon + titles ── */
+    .shield-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    /* SVG ring countdown — replaces the spinning border hack */
+    .ring-wrap {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        flex-shrink: 0;
+    }
+
+        .ring-wrap svg {
+            position: absolute;
+            inset: 0;
+            transform: rotate(-90deg);
+        }
+
+    .ring-track {
+        fill: none;
+        stroke: rgba(239,68,68,0.12);
+        stroke-width: 3.5;
+    }
+
+    .ring-fill {
+        fill: none;
+        stroke: #ef4444;
+        stroke-width: 3.5;
+        stroke-linecap: round;
+        /* r=24 → circumference = 2π×24 ≈ 150.8 */
+        stroke-dasharray: 150.8;
+        stroke-dashoffset: 0;
+        transition: stroke-dashoffset 1s linear, stroke .5s ease;
+    }
+
+        .ring-fill.expired {
+            stroke: rgba(239,68,68,0.28);
+        }
+
+    .ring-number {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'JetBrains Mono',monospace;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #ef4444;
+        transition: color .4s ease;
+    }
+
+        .ring-number.expired {
+            color: rgba(239,68,68,0.35);
+        }
+
+    .shield-titles {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .shield-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+
+    .shield-subtitle {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.55;
+    }
+
+    /* ── Risk callout ── */
+    .shield-callout {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 13px 15px;
+        border-radius: 12px;
+        background: rgba(239,68,68,0.06);
+        border: 1px solid rgba(239,68,68,0.16);
+        margin-bottom: 20px;
+    }
+
+    .shield-callout-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .shield-callout p {
+        font-size: 0.77rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .shield-callout strong {
+        color: var(--text-main);
+    }
+
+    /* ── Timer status line ── */
+    .shield-timer-status {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono',monospace;
+        margin-bottom: 20px;
+        opacity: 1;
+        transition: opacity .4s ease;
+    }
+
+        .shield-timer-status.hidden {
+            opacity: 0;
+        }
+
+    .timer-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ef4444;
+        flex-shrink: 0;
+        animation: timerPulse 1s ease infinite;
+    }
+
+    @@keyframes timerPulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .3;
+        }
+    }
+
+    .timer-dot.done {
+        animation: none;
+        background: rgba(239,68,68,0.3);
+    }
+
+    /* ── Actions ── */
+    .shield-actions {
+        display: flex;
+        gap: 10px;
+        padding: 16px 28px 22px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-shield-cancel {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-main);
+        font-size: 0.81rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .15s, border-color .15s;
+    }
+
+        .btn-shield-cancel:hover {
+            background: var(--hover-bg);
+            border-color: rgba(124,58,237,0.35);
+        }
+
+    .btn-shield-confirm {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: none;
+        background: rgba(239,68,68,0.1);
+        color: rgba(239,68,68,0.38);
+        font-size: 0.81rem;
+        font-weight: 700;
+        cursor: not-allowed;
+        transition: background .2s, color .2s, box-shadow .2s, transform .2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+        .btn-shield-confirm.ready {
+            background: #ef4444;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(239,68,68,0.28);
+        }
+
+            .btn-shield-confirm.ready:hover {
+                background: #dc2626;
+                box-shadow: 0 6px 22px rgba(239,68,68,0.38);
+                transform: scale(1.02);
+            }
+
+            .btn-shield-confirm.ready:active {
+                transform: scale(0.97);
+            }
 </style>
 
+<!-- ═══════════════════════════════════════════════════
+     PAGE
+═══════════════════════════════════════════════════ -->
 <div style="background:var(--bg-main);color:var(--text-main);min-height:100%;padding-bottom:60px;">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
 
-        <!-- ── ALERTS ── -->
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success k-fade">
-                <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0;margin-top:1px;"></i>
+                <i data-lucide="check-circle" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
                 @TempData["SuccessMessage"]
             </div>
         }
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-error k-fade">
-                <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0;margin-top:1px;"></i>
+                <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
                 @TempData["ErrorMessage"]
             </div>
         }
         @if (TempData["InfoMessage"] != null)
         {
             <div class="alert alert-info k-fade">
-                <i data-lucide="info" style="width:16px;height:16px;flex-shrink:0;margin-top:1px;"></i>
+                <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
                 @TempData["InfoMessage"]
             </div>
         }
 
-        <!-- ── PROFILE HERO ── -->
-        <div class="k-fade profile-card mb-6" style="overflow:visible;">
-            <div style="padding:24px 24px 0;">
-                <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px;margin-bottom:20px;">
+        <!-- ═══════════════════════════════════════
+             PROFILE HERO
+        ═══════════════════════════════════════ -->
+        <div class="k-fade profile-card mb-5">
+            <div style="padding:22px 22px 18px;">
+                <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px;">
 
                     <!-- Avatar -->
-                    <div class="avatar-ring">
+                    <div class="avatar-ring" aria-label="Avatar de Kevin H.">
                         KH
-                        <label class="avatar-edit-btn" title="Cambiar foto" style="cursor:pointer;">
-                            <i data-lucide="camera" style="width:11px;height:11px;color:#fff;"></i>
-                            <input type="file" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
+                        <label class="avatar-edit-btn" title="Cambiar foto de perfil" aria-label="Cambiar foto de perfil">
+                            <i data-lucide="camera" style="width:11px;height:11px;color:#fff;" aria-hidden="true"></i>
+                            <input type="file" accept="image/*" style="display:none;">
                         </label>
                     </div>
 
-                    <!-- Name + meta -->
+                    <!-- Name block -->
                     <div style="flex:1;min-width:0;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-                            <h1 style="font-size:1.25rem;font-weight:800;color:var(--text-main);">@Model.FullName</h1>
+                            <h1 style="font-size:1.22rem;font-weight:800;color:var(--text-main);letter-spacing:-0.01em;">
+                                Kevin Hernández Trejo
+                            </h1>
                             <span class="plan-badge plan-pro">
-                                <i data-lucide="sparkles" style="width:10px;height:10px;"></i>
-                                @Model.SubscriptionPlan
+                                <i data-lucide="sparkles" style="width:9px;height:9px;" aria-hidden="true"></i>
+                                @(Model?.SubscriptionPlan ?? "Pro Alpha")
                             </span>
                         </div>
-                        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">@Model.Email</p>
-                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                            <span style="font-size:0.68rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
-                                <i data-lucide="calendar" style="width:11px;height:11px;"></i>
-                                Miembro desde @Model.MemberSince
+                        <p style="font-size:0.77rem;color:var(--text-muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;">
+                            @(Model?.Email ?? "kevin@kairos.ai")
+                        </p>
+                        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                            <span style="font-size:0.66rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
+                                <i data-lucide="calendar" style="width:11px;height:11px;" aria-hidden="true"></i>
+                                Miembro desde @(Model?.MemberSince ?? "enero 2025")
                             </span>
-                            <span style="font-size:0.68rem;color:#10b981;display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;">
-                                <i data-lucide="shield-check" style="width:11px;height:11px;"></i>
+                            <span style="font-size:0.66rem;color:#10b981;display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;">
+                                <i data-lucide="shield-check" style="width:11px;height:11px;" aria-hidden="true"></i>
                                 Cuenta verificada
                             </span>
                         </div>
                     </div>
 
-                    <!-- Security score -->
+                    <!-- Security meter -->
                     <div style="text-align:right;flex-shrink:0;">
-                        <p style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;">Seguridad</p>
+                        <p style="font-size:0.58rem;font-weight:700;color:var(--text-muted);
+                               text-transform:uppercase;letter-spacing:0.09em;margin-bottom:5px;">Seguridad</p>
                         <div class="security-level" style="justify-content:flex-end;margin-bottom:4px;">
                             <div class="sec-bar filled"></div>
                             <div class="sec-bar filled"></div>
@@ -624,816 +931,708 @@
                             <div class="sec-bar"></div>
                             <div class="sec-bar"></div>
                         </div>
-                        <span style="font-size:0.62rem;color:var(--text-muted);">Buena</span>
+                        <span style="font-size:0.6rem;color:var(--text-muted);">Buena · 3/5</span>
                     </div>
                 </div>
             </div>
 
             <!-- Stats strip -->
-            <div class="stat-strip">
-                <div class="stat-cell">
-                    <p style="font-size:1rem;font-weight:800;color:var(--text-main);font-family:'JetBrains Mono',monospace;">@@Model.TotalPoints</p>
-                    <p style="font-size:0.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">KP Ganados</p>
+            <div class="stat-strip" role="list" aria-label="Estadísticas de usuario">
+                <div class="stat-cell" role="listitem">
+                    <p style="font-size:1rem;font-weight:800;color:var(--text-main);
+                           font-family:'JetBrains Mono',monospace;">@(Model?.TotalPoints ?? 1240)</p>
+                    <p style="font-size:0.58rem;color:var(--text-muted);font-weight:600;
+                           text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">KP Ganados</p>
                 </div>
-                <div class="stat-cell">
-                    <p style="font-size:1rem;font-weight:800;color:#10b981;font-family:'JetBrains Mono',monospace;">@Model.RiskScore<span style="font-size:0.6rem;color:var(--text-muted);">/100</span></p>
-                    <p style="font-size:0.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Índice Riesgo</p>
+                <div class="stat-cell" role="listitem">
+                    <p style="font-size:1rem;font-weight:800;color:#10b981;font-family:'JetBrains Mono',monospace;">
+                        @(Model?.RiskScore ?? 62)<span style="font-size:0.58rem;color:var(--text-muted);">/100</span>
+                    </p>
+                    <p style="font-size:0.58rem;color:var(--text-muted);font-weight:600;
+                           text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Índice Riesgo</p>
                 </div>
-                <div class="stat-cell">
+                <div class="stat-cell" role="listitem">
                     <p style="font-size:1rem;font-weight:800;color:#7c3aed;font-family:'JetBrains Mono',monospace;">7</p>
-                    <p style="font-size:0.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Días Racha</p>
+                    <p style="font-size:0.58rem;color:var(--text-muted);font-weight:600;
+                           text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Días Racha</p>
                 </div>
-                <div class="stat-cell">
+                <div class="stat-cell" role="listitem">
                     <p style="font-size:1rem;font-weight:800;color:#f59e0b;font-family:'JetBrains Mono',monospace;">3</p>
-                    <p style="font-size:0.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Módulos ✓</p>
+                    <p style="font-size:0.58rem;color:var(--text-muted);font-weight:600;
+                           text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Módulos ✓</p>
                 </div>
             </div>
         </div>
 
-        <!-- ── TABS ── -->
-        <div class="profile-tabs k-fade mb-6" style="transition-delay:0.06s;" role="tablist">
-            <button class="tab-btn active" onclick="switchTab(this,'tab-personal')" role="tab" aria-selected="true">
-                <i data-lucide="user" style="width:14px;height:14px;"></i>Personal
+        <!-- TABS -->
+        <div class="profile-tabs k-fade mb-5" style="transition-delay:.06s;" role="tablist">
+            <button class="tab-btn active" onclick="switchTab(this,'tab-personal')"
+                    role="tab" aria-selected="true" aria-controls="tab-personal">
+                <i data-lucide="user" style="width:13px;height:13px;" aria-hidden="true"></i>Personal
             </button>
-            <button class="tab-btn" onclick="switchTab(this,'tab-riesgo')" role="tab" aria-selected="false">
-                <i data-lucide="brain-circuit" style="width:14px;height:14px;"></i>Perfil IA
+            <button class="tab-btn" onclick="switchTab(this,'tab-riesgo')"
+                    role="tab" aria-selected="false" aria-controls="tab-riesgo">
+                <i data-lucide="brain-circuit" style="width:13px;height:13px;" aria-hidden="true"></i>Perfil IA
             </button>
-            <button class="tab-btn" onclick="switchTab(this,'tab-notif')" role="tab" aria-selected="false">
-                <i data-lucide="bell" style="width:14px;height:14px;"></i>Notificaciones
+            <button class="tab-btn" onclick="switchTab(this,'tab-notif')"
+                    role="tab" aria-selected="false" aria-controls="tab-notif">
+                <i data-lucide="bell" style="width:13px;height:13px;" aria-hidden="true"></i>Notificaciones
             </button>
-            <button class="tab-btn" onclick="switchTab(this,'tab-seguridad')" role="tab" aria-selected="false">
-                <i data-lucide="shield" style="width:14px;height:14px;"></i>Seguridad
+            <button class="tab-btn" onclick="switchTab(this,'tab-seguridad')"
+                    role="tab" aria-selected="false" aria-controls="tab-seguridad">
+                <i data-lucide="shield" style="width:13px;height:13px;" aria-hidden="true"></i>Seguridad
             </button>
-            <button class="tab-btn" onclick="switchTab(this,'tab-cuenta')" role="tab" aria-selected="false">
-                <i data-lucide="credit-card" style="width:14px;height:14px;"></i>Cuenta
+            <button class="tab-btn" onclick="switchTab(this,'tab-cuenta')"
+                    role="tab" aria-selected="false" aria-controls="tab-cuenta">
+                <i data-lucide="credit-card" style="width:13px;height:13px;" aria-hidden="true"></i>Cuenta
             </button>
         </div>
 
-        <!-- ══════════════════════════════════
-             TAB 1: PERSONAL
-        ══════════════════════════════════ -->
-        <div id="tab-personal" class="tab-panel active k-fade" style="transition-delay:0.1s;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="profile-main-grid">
-
-                <!-- Información personal -->
+        <!-- ══════ TAB: PERSONAL ══════ -->
+        <div id="tab-personal" class="tab-panel active k-fade" style="transition-delay:.1s;"
+             role="tabpanel" aria-labelledby="tab-personal">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="profile-main-grid">
                 <div class="profile-card" style="grid-column:1/-1;">
                     <div class="profile-card-header">
                         <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                            <i data-lucide="user-cog" style="width:17px;height:17px;"></i>
+                            <i data-lucide="user-cog" style="width:16px;height:16px;" aria-hidden="true"></i>
                         </div>
                         <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Información Personal</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Datos de contacto y preferencias de cuenta</p>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Información Personal</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Datos de contacto y preferencias de cuenta</p>
                         </div>
                     </div>
-
                     <div class="profile-card-body">
                         <form asp-action="Update" method="post" novalidate>
                             @Html.AntiForgeryToken()
-
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" class="profile-main-grid">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" class="profile-main-grid">
                                 <div>
                                     <label class="k-label" for="FullName">Nombre completo <span class="req">*</span></label>
-                                    <input asp-for="FullName" class="k-input" type="text" autocomplete="name" placeholder="Kevin Hernández" />
-                                    <span asp-validation-for="FullName" style="color:#ef4444;font-size:0.72rem;margin-top:4px;display:block;"></span>
+                                    <input asp-for="FullName" class="k-input" type="text" autocomplete="name"
+                                           placeholder="Kevin Hernández Trejo" />
+                                    <span asp-validation-for="FullName"
+                                          style="color:#ef4444;font-size:0.7rem;margin-top:4px;display:block;"></span>
                                 </div>
                                 <div>
                                     <label class="k-label" for="Email">Correo electrónico <span class="req">*</span></label>
                                     <div class="input-icon-wrap">
-                                        <i data-lucide="mail" class="icon-left" style="width:15px;height:15px;"></i>
-                                        <input asp-for="Email" class="k-input" type="email" autocomplete="email" placeholder="kevin@ejemplo.com" />
+                                        <i data-lucide="mail" class="icon-left" style="width:14px;height:14px;" aria-hidden="true"></i>
+                                        <input asp-for="Email" class="k-input" type="email"
+                                               autocomplete="email" placeholder="kevin@kairos.ai" />
                                     </div>
-                                    <span asp-validation-for="Email" style="color:#ef4444;font-size:0.72rem;margin-top:4px;display:block;"></span>
+                                    <span asp-validation-for="Email"
+                                          style="color:#ef4444;font-size:0.7rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>
-
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" class="profile-main-grid">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" class="profile-main-grid">
                                 <div>
                                     <label class="k-label">Moneda base</label>
                                     <div class="input-icon-wrap">
-                                        <i data-lucide="coins" class="icon-left" style="width:15px;height:15px;"></i>
-                                        <select asp-for="PreferredCurrency" class="k-input" style="padding-left:40px;cursor:pointer;">
-                                            <option value="MXN">🇲🇽 MXN - Peso Mexicano</option>
-                                            <option value="USD">🇺🇸 USD - Dólar Estadounidense</option>
-                                            <option value="EUR">🇪🇺 EUR - Euro</option>
-                                            <option value="BTC">₿ BTC - Bitcoin</option>
+                                        <i data-lucide="coins" class="icon-left" style="width:14px;height:14px;" aria-hidden="true"></i>
+                                        <select asp-for="PreferredCurrency" class="k-input" style="padding-left:38px;">
+                                            <option value="MXN">🇲🇽 MXN — Peso Mexicano</option>
+                                            <option value="USD">🇺🇸 USD — Dólar</option>
+                                            <option value="EUR">🇪🇺 EUR — Euro</option>
+                                            <option value="BTC">₿ BTC — Bitcoin</option>
                                         </select>
-                                        <i data-lucide="chevron-down" class="icon-right" style="width:14px;height:14px;"></i>
+                                        <i data-lucide="chevron-down" class="icon-right" style="width:13px;height:13px;" aria-hidden="true"></i>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="k-label">Zona horaria</label>
                                     <div class="input-icon-wrap">
-                                        <i data-lucide="globe" class="icon-left" style="width:15px;height:15px;"></i>
-                                        <select class="k-input" style="padding-left:40px;cursor:pointer;">
-                                            <option>🇲🇽 América/México (GMT-6)</option>
-                                            <option>🇺🇸 América/Nueva York (GMT-5)</option>
+                                        <i data-lucide="globe" class="icon-left" style="width:14px;height:14px;" aria-hidden="true"></i>
+                                        <select class="k-input" style="padding-left:38px;">
+                                            <option>🇲🇽 América/México (GMT−6)</option>
+                                            <option>🇺🇸 América/Nueva York (GMT−5)</option>
                                             <option>🇬🇧 Europa/Londres (GMT+0)</option>
                                         </select>
-                                        <i data-lucide="chevron-down" class="icon-right" style="width:14px;height:14px;"></i>
+                                        <i data-lucide="chevron-down" class="icon-right" style="width:13px;height:13px;" aria-hidden="true"></i>
                                     </div>
                                 </div>
                             </div>
-
-                            <div style="display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--border-color);flex-wrap:wrap;">
+                            <div style="display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border-color);flex-wrap:wrap;">
                                 <button type="submit" class="btn-primary">
-                                    <i data-lucide="save" style="width:15px;height:15px;"></i>
+                                    <i data-lucide="save" style="width:13px;height:13px;" aria-hidden="true"></i>
                                     Guardar cambios
                                 </button>
                                 <button type="reset" class="btn-secondary">
-                                    <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i>
+                                    <i data-lucide="rotate-ccw" style="width:13px;height:13px;" aria-hidden="true"></i>
                                     Restablecer
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
-
-                <!-- Modo de inversión -->
-                <div class="profile-card">
-                    <div class="profile-card-header">
-                        <div class="profile-card-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
-                            <i data-lucide="toggle-right" style="width:17px;height:17px;"></i>
-                        </div>
-                        <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Preferencias de App</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Comportamiento y visualización</p>
-                        </div>
-                    </div>
-                    <div class="profile-card-body" style="display:flex;flex-direction:column;gap:8px;">
-
-                        <label class="toggle-wrap" for="chk-notif">
-                            <div>
-                                <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">Notificaciones push</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Alertas en tiempo real del mercado</p>
-                            </div>
-                            <div class="toggle-track on" id="trk-notif" onclick="toggleSwitch(this)">
-                                <div class="toggle-thumb"></div>
-                            </div>
-                            <input type="checkbox" id="chk-notif" asp-for="EmailNotifications" class="toggle-check" checked>
-                        </label>
-
-                        <label class="toggle-wrap" for="chk-digest">
-                            <div>
-                                <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">Resumen semanal por email</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Reporte de rendimiento cada lunes</p>
-                            </div>
-                            <div class="toggle-track on" id="trk-digest" onclick="toggleSwitch(this)">
-                                <div class="toggle-thumb"></div>
-                            </div>
-                            <input type="checkbox" id="chk-digest" class="toggle-check" checked>
-                        </label>
-
-                        <label class="toggle-wrap" for="chk-biometric">
-                            <div>
-                                <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">Acceso biométrico</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Huella o Face ID al iniciar sesión</p>
-                            </div>
-                            <div class="toggle-track" id="trk-biometric" onclick="toggleSwitch(this)">
-                                <div class="toggle-thumb"></div>
-                            </div>
-                            <input type="checkbox" id="chk-biometric" class="toggle-check">
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Actividad reciente -->
-                <div class="profile-card">
-                    <div class="profile-card-header">
-                        <div class="profile-card-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">
-                            <i data-lucide="activity" style="width:17px;height:17px;"></i>
-                        </div>
-                        <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Actividad Reciente</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Últimas acciones en la plataforma</p>
-                        </div>
-                    </div>
-                    <div class="profile-card-body">
-                        <div class="timeline-item">
-                            <div class="timeline-dot" style="background:rgba(16,185,129,0.1);color:#10b981;">
-                                <i data-lucide="book-open" style="width:13px;height:13px;"></i>
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <p style="font-size:0.8rem;font-weight:600;color:var(--text-main);">Módulo completado</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Introducción a ETFs · +50 KP</p>
-                            </div>
-                            <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;flex-shrink:0;">Hoy</span>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-dot" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                                <i data-lucide="message-circle" style="width:13px;height:13px;"></i>
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <p style="font-size:0.8rem;font-weight:600;color:var(--text-main);">Consulta a Kairos</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Análisis de portafolio</p>
-                            </div>
-                            <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;flex-shrink:0;">Ayer</span>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-dot" style="background:rgba(245,158,11,0.1);color:#f59e0b;">
-                                <i data-lucide="gift" style="width:13px;height:13px;"></i>
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <p style="font-size:0.8rem;font-weight:600;color:var(--text-main);">Recompensa canjeada</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Gift card Spotify · −500 KP</p>
-                            </div>
-                            <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;flex-shrink:0;">Lun</span>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-dot" style="background:rgba(6,182,212,0.1);color:#06b6d4;">
-                                <i data-lucide="log-in" style="width:13px;height:13px;"></i>
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <p style="font-size:0.8rem;font-weight:600;color:var(--text-main);">Inicio de sesión</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Ciudad de México · Chrome</p>
-                            </div>
-                            <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;flex-shrink:0;">Dom</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- ══════════════════════════════════
-             TAB 2: PERFIL IA (exclusivo Kairos)
-        ══════════════════════════════════ -->
-        <div id="tab-riesgo" class="tab-panel k-fade" style="transition-delay:0.1s;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="profile-main-grid">
+        <!-- ══════ TAB: PERFIL IA ══════ -->
+        <div id="tab-riesgo" class="tab-panel k-fade" style="transition-delay:.1s;"
+             role="tabpanel" aria-labelledby="tab-riesgo">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="profile-main-grid">
 
-                <!-- Perfil de riesgo IA -->
+                <div class="profile-card" style="grid-column:1/-1;">
+                    <div class="profile-card-header" style="border-color:rgba(124,58,237,0.18);">
+                        <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
+                            <i data-lucide="shield" style="width:16px;height:16px;" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Configuración de Intervención (Escudo)</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Decide cómo quieres que KairosAI interactúe con tus operaciones</p>
+                        </div>
+                    </div>
+                    <div class="profile-card-body">
+                        <label class="toggle-wrap" style="padding:18px;border-color:rgba(124,58,237,0.28);background:rgba(124,58,237,0.03);">
+                            <div style="max-width:82%;">
+                                <p style="font-size:0.88rem;font-weight:700;color:var(--text-main);margin-bottom:4px;">
+                                    Activar Intervención en Tiempo Real
+                                </p>
+                                <p style="font-size:0.73rem;color:var(--text-muted);line-height:1.55;">
+                                    Permite que KairosAI actúe como tu guardián financiero. Si detectamos operaciones impulsivas guiadas por
+                                    <strong style="color:var(--text-main);">FOMO o FUD</strong>, pausaremos la transacción para darte una segunda opinión basada en datos reales.
+                                </p>
+                            </div>
+                            <div class="toggle-track on" id="kairos-shield-toggle"
+                                 onclick="handleShieldToggle(this)"
+                                 role="switch" aria-checked="true" aria-label="Escudo KairosAI">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="profile-card">
                     <div class="profile-card-header">
                         <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                            <i data-lucide="brain-circuit" style="width:17px;height:17px;"></i>
+                            <i data-lucide="brain-circuit" style="width:16px;height:16px;" aria-hidden="true"></i>
                         </div>
                         <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Perfil de Riesgo KairosAI</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Calibrado con IA basado en tu comportamiento</p>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Perfil de Riesgo KairosAI</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Calibrado con IA según tu comportamiento</p>
                         </div>
                     </div>
                     <div class="profile-card-body">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                             <div>
-                                <p style="font-size:1.4rem;font-weight:800;color:var(--text-main);line-height:1.1;">@Model.RiskProfileLabel</p>
-                                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">@Model.RiskProfileDescription</p>
+                                <p style="font-size:1.3rem;font-weight:800;color:var(--text-main);line-height:1.1;">
+                                    @(Model?.RiskProfileLabel ?? "Moderado")
+                                </p>
+                                <p style="font-size:0.7rem;color:var(--text-muted);margin-top:3px;">
+                                    @(Model?.RiskProfileDescription ?? "Balance entre seguridad y rendimiento")
+                                </p>
                             </div>
-                            <div style="text-align:center;padding:12px;background:rgba(124,58,237,0.08);border-radius:12px;min-width:64px;">
-                                <p style="font-size:1.3rem;font-weight:800;color:#7c3aed;font-family:'JetBrains Mono',monospace;line-height:1;">@Model.RiskScore</p>
-                                <p style="font-size:0.58rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;">/100</p>
+                            <div style="text-align:center;padding:11px;background:rgba(124,58,237,0.08);border-radius:12px;min-width:58px;">
+                                <p style="font-size:1.2rem;font-weight:800;color:#7c3aed;
+                                       font-family:'JetBrains Mono',monospace;line-height:1;">
+                                    @(Model?.RiskScore ?? 62)
+                                </p>
+                                <p style="font-size:0.55rem;color:var(--text-muted);font-weight:600;
+                                       text-transform:uppercase;letter-spacing:0.07em;">/100</p>
                             </div>
                         </div>
-
                         <div style="margin-bottom:8px;">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">
-                                <span>Conservador</span>
-                                <span>Moderado</span>
-                                <span>Agresivo</span>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;
+                                    font-size:0.6rem;font-weight:700;text-transform:uppercase;
+                                    letter-spacing:0.07em;color:var(--text-muted);">
+                                <span>Conservador</span><span>Moderado</span><span>Agresivo</span>
                             </div>
                             <div class="risk-track">
-                                <div class="risk-fill" id="riskFill" style="width:0%" data-target="@Model.RiskScore"></div>
+                                <div class="risk-fill" id="riskFill" style="width:0%"
+                                     data-target="@(Model?.RiskScore ?? 62)"
+                                     role="progressbar"
+                                     aria-valuenow="@(Model?.RiskScore ?? 62)"
+                                     aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
-
                         <form asp-action="RetakeTest" method="get" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-color);">
                             <button type="submit" class="btn-secondary" style="width:100%;justify-content:center;">
-                                <i data-lucide="clipboard-list" style="width:14px;height:14px;"></i>
+                                <i data-lucide="clipboard-list" style="width:13px;height:13px;" aria-hidden="true"></i>
                                 Rehacer evaluación de riesgo
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- IA Insight exclusivo -->
                 <div class="profile-card">
                     <div class="profile-card-header">
                         <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                            <i data-lucide="sparkles" style="width:17px;height:17px;"></i>
+                            <i data-lucide="sparkles" style="width:16px;height:16px;" aria-hidden="true"></i>
                         </div>
                         <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Análisis IA de Tu Perfil</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Exclusivo KairosAI · Actualizado hoy</p>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Análisis IA de Tu Perfil</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Exclusivo KairosAI · Actualizado hoy</p>
                         </div>
                     </div>
                     <div class="profile-card-body" style="display:flex;flex-direction:column;gap:10px;">
                         <div class="ai-insight">
                             <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                                <i data-lucide="trending-up" style="width:13px;height:13px;color:#7c3aed;"></i>
-                                <strong style="font-size:0.72rem;color:#7c3aed;text-transform:uppercase;letter-spacing:0.06em;">Patrón detectado</strong>
+                                <i data-lucide="trending-up" style="width:12px;height:12px;color:#7c3aed;" aria-hidden="true"></i>
+                                <strong style="font-size:0.66rem;color:#7c3aed;text-transform:uppercase;letter-spacing:0.07em;">Patrón detectado</strong>
                             </div>
                             Tu historial muestra preferencia por <strong>activos de alta liquidez</strong>. KairosAI recomienda explorar ETFs de renta variable para diversificar sin salir de tu zona de confort.
                         </div>
                         <div class="ai-insight">
                             <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                                <i data-lucide="clock" style="width:13px;height:13px;color:#7c3aed;"></i>
-                                <strong style="font-size:0.72rem;color:#7c3aed;text-transform:uppercase;letter-spacing:0.06em;">Comportamiento</strong>
+                                <i data-lucide="clock" style="width:12px;height:12px;color:#7c3aed;" aria-hidden="true"></i>
+                                <strong style="font-size:0.66rem;color:#7c3aed;text-transform:uppercase;letter-spacing:0.07em;">Comportamiento</strong>
                             </div>
                             Revisas tu portafolio en promedio <strong>2.3 veces al día</strong>. Los inversores con mejor rendimiento suelen revisar menos frecuentemente. Considera establecer alertas de precio.
                         </div>
-                        <div class="ai-insight">
-                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                                <i data-lucide="target" style="width:13px;height:13px;color:#7c3aed;"></i>
-                                <strong style="font-size:0.72rem;color:#7c3aed;text-transform:uppercase;letter-spacing:0.06em;">Próximo paso</strong>
-                            </div>
-                            Basado en tu perfil <strong>@Model.RiskProfileLabel</strong>, el módulo de <em>Análisis Técnico</em> en Academia podría incrementar tu rendimiento simulado un ~12%.
-                        </div>
                     </div>
                 </div>
-
-                <!-- Objetivos financieros (exclusivo Kairos) -->
-                <div class="profile-card" style="grid-column:1/-1;">
-                    <div class="profile-card-header">
-                        <div class="profile-card-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
-                            <i data-lucide="target" style="width:17px;height:17px;"></i>
-                        </div>
-                        <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Objetivos Financieros</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">KairosAI adapta tus recomendaciones según tus metas</p>
-                        </div>
-                    </div>
-                    <div class="profile-card-body">
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:18px;">
-                            @foreach (var (label, icon, color, selected) in new[]{
-                                                        ("Libertad financiera","rocket","#7c3aed",true),
-                                                        ("Retiro anticipado","sun","#f59e0b",false),
-                                                        ("Educación hijos","graduation-cap","#3b82f6",false),
-                                                        ("Comprar vivienda","home","#10b981",true),
-                                                        ("Fondo emergencia","shield","#06b6d4",false),
-                                                        ("Generar ingresos","trending-up","#ec4899",false)
-                                                        })
-                            {
-                                <label style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:12px;border:1px solid @(selected? color : "var(--border-color)");background:@(selected ? $"rgba({(color == "#7c3aed" ? "124,58,237" : color == "#f59e0b" ? "245,158,11" : color == "#3b82f6" ? "59,130,246" : color == "#10b981" ? "16,185,129" : color == "#06b6d4" ? "6,182,212" : "236,72,153")},0.08)" : "var(--bg-panel)");cursor:pointer;transition:all 0.18s;">
-                                    <input type="checkbox" @(selected ? "checked" : "") style="display:none;">
-                                    <i data-lucide="@icon" style="width:15px;height:15px;color:@color;flex-shrink:0;"></i>
-                                    <span style="font-size:0.78rem;font-weight:600;color:var(--text-main);">@label</span>
-                                </label>
-                            }
-                        </div>
-                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                            <button class="btn-primary" type="button">
-                                <i data-lucide="save" style="width:14px;height:14px;"></i>
-                                Actualizar objetivos
-                            </button>
-                            <div class="ai-insight" style="flex:1;min-width:200px;margin:0;">
-                                <i data-lucide="sparkles" style="width:12px;height:12px;color:#7c3aed;display:inline;margin-right:4px;"></i>
-                                KairosAI ajustará tu feed de noticias y módulos sugeridos según tus metas seleccionadas.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- ══════════════════════════════════
-             TAB 3: NOTIFICACIONES
-        ══════════════════════════════════ -->
-        <div id="tab-notif" class="tab-panel k-fade" style="transition-delay:0.1s;">
+        <!-- ══════ TAB: NOTIFICACIONES ══════ -->
+        <div id="tab-notif" class="tab-panel k-fade" style="transition-delay:.1s;"
+             role="tabpanel" aria-labelledby="tab-notif">
             <div class="profile-card">
                 <div class="profile-card-header">
                     <div class="profile-card-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">
-                        <i data-lucide="bell" style="width:17px;height:17px;"></i>
+                        <i data-lucide="bell" style="width:16px;height:16px;" aria-hidden="true"></i>
                     </div>
                     <div>
-                        <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Centro de Notificaciones</h2>
-                        <p style="font-size:0.7rem;color:var(--text-muted);">Controla qué te alertamos y cuándo</p>
+                        <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Centro de Notificaciones</h2>
+                        <p style="font-size:0.68rem;color:var(--text-muted);">Controla qué te alertamos y cuándo</p>
                     </div>
                 </div>
-                <div class="profile-card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="profile-main-grid">
-
-                    <div>
-                        <p class="section-label">Mercado y Portafolio</p>
-                        @foreach (var (label, desc, def) in new[]{
-                                                ("Alertas de precio","Cuando un activo supere un umbral",true),
-                                                ("Volatilidad extrema","Cambios >5% en menos de 1h",true),
-                                                ("Resumen diario","Cierre del mercado con tu posición",false),
-                                                ("Señales KairosAI","Recomendaciones personalizadas IA",true)
-                                                })
-                        {
-                            <div class="notif-item">
-                                <div style="flex:1;min-width:0;">
-                                    <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">@label</p>
-                                    <p style="font-size:0.7rem;color:var(--text-muted);">@desc</p>
+                <div class="profile-card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="notif-grid">
+                        <div>
+                            <p class="section-label">Mercado y Portafolio</p>
+                            @foreach (var (label, desc, def) in new[]{
+                                                        ("Alertas de precio",    "Cuando un activo supere un umbral",   true),
+                                                        ("Volatilidad extrema",  "Cambios >5% en menos de 1h",          true),
+                                                        ("Resumen diario",       "Cierre del mercado con tu posición",   false),
+                                                        ("Señales KairosAI",     "Recomendaciones personalizadas IA",    true)
+                                                        })
+                            {
+                                <div class="notif-item">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">@label</p>
+                                        <p style="font-size:0.68rem;color:var(--text-muted);">@desc</p>
+                                    </div>
+                                    <div class="toggle-track @(def ? "on" : "")" onclick="toggleSwitch(this)"
+                                         role="switch" aria-checked="@def.ToString().ToLower()" aria-label="@label" style="flex-shrink:0;">
+                                        <div class="toggle-thumb"></div>
+                                    </div>
                                 </div>
-                                <div class="toggle-track @(def ? "on" : "")" onclick="toggleSwitch(this)" style="flex-shrink:0;">
-                                    <div class="toggle-thumb"></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div>
-                        <p class="section-label">Academia y Plataforma</p>
-                        @foreach (var (label, desc, def) in new[]{
-                                                ("Nuevo módulo disponible","Cuando se publique contenido nuevo",true),
-                                                ("Recordatorio de racha","Si llevas 1 día sin actividad",true),
-                                                ("Recompensas disponibles","Puntos suficientes para canjear",false),
-                                                ("Noticias relevantes","Basadas en tu portafolio actual",true)
-                                                })
-                        {
-                            <div class="notif-item">
-                                <div style="flex:1;min-width:0;">
-                                    <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">@label</p>
-                                    <p style="font-size:0.7rem;color:var(--text-muted);">@desc</p>
-                                </div>
-                                <div class="toggle-track @(def ? "on" : "")" onclick="toggleSwitch(this)" style="flex-shrink:0;">
-                                    <div class="toggle-thumb"></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <!-- Horario silencio -->
-                    <div style="grid-column:1/-1;padding:16px;border-radius:14px;border:1px solid var(--border-color);background:var(--bg-panel);">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                            <div>
-                                <p style="font-size:0.85rem;font-weight:700;color:var(--text-main);">Modo silencio</p>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">No interrumpir en este horario</p>
-                            </div>
-                            <div class="toggle-track" id="trk-silence" onclick="toggleSwitch(this)">
-                                <div class="toggle-thumb"></div>
-                            </div>
+                            }
                         </div>
-                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                            <div>
-                                <label class="k-label">Desde</label>
-                                <input type="time" value="22:00" class="k-input" style="width:120px;">
-                            </div>
-                            <i data-lucide="arrow-right" style="width:14px;height:14px;color:var(--text-muted);margin-top:18px;flex-shrink:0;"></i>
-                            <div>
-                                <label class="k-label">Hasta</label>
-                                <input type="time" value="08:00" class="k-input" style="width:120px;">
-                            </div>
+                        <div>
+                            <p class="section-label">Academia y Plataforma</p>
+                            @foreach (var (label, desc, def) in new[]{
+                                                        ("Nuevo módulo",         "Cuando se publique contenido nuevo",   true),
+                                                        ("Recordatorio racha",   "Si llevas 1 día sin actividad",        true),
+                                                        ("Recompensas",          "Puntos suficientes para canjear",       false),
+                                                        ("Noticias relevantes",  "Basadas en tu portafolio actual",      true)
+                                                        })
+                            {
+                                <div class="notif-item">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:0.82rem;font-weight:600;color:var(--text-main);margin-bottom:2px;">@label</p>
+                                        <p style="font-size:0.68rem;color:var(--text-muted);">@desc</p>
+                                    </div>
+                                    <div class="toggle-track @(def ? "on" : "")" onclick="toggleSwitch(this)"
+                                         role="switch" aria-checked="@def.ToString().ToLower()" aria-label="@label" style="flex-shrink:0;">
+                                        <div class="toggle-thumb"></div>
+                                    </div>
+                                </div>
+                            }
                         </div>
-                    </div>
-
-                    <div style="grid-column:1/-1;display:flex;gap:10px;">
-                        <button class="btn-primary" type="button">
-                            <i data-lucide="save" style="width:14px;height:14px;"></i>
-                            Guardar preferencias
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ══════════════════════════════════
-             TAB 4: SEGURIDAD
-        ══════════════════════════════════ -->
-        <div id="tab-seguridad" class="tab-panel k-fade" style="transition-delay:0.1s;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="profile-main-grid">
-
-                <!-- Cambiar contraseña -->
+        <!-- ══════ TAB: SEGURIDAD ══════ -->
+        <div id="tab-seguridad" class="tab-panel k-fade" style="transition-delay:.1s;"
+             role="tabpanel" aria-labelledby="tab-seguridad">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="profile-main-grid">
                 <div class="profile-card">
                     <div class="profile-card-header">
                         <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                            <i data-lucide="lock" style="width:17px;height:17px;"></i>
+                            <i data-lucide="lock" style="width:16px;height:16px;" aria-hidden="true"></i>
                         </div>
                         <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Cambiar Contraseña</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Última actualización hace 30 días</p>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Cambiar Contraseña</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Última actualización hace 30 días</p>
                         </div>
                     </div>
                     <div class="profile-card-body" style="display:flex;flex-direction:column;gap:14px;">
                         <div>
-                            <label class="k-label">Contraseña actual <span class="req">*</span></label>
+                            <label class="k-label" for="pwNew">Nueva contraseña <span class="req">*</span></label>
                             <div class="input-icon-wrap">
-                                <i data-lucide="lock" class="icon-left" style="width:15px;height:15px;"></i>
-                                <input type="password" class="k-input" placeholder="••••••••" id="pwCurrent">
-                                <button type="button" class="icon-right" onclick="togglePw('pwCurrent',this)" style="pointer-events:auto;background:none;border:none;cursor:pointer;color:var(--text-muted);">
-                                    <i data-lucide="eye" style="width:14px;height:14px;"></i>
-                                </button>
+                                <i data-lucide="lock" class="icon-left" style="width:14px;height:14px;" aria-hidden="true"></i>
+                                <input type="password" class="k-input" placeholder="Mínimo 8 caracteres"
+                                       id="pwNew" oninput="evalStrength(this)" autocomplete="new-password">
                             </div>
-                        </div>
-                        <div>
-                            <label class="k-label">Nueva contraseña <span class="req">*</span></label>
-                            <div class="input-icon-wrap">
-                                <i data-lucide="lock" class="icon-left" style="width:15px;height:15px;"></i>
-                                <input type="password" class="k-input" placeholder="Mínimo 8 caracteres" id="pwNew" oninput="evalStrength(this)">
+                            <div style="display:flex;gap:4px;margin-top:7px;" id="strengthBars" aria-hidden="true">
+                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background .3s;" class="sb"></div>
+                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background .3s;" class="sb"></div>
+                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background .3s;" class="sb"></div>
+                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background .3s;" class="sb"></div>
                             </div>
-                            <!-- Strength meter -->
-                            <div style="display:flex;gap:4px;margin-top:6px;" id="strengthBars">
-                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background 0.3s;" class="sb"></div>
-                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background 0.3s;" class="sb"></div>
-                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background 0.3s;" class="sb"></div>
-                                <div style="height:3px;flex:1;border-radius:3px;background:var(--border-color);transition:background 0.3s;" class="sb"></div>
-                            </div>
-                            <p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;" id="strengthLabel"></p>
-                        </div>
-                        <div>
-                            <label class="k-label">Confirmar contraseña <span class="req">*</span></label>
-                            <div class="input-icon-wrap">
-                                <i data-lucide="lock" class="icon-left" style="width:15px;height:15px;"></i>
-                                <input type="password" class="k-input" placeholder="Repite la contraseña">
-                            </div>
+                            <p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;" id="strengthLabel" aria-live="polite"></p>
                         </div>
                         <button class="btn-primary" type="button">
-                            <i data-lucide="key" style="width:14px;height:14px;"></i>
+                            <i data-lucide="key" style="width:13px;height:13px;" aria-hidden="true"></i>
                             Actualizar contraseña
                         </button>
                     </div>
                 </div>
 
-                <!-- 2FA + sesiones -->
-                <div style="display:flex;flex-direction:column;gap:18px;">
-                    <!-- 2FA -->
-                    <div class="profile-card">
-                        <div class="profile-card-header">
-                            <div class="profile-card-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
-                                <i data-lucide="shield-check" style="width:17px;height:17px;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Autenticación 2FA</h2>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Actualmente: desactivado</p>
-                            </div>
-                        </div>
-                        <div class="profile-card-body">
-                            <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">
-                                Agrega una capa extra de seguridad con Google Authenticator o SMS.
-                            </p>
-                            <button class="btn-primary" type="button" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,0.25);">
-                                <i data-lucide="shield-plus" style="width:14px;height:14px;"></i>
-                                Activar 2FA
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sesiones activas -->
-                    <div class="profile-card">
-                        <div class="profile-card-header">
-                            <div class="profile-card-icon" style="background:rgba(239,68,68,0.1);color:#ef4444;">
-                                <i data-lucide="monitor" style="width:17px;height:17px;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Sesiones Activas</h2>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">2 dispositivos conectados</p>
-                            </div>
-                        </div>
-                        <div class="profile-card-body" style="display:flex;flex-direction:column;gap:8px;">
-                            @foreach (var (device, loc, current) in new[]{
-                                                        ("Chrome · macOS","CDMX, México",true),
-                                                        ("Safari · iPhone 15","CDMX, México",false)
-                                                        })
-                            {
-                                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-panel);">
-                                    <i data-lucide="@(device.Contains("iPhone") ? "smartphone" : "monitor")" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0;"></i>
-                                    <div style="flex:1;min-width:0;">
-                                        <p style="font-size:0.78rem;font-weight:600;color:var(--text-main);">@device</p>
-                                        <p style="font-size:0.68rem;color:var(--text-muted);">@loc</p>
-                                    </div>
-                                    @if (current)
-                                    {
-                                        <span style="font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">ACTUAL</span>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn-danger" type="button" style="padding:5px 10px;font-size:0.68rem;">Cerrar</button>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ══════════════════════════════════
-             TAB 5: CUENTA Y PLAN
-        ══════════════════════════════════ -->
-        <div id="tab-cuenta" class="tab-panel k-fade" style="transition-delay:0.1s;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;" class="profile-main-grid">
-
-                <!-- Plan actual -->
                 <div class="profile-card">
                     <div class="profile-card-header">
-                        <div class="profile-card-icon" style="background:rgba(124,58,237,0.1);color:#7c3aed;">
-                            <i data-lucide="credit-card" style="width:17px;height:17px;"></i>
+                        <div class="profile-card-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
+                            <i data-lucide="shield-check" style="width:16px;height:16px;" aria-hidden="true"></i>
                         </div>
                         <div>
-                            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Plan Actual</h2>
-                            <p style="font-size:0.7rem;color:var(--text-muted);">Gestión de suscripción</p>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-main);">Autenticación 2FA</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Actualmente: desactivado</p>
                         </div>
                     </div>
                     <div class="profile-card-body">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">
-                            <div>
-                                <p style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">Plan activo</p>
-                                <span class="plan-badge plan-pro" style="font-size:0.78rem;padding:5px 14px;">
-                                    <i data-lucide="sparkles" style="width:12px;height:12px;"></i>
-                                    @Model.SubscriptionPlan
-                                </span>
-                            </div>
-                            <div style="text-align:right;">
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Próxima factura</p>
-                                <p style="font-size:0.85rem;font-weight:700;color:var(--text-main);font-family:'JetBrains Mono',monospace;">18 Mar 2026</p>
-                            </div>
-                        </div>
-                        @foreach (var (feature, included) in new[]{
-                                                ("Chat con KairosAI ilimitado",true),
-                                                ("Análisis de portafolio IA",true),
-                                                ("Alertas de precio en tiempo real",true),
-                                                ("Acceso a todos los módulos",true),
-                                                ("Signals de trading avanzados",false),
-                                                ("API de portafolio personal",false)
-                                                })
-                        {
-                            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
-                                <i data-lucide="@(included ? "check" : "x")" style="width:14px;height:14px;color:@(included ? "#10b981" : "#6b7280");flex-shrink:0;"></i>
-                                <span style="font-size:0.78rem;color:@(included ? "var(--text-main)" : "var(--text-muted)");">@feature</span>
-                            </div>
-                        }
-                        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-color);display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-primary" type="button" style="flex:1;justify-content:center;">
-                                <i data-lucide="zap" style="width:14px;height:14px;"></i>
-                                Upgrade a Elite
-                            </button>
-                            <button class="btn-secondary" type="button">
-                                Gestionar
-                            </button>
-                        </div>
+                        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.65;margin-bottom:14px;">
+                            Agrega una capa extra de seguridad con Google Authenticator o SMS.
+                        </p>
+                        <button class="btn-primary" type="button"
+                                style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,0.22);">
+                            <i data-lucide="shield-plus" style="width:13px;height:13px;" aria-hidden="true"></i>
+                            Activar 2FA
+                        </button>
                     </div>
                 </div>
-
-                <!-- Info cuenta + eliminar -->
-                <div style="display:flex;flex-direction:column;gap:18px;">
-                    <div class="profile-card">
-                        <div class="profile-card-header">
-                            <div class="profile-card-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">
-                                <i data-lucide="info" style="width:17px;height:17px;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);">Datos de Cuenta</h2>
-                            </div>
-                        </div>
-                        <div class="profile-card-body" style="display:flex;flex-direction:column;gap:10px;">
-                            @foreach (var (label, value) in new[]{
-                                                        ("ID de usuario","KAI-00842"),
-                                                        ("Miembro desde",Model.MemberSince),
-                                                        ("Moneda base",Model.PreferredCurrency),
-                                                        ("Último acceso","Hoy, 14:32")
-                                                        })
-                            {
-                                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
-                                    <span style="font-size:0.78rem;color:var(--text-muted);">@label</span>
-                                    <span style="font-size:0.78rem;font-weight:600;color:var(--text-main);font-family:'JetBrains Mono',monospace;">@value</span>
-                                </div>
-                            }
-                            <button class="btn-secondary" type="button" style="margin-top:4px;">
-                                <i data-lucide="download" style="width:13px;height:13px;"></i>
-                                Exportar mis datos
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Zona de peligro -->
-                    <div class="profile-card" style="border-color:rgba(239,68,68,0.2);">
-                        <div class="profile-card-header" style="border-color:rgba(239,68,68,0.15);">
-                            <div class="profile-card-icon" style="background:rgba(239,68,68,0.1);color:#ef4444;">
-                                <i data-lucide="alert-triangle" style="width:17px;height:17px;"></i>
-                            </div>
-                            <div>
-                                <h2 style="font-size:0.92rem;font-weight:700;color:#ef4444;">Zona de Peligro</h2>
-                                <p style="font-size:0.7rem;color:var(--text-muted);">Acciones irreversibles</p>
-                            </div>
-                        </div>
-                        <div class="profile-card-body" style="display:flex;flex-direction:column;gap:10px;">
-                            <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">
-                                Al eliminar tu cuenta perderás todo tu historial, puntos KP, portafolio simulado y progreso en Academia. Esta acción <strong style="color:var(--text-main);">no se puede deshacer</strong>.
-                            </p>
-                            <button class="btn-danger" type="button" onclick="confirmDelete()">
-                                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-                                Eliminar mi cuenta
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-    </div><!-- /max-w -->
-</div><!-- /bg-main -->
+        <!-- ══════ TAB: CUENTA ══════ -->
+        <div id="tab-cuenta" class="tab-panel k-fade" style="transition-delay:.1s;"
+             role="tabpanel" aria-labelledby="tab-cuenta">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="profile-main-grid">
+                <div class="profile-card" style="border-color:rgba(239,68,68,0.2);">
+                    <div class="profile-card-header" style="border-color:rgba(239,68,68,0.14);">
+                        <div class="profile-card-icon" style="background:rgba(239,68,68,0.1);color:#ef4444;">
+                            <i data-lucide="alert-triangle" style="width:16px;height:16px;" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size:0.9rem;font-weight:700;color:#ef4444;">Zona de Peligro</h2>
+                            <p style="font-size:0.68rem;color:var(--text-muted);">Acciones irreversibles</p>
+                        </div>
+                    </div>
+                    <div class="profile-card-body" style="display:flex;flex-direction:column;gap:10px;">
+                        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.65;">
+                            Al eliminar tu cuenta perderás todo tu historial, puntos KP, portafolio simulado y progreso en Academia.
+                            Esta acción <strong style="color:var(--text-main);">no se puede deshacer</strong>.
+                        </p>
+                        <button class="btn-danger" type="button" onclick="confirmDelete()">
+                            <i data-lucide="trash-2" style="width:12px;height:12px;" aria-hidden="true"></i>
+                            Eliminar mi cuenta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SHIELD MODAL
+     Serio como un aviso bancario, moderno como 2025
+═══════════════════════════════════════════════════ -->
+<div id="legalModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="shieldTitle" aria-describedby="shieldDesc">
+    <div class="shield-modal">
+
+        <!-- Gradient stripe top -->
+        <div class="shield-stripe" aria-hidden="true"></div>
+
+        <div class="shield-modal-body">
+
+            <!-- Header: ring + titles side by side -->
+            <div class="shield-header">
+
+                <!-- SVG countdown ring -->
+                <div class="ring-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 56 56" width="56" height="56">
+                        <circle class="ring-track" cx="28" cy="28" r="24" />
+                        <circle class="ring-fill" id="ringFill" cx="28" cy="28" r="24" />
+                    </svg>
+                    <div class="ring-number" id="ringNumber">10</div>
+                </div>
+
+                <!-- Titles -->
+                <div class="shield-titles">
+                    <h2 class="shield-title" id="shieldTitle">
+                        Deshabilitar Escudo KairosAI
+                    </h2>
+                    <p class="shield-subtitle" id="shieldDesc">
+                        Estás a punto de desactivar la protección en tiempo real. Lee con atención lo que implica esta decisión.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Risk callout -->
+            <div class="shield-callout">
+                <div class="shield-callout-icon" aria-hidden="true">
+                    <i data-lucide="triangle-alert" style="width:14px;height:14px;"></i>
+                </div>
+                <p>
+                    Al confirmar, asumes <strong>responsabilidad total</strong> por pérdidas derivadas de volatilidad
+                    o decisiones impulsivas. KairosAI <strong>no podrá intervenir</strong> ni pausar tus operaciones.
+                </p>
+            </div>
+
+            <!-- Timer status line -->
+            <div class="shield-timer-status" id="timerStatus" aria-live="polite" aria-atomic="true">
+                <span class="timer-dot" id="timerDot" aria-hidden="true"></span>
+                <span id="timerLabel">Revisando implicaciones — confirmar disponible en <strong id="timerSec">10</strong>s</span>
+            </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="shield-actions">
+            <button class="btn-shield-cancel" onclick="cancelShieldDisable()" type="button">
+                <i data-lucide="shield-check" style="width:14px;height:14px;" aria-hidden="true"></i>
+                Mantener Escudo
+            </button>
+            <button class="btn-shield-confirm" id="confirmDisableBtn"
+                    onclick="confirmShieldDisable()" type="button"
+                    disabled aria-disabled="true">
+                <i data-lucide="shield-off" style="width:14px;height:14px;" aria-hidden="true"></i>
+                Acepto el Riesgo
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="k-toast" id="kairos-toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <span id="toast-icon" aria-hidden="true"></span>
+    <span id="toast-message"></span>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        (function () {
+            'use strict';
 
-        // ── Fade in ──
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.k-fade').forEach((el, i) => {
-                setTimeout(() => el.classList.add('visible'), 60 + i * 70);
-            });
-            setTimeout(() => {
-                const fill = document.getElementById('riskFill');
-                if (fill) fill.style.width = fill.dataset.target + '%';
-            }, 400);
-        });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        // ── Tabs ──
-        function switchTab(btn, panelId) {
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('active');
-                b.setAttribute('aria-selected','false');
-            });
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-
-            btn.classList.add('active');
-            btn.setAttribute('aria-selected','true');
-
-            const panel = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.add('active');
-                panel.style.animation = 'none';
-                void panel.offsetWidth;
-                panel.style.animation = '';
-                panel.style.opacity = '0'; panel.style.transform = 'translateY(8px)';
-                requestAnimationFrame(() => {
-                    panel.style.transition = 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.22,1,0.36,1)';
-                    panel.style.opacity = '1'; panel.style.transform = 'translateY(0)';
+            /* ── Fade in orchestration ── */
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.k-fade').forEach(function (el, i) {
+                    setTimeout(function () { el.classList.add('visible'); }, 55 + i * 60);
                 });
-            }
-        }
-
-        // ── Toggle switch ──
-        function toggleSwitch(track) {
-            track.classList.toggle('on');
-            const cb = track.closest('label')?.querySelector('.toggle-check');
-            if (cb) cb.checked = track.classList.contains('on');
-
-            track.style.transform = 'scale(0.93)';
-            setTimeout(() => {
-                track.style.transform = 'scale(1)';
-                track.style.transition = 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)';
-            }, 80);
-        }
-
-        // ── Password visibility ──
-        function togglePw(id, btn) {
-            const input = document.getElementById(id);
-            if (!input) return;
-            const isText = input.type === 'text';
-            input.type = isText ? 'password' : 'text';
-            btn.innerHTML = isText
-                ? '<i data-lucide="eye" style="width:14px;height:14px;"></i>'
-                : '<i data-lucide="eye-off" style="width:14px;height:14px;"></i>';
-            lucide.createIcons();
-        }
-
-        // ── Password strength ──
-        function evalStrength(input) {
-            const val = input.value;
-            const bars = document.querySelectorAll('#strengthBars .sb');
-            const label = document.getElementById('strengthLabel');
-            let score = 0;
-            if (val.length >= 8)  score++;
-            if (/[A-Z]/.test(val)) score++;
-            if (/[0-9]/.test(val)) score++;
-            if (/[^A-Za-z0-9]/.test(val)) score++;
-
-            const colors = ['','#ef4444','#f59e0b','#3b82f6','#10b981'];
-            const labels = ['','Débil','Regular','Buena','Fuerte'];
-            bars.forEach((bar, i) => {
-                bar.style.background = i < score ? colors[score] : 'var(--border-color)';
+                /* Risk bar */
+                setTimeout(function () {
+                    var fill = document.getElementById('riskFill');
+                    if (fill) fill.style.width = fill.dataset.target + '%';
+                }, 400);
             });
-            if (label) {
-                label.textContent = val.length ? labels[score] : '';
-                label.style.color = colors[score];
-            }
-        }
 
-        // ── Confirm delete ──
-        function confirmDelete() {
-            if (confirm('¿Estás seguro? Esta acción eliminará tu cuenta permanentemente.')) {
-                // form submit
-            }
-        }
+            /* ── Tabs ── */
+            window.switchTab = function (btn, panelId) {
+                document.querySelectorAll('.tab-btn').forEach(function (b) {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                document.querySelectorAll('.tab-panel').forEach(function (p) {
+                    p.classList.remove('active');
+                });
 
-        // ── Avatar preview ──
-        function previewAvatar(input) {
-            const file = input.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                const ring = input.closest('.avatar-ring');
-                if (!ring) return;
-                ring.style.backgroundImage = `url(${e.target.result})`;
-                ring.style.backgroundSize = 'cover';
-                ring.style.fontSize = '0';
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+
+                var panel = document.getElementById(panelId);
+                if (!panel) return;
+                panel.classList.add('active');
+                panel.style.opacity   = '0';
+                panel.style.transform = 'translateY(6px)';
+                requestAnimationFrame(function () {
+                    panel.style.transition = 'opacity .3s ease, transform .3s cubic-bezier(0.22,1,0.36,1)';
+                    panel.style.opacity    = '1';
+                    panel.style.transform  = 'translateY(0)';
+                });
             };
-            reader.readAsDataURL(file);
-        }
 
-        // ── Goal checkboxes visual ──
-        document.querySelectorAll('[type="checkbox"]:not(.toggle-check)').forEach(cb => {
-            cb.addEventListener('change', () => {
-                const label = cb.closest('label');
-                if (!label) return;
-                // color extraído del estilo inline
-                const icon = label.querySelector('i');
-                const color = icon?.style.color || '#7c3aed';
-                label.style.borderColor = cb.checked ? color : 'var(--border-color)';
+            /* ═══════════════════════════════════════════════════
+               SHIELD MODAL — SVG progress ring countdown
+               r=24 → circumference = 2π × 24 ≈ 150.8
+            ═══════════════════════════════════════════════════ */
+            var CIRC     = 150.796;   /* 2π × 24 */
+            var DURATION = 10;
+            var shieldEl = null;
+            var ticker   = null;
+            var remaining;
+
+            window.handleShieldToggle = function (el) {
+                if (el.classList.contains('on')) {
+                    shieldEl = el;
+                    openShieldModal();
+                } else {
+                    el.classList.add('on');
+                    el.setAttribute('aria-checked', 'true');
+                    showToast('Escudo KairosAI activado. Tu portafolio vuelve a estar protegido.', 'success');
+                }
+            };
+
+            function openShieldModal () {
+                remaining = DURATION;
+
+                /* DOM refs */
+                var ring   = document.getElementById('ringFill');
+                var numEl  = document.getElementById('ringNumber');
+                var secEl  = document.getElementById('timerSec');
+                var dot    = document.getElementById('timerDot');
+                var status = document.getElementById('timerStatus');
+                var btn    = document.getElementById('confirmDisableBtn');
+
+                /* Reset visuals */
+                ring.style.strokeDashoffset = '0';
+                ring.classList.remove('expired');
+                numEl.textContent = remaining;
+                numEl.classList.remove('expired');
+                secEl.textContent  = remaining;
+                dot.classList.remove('done');
+                status.classList.remove('hidden');
+                btn.disabled = true;
+                btn.setAttribute('aria-disabled', 'true');
+                btn.classList.remove('ready');
+
+                /* Show modal */
+                var modal = document.getElementById('legalModal');
+                modal.classList.add('open');
+                setTimeout(function () {
+                    modal.querySelector('.btn-shield-cancel').focus();
+                }, 60);
+
+                /* Tick every second */
+                ticker = setInterval(function () {
+                    remaining--;
+                    numEl.textContent = remaining;
+                    secEl.textContent = remaining;
+
+                    /* Shrink ring proportionally: full → empty */
+                    var progress = remaining / DURATION;            /* 1 → 0 */
+                    ring.style.strokeDashoffset = String(CIRC * (1 - progress));
+
+                    if (remaining <= 0) {
+                        clearInterval(ticker);
+                        ticker = null;
+                        ring.classList.add('expired');
+                        numEl.classList.add('expired');
+                        dot.classList.add('done');
+
+                        /* Update status text */
+                        secEl.parentElement.innerHTML =
+                            '<span style="color:var(--text-main);font-weight:600;">Puedes confirmar ahora</span>';
+
+                        /* Unlock confirm button */
+                        btn.disabled = false;
+                        btn.setAttribute('aria-disabled', 'false');
+                        btn.classList.add('ready');
+                        btn.focus();
+                    }
+                }, 1000);
+            }
+
+            window.cancelShieldDisable = function () {
+                if (ticker) { clearInterval(ticker); ticker = null; }
+                document.getElementById('legalModal').classList.remove('open');
+                if (shieldEl) {
+                    shieldEl.classList.add('on');
+                    shieldEl.setAttribute('aria-checked', 'true');
+                }
+            };
+
+            window.confirmShieldDisable = function () {
+                if (ticker) { clearInterval(ticker); ticker = null; }
+                document.getElementById('legalModal').classList.remove('open');
+                if (shieldEl) {
+                    shieldEl.classList.remove('on');
+                    shieldEl.setAttribute('aria-checked', 'false');
+                }
+                showToast('Intervención IA desactivada. Operando bajo tu propio riesgo.', 'error');
+            };
+
+            /* Close on backdrop */
+            document.getElementById('legalModal').addEventListener('click', function (e) {
+                if (e.target === this) window.cancelShieldDisable();
             });
-        });
+
+            /* Close on Esc */
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && document.getElementById('legalModal').classList.contains('open')) {
+                    window.cancelShieldDisable();
+                }
+            });
+
+            /* ── Generic toggle ── */
+            window.toggleSwitch = function (track) {
+                if (track.id === 'kairos-shield-toggle') return;
+                track.classList.toggle('on');
+                var on = track.classList.contains('on');
+                track.setAttribute('aria-checked', String(on));
+                track.style.transform = 'scale(0.9)';
+                setTimeout(function () {
+                    track.style.transition = 'transform .22s cubic-bezier(0.34,1.56,0.64,1)';
+                    track.style.transform  = 'scale(1)';
+                }, 70);
+            };
+
+            /* ── Password strength ── */
+            window.evalStrength = function (input) {
+                var val   = input.value;
+                var bars  = document.querySelectorAll('#strengthBars .sb');
+                var label = document.getElementById('strengthLabel');
+                var score = 0;
+                if (val.length >= 8)           score++;
+                if (/[A-Z]/.test(val))         score++;
+                if (/[0-9]/.test(val))         score++;
+                if (/[^A-Za-z0-9]/.test(val))  score++;
+                var colors = ['','#ef4444','#f59e0b','#3b82f6','#10b981'];
+                var labels = ['','Débil','Regular','Buena','Fuerte'];
+                bars.forEach(function (bar, i) {
+                    bar.style.background = i < score ? colors[score] : 'var(--border-color)';
+                });
+                if (label) {
+                    label.textContent = val.length ? labels[score] : '';
+                    label.style.color = colors[score] || 'var(--text-muted)';
+                }
+            };
+
+            /* ── Delete confirm ── */
+            window.confirmDelete = function () {
+                if (confirm('¿Estás seguro? Esta acción eliminará tu cuenta de forma permanente y no se puede deshacer.')) {
+                    /* submit delete form */
+                }
+            };
+
+            /* ── Toast ── */
+            window.showToast = function (message, type) {
+                var toast = document.getElementById('kairos-toast');
+                var msg   = document.getElementById('toast-message');
+                var icon  = document.getElementById('toast-icon');
+                msg.textContent = message;
+                if (type === 'error') {
+                    toast.style.borderColor = 'rgba(239,68,68,0.3)';
+                    toast.style.color       = '#ef4444';
+                    icon.innerHTML          = '<i data-lucide="shield-off" style="width:14px;height:14px;flex-shrink:0;"></i>';
+                } else {
+                    toast.style.borderColor = 'rgba(16,185,129,0.3)';
+                    toast.style.color       = '#10b981';
+                    icon.innerHTML          = '<i data-lucide="shield-check" style="width:14px;height:14px;flex-shrink:0;"></i>';
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                toast.classList.add('show');
+                setTimeout(function () { toast.classList.remove('show'); }, 4200);
+            };
+
+        })();
     </script>
 }

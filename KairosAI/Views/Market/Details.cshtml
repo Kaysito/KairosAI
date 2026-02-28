@@ -3,7 +3,6 @@
     ViewData["Title"] = $"Análisis de {Model.Name} ({Model.Symbol})";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    // Lógica para colores de sentimiento y variaciones (usando Tailwind de forma que no choque con el tema)
     var changeClass = Model.Change24h >= 0 ? "text-emerald-500" : "text-red-500";
     var changeSign = Model.Change24h >= 0 ? "+" : "";
 
@@ -11,18 +10,18 @@
     {
         "alcista" => "color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.1);",
         "bajista" => "color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);",
-        _ => "color: #06b6d4; border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.1);" // Neutral
+        _ => "color: #06b6d4; border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.1);"
     };
 }
 
 <style>
-    /* ── Adaptación al Tema Claro/Oscuro ── */
+    /* ── UI Limpia y Optimizada ── */
     .glass-panel {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 24px;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        transition: all 0.3s ease;
     }
 
     .ai-glow-panel {
@@ -30,23 +29,10 @@
         border: 1px solid rgba(124,58,237,0.3);
         border-radius: 16px;
         position: relative;
-        overflow: hidden;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     [data-theme="dark"] .ai-glow-panel {
         box-shadow: inset 0 1px 15px rgba(124,58,237,0.1);
-    }
-
-    .ai-glow-panel::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--kairos-purple), transparent);
-        opacity: 0.7;
     }
 
     .stat-box {
@@ -54,102 +40,85 @@
         border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 16px;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
-    /* Contenedor del logo idéntico a Market Index */
     .asset-logo-wrap {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        border: 1px solid var(--border-color);
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
         background: var(--bg-panel);
-        overflow: hidden;
-        flex-shrink: 0;
+        border: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 8px;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        overflow: hidden;
+        flex-shrink: 0;
     }
 
         .asset-logo-wrap img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            padding: 8px; /* Respiración para logos de bolsa */
         }
 
-    .asset-logo-fallback {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--kairos-purple);
-    }
-
-    .text-theme-main {
-        color: var(--text-main);
-        transition: color 0.3s ease;
-    }
-
-    .text-theme-muted {
-        color: var(--text-muted);
-        transition: color 0.3s ease;
-    }
-
+    /* Input estilo trading */
     .input-theme {
         background: var(--bg-panel);
         border: 1px solid var(--border-color);
         color: var(--text-main);
-        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Animación de entrada fluida */
+    .k-fade {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @@keyframes fadeUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <div class="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-    <a asp-action="Index" class="inline-flex items-center gap-2 text-sm text-theme-muted hover:text-theme-main transition-colors mb-6 font-medium">
+    <a asp-action="Index" class="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors mb-6 font-medium no-underline">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Mercado
     </a>
 
-    <div class="glass-panel flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 k-fade visible">
+    <div class="glass-panel flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 k-fade">
         <div class="flex items-center gap-4">
 
-            <div class="asset-logo-wrap" aria-hidden="true">
-                @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                {
-                    <img src="@Model.ImageUrl"
-                         alt="@(Model.Symbol) logo"
-                         onerror="handleLogoError(this, '@(Model.Symbol)', '@(Model.Type)')" />
-                }
-                else
-                {
-                    <img data-stock-ticker="@Model.Symbol"
-                         alt="@(Model.Symbol) logo"
-                         style="display:none;"
-                         onerror="handleLogoError(this, '@(Model.Symbol)', '@(Model.Type)')" />
-
-                    <span class="asset-logo-fallback" data-fallback-ticker="@Model.Symbol">
-                        @(string.IsNullOrEmpty(Model.Symbol) ? "?" : Model.Symbol.Substring(0, 1).ToUpper())
-                    </span>
-                }
+            <div class="asset-logo-wrap">
+                <img src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "invalid")"
+                     alt="@Model.Symbol"
+                     onerror="handleLogoError(this, '@Model.Symbol')" />
+                <span class="hidden w-full h-full flex items-center justify-center font-mono font-bold text-xl text-[var(--text-muted)]">
+                    @Model.Symbol.Substring(0, 1)
+                </span>
             </div>
 
             <div>
                 <div class="flex items-center gap-3">
-                    <h1 class="text-2xl font-bold text-theme-main tracking-tight">@Model.Name</h1>
-                    <span class="px-2.5 py-1 rounded-md text-theme-muted font-mono text-xs font-semibold border border-solid border-[var(--border-color)] bg-[var(--bg-panel)]">@Model.Symbol</span>
+                    <h1 class="text-2xl font-bold tracking-tight text-[var(--text-main)]">@Model.Name</h1>
+                    <span class="px-2.5 py-1 rounded-md text-[var(--text-muted)] font-mono text-xs font-semibold border border-[var(--border-color)] bg-[var(--bg-panel)]">@Model.Symbol</span>
                     @if (Model.IsTrending)
                     {
-                        <span class="px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-bold border border-orange-500/20 flex items-center gap-1">
+                        <span class="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 text-[0.65rem] font-bold border border-orange-500/20 flex items-center gap-1">
                             <i data-lucide="flame" class="w-3 h-3"></i> HOT
                         </span>
                     }
                 </div>
-                <p class="text-sm text-theme-muted mt-1">Riesgo evaluado: <span class="font-semibold text-theme-main">@Model.RiskLevel</span></p>
+                <p class="text-sm text-[var(--text-muted)] mt-1">Riesgo evaluado: <span class="font-semibold text-[var(--text-main)]">@Model.RiskLevel</span></p>
             </div>
         </div>
 
-        <div class="text-left md:text-right">
-            <div class="text-3xl font-mono font-bold text-theme-main tracking-tight">$@Model.Price.ToString("N2")</div>
+        <div class="text-left md:text-right flex flex-col justify-center">
+            <div class="text-3xl font-mono font-bold tracking-tight tabular-nums text-[var(--text-main)]">$@Model.Price.ToString("N2")</div>
             <div class="text-sm font-mono font-semibold @changeClass mt-1 flex items-center md:justify-end gap-1">
                 <i data-lucide="@(Model.Change24h >= 0 ? "trending-up" : "trending-down")" class="w-4 h-4"></i>
                 @changeSign@Model.Change24h.ToString("F2")% (24h)
@@ -160,125 +129,164 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <div class="lg:col-span-2 space-y-6">
-            <div class="glass-panel k-fade visible" style="transition-delay: 0.1s;">
-                <h3 class="text-sm font-bold text-theme-muted uppercase tracking-widest mb-4">Evolución de Precio</h3>
+            <div class="glass-panel k-fade" style="animation-delay: 0.1s;">
+                <h3 class="text-[0.65rem] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4">Evolución de Precio</h3>
                 <div class="w-full h-[300px] relative">
                     <canvas id="assetChart"></canvas>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 k-fade visible" style="transition-delay: 0.2s;">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 k-fade" style="animation-delay: 0.15s;">
                 <div class="stat-box">
-                    <p class="text-xs text-theme-muted uppercase tracking-wider mb-1">Cap. de Mercado</p>
-                    <p class="font-mono text-sm font-semibold text-theme-main">@(!string.IsNullOrEmpty(Model.MarketCap) ? Model.MarketCap : "N/D")</p>
+                    <p class="text-[0.65rem] text-[var(--text-muted)] uppercase tracking-wider mb-1 font-bold">Cap. de Mercado</p>
+                    <p class="font-mono text-sm font-semibold text-[var(--text-main)] tabular-nums">@(!string.IsNullOrEmpty(Model.MarketCap) ? Model.MarketCap : "N/D")</p>
                 </div>
                 <div class="stat-box">
-                    <p class="text-xs text-theme-muted uppercase tracking-wider mb-1">Volumen (24h)</p>
-                    <p class="font-mono text-sm font-semibold text-theme-main">@(!string.IsNullOrEmpty(Model.Volume24h) ? Model.Volume24h : "N/D")</p>
+                    <p class="text-[0.65rem] text-[var(--text-muted)] uppercase tracking-wider mb-1 font-bold">Volumen (24h)</p>
+                    <p class="font-mono text-sm font-semibold text-[var(--text-main)] tabular-nums">@(!string.IsNullOrEmpty(Model.Volume24h) ? Model.Volume24h : "N/D")</p>
                 </div>
                 <div class="stat-box">
-                    <p class="text-xs text-theme-muted uppercase tracking-wider mb-1">Máx (24h)</p>
-                    <p class="font-mono text-sm font-semibold text-emerald-500">$@Model.High24h.ToString("N2")</p>
+                    <p class="text-[0.65rem] text-[var(--text-muted)] uppercase tracking-wider mb-1 font-bold">Máx (24h)</p>
+                    <p class="font-mono text-sm font-semibold text-emerald-500 tabular-nums">$@Model.High24h.ToString("N2")</p>
                 </div>
                 <div class="stat-box">
-                    <p class="text-xs text-theme-muted uppercase tracking-wider mb-1">Mín (24h)</p>
-                    <p class="font-mono text-sm font-semibold text-red-500">$@Model.Low24h.ToString("N2")</p>
+                    <p class="text-[0.65rem] text-[var(--text-muted)] uppercase tracking-wider mb-1 font-bold">Mín (24h)</p>
+                    <p class="font-mono text-sm font-semibold text-red-500 tabular-nums">$@Model.Low24h.ToString("N2")</p>
                 </div>
             </div>
         </div>
 
         <div class="space-y-6">
-            <div class="ai-glow-panel p-6 k-fade visible" style="transition-delay: 0.15s;">
+
+            <div class="ai-glow-panel p-6 k-fade" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="sparkles" class="w-5 h-5 text-[#7c3aed]"></i>
-                        <h2 class="font-bold text-theme-main tracking-wide">Análisis KairósAI</h2>
+                        <i data-lucide="sparkles" class="w-4 h-4 text-[#7c3aed]"></i>
+                        <h2 class="font-bold text-[var(--text-main)] text-sm tracking-wide">Análisis KairósAI</h2>
                     </div>
                     @if (!string.IsNullOrEmpty(Model.KairosSentiment))
                     {
-                        <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full border" style="@sentimentColor">
+                        <span class="px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider rounded-full border" style="@sentimentColor">
                             @Model.KairosSentiment
                         </span>
                     }
                 </div>
 
-                <div class="text-sm text-theme-main opacity-90 leading-relaxed mb-6 font-medium">
+                <div class="text-[0.8rem] text-[var(--text-main)] opacity-90 leading-relaxed font-medium">
                     @if (!string.IsNullOrEmpty(Model.KairosAnalysis))
                     {
                         @Html.Raw(Model.KairosAnalysis.Replace("\n", "<br/>"))
                     }
                     else
                     {
-                        <p class="italic text-theme-muted">Recopilando datos de red neuronal en tiempo real... Por favor, solicita un análisis en el chat.</p>
+                        <p class="italic text-[var(--text-muted)]">Recopilando datos... Solicita un análisis en el chat.</p>
                     }
                 </div>
             </div>
 
-            <div class="glass-panel k-fade visible" style="transition-delay: 0.25s;">
-                <h3 class="text-sm font-bold text-theme-main mb-4">Simular Operación</h3>
+            <div class="glass-panel k-fade" style="animation-delay: 0.25s;">
+                <h3 class="text-sm font-bold text-[var(--text-main)] mb-4">Operar @Model.Symbol</h3>
                 <form class="space-y-4">
                     <div>
-                        <label class="block text-xs text-theme-muted mb-2 font-semibold">Monto a Invertir (USD)</label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[0.65rem] uppercase tracking-wider text-[var(--text-muted)] font-bold">Monto a Invertir</label>
+                            <span class="text-xs font-mono text-[var(--text-muted)]">Saldo: $450.00</span>
+                        </div>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted font-mono">$</span>
-                            <input type="number" asp-for="AmountToInvest" class="input-theme w-full rounded-lg py-2.5 pl-8 pr-4 font-mono focus:border-[#7c3aed] focus:ring-1 focus:ring-[#7c3aed] outline-none" placeholder="0.00">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] font-mono">$</span>
+                            <input type="number" asp-for="AmountToInvest" class="input-theme w-full rounded-xl py-3 pl-8 pr-4 font-mono text-lg font-bold focus:border-[#7c3aed] focus:ring-1 focus:ring-[#7c3aed] outline-none transition-all" placeholder="0.00">
                         </div>
                     </div>
-                    <button type="button" class="w-full py-3 rounded-lg font-bold text-white transition-all bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] hover:opacity-90 shadow-[0_0_20px_rgba(124,58,237,0.3)]">
-                        Ejecutar Orden Mkt
+                    <button type="button" class="w-full py-3.5 rounded-xl font-bold text-white transition-all bg-gradient-to-r from-[#7c3aed] to-[#06b6d4] hover:opacity-90 shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:-translate-y-0.5">
+                        Previsualizar Orden
                     </button>
-                    <p class="text-[0.65rem] text-theme-muted text-center uppercase tracking-widest mt-3">Transacción protegida por cifrado</p>
+                    <p class="text-[0.6rem] text-[var(--text-muted)] text-center uppercase tracking-widest mt-3 flex items-center justify-center gap-1">
+                        <i data-lucide="lock" class="w-3 h-3"></i> Protegido por Kairós
+                    </p>
                 </form>
             </div>
-        </div>
 
+            <div class="glass-panel k-fade" style="animation-delay: 0.3s;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-bold flex items-center gap-2 text-[var(--text-main)]">
+                        <i data-lucide="layers" class="w-4 h-4 text-blue-500"></i> Mercado Hoy
+                    </h2>
+                </div>
+
+                <div class="flex flex-col flex-1 overflow-y-auto pr-1 custom-scroll" style="max-height: 340px;">
+                    @foreach (var asset in Model.TopAssets)
+                    {
+                        <a href="#" class="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 no-underline">
+                            <div class="flex items-center gap-3">
+                                <img src="@(!string.IsNullOrEmpty(asset.ImageUrl) ? asset.ImageUrl : "invalid")"
+                                     class="w-8 h-8 rounded-full object-cover bg-black/20"
+                                     alt="@asset.Symbol"
+                                     onerror="handleListLogoError(this, '@asset.Symbol')" />
+
+                                <div class="fallback-icon hidden w-8 h-8 rounded-full border border-[var(--border-color)] items-center justify-center font-bold text-xs font-mono bg-[var(--bg-panel)] text-[var(--text-main)]">
+                                    @asset.Symbol.Substring(0, 1)
+                                </div>
+
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-[var(--text-main)] leading-tight">@asset.Symbol</span>
+                                    <span class="text-xs text-[var(--text-muted)] truncate w-20">@asset.Name</span>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col">
+                                <span class="text-[0.85rem] font-bold text-[var(--text-main)] tabular-nums font-mono">$@asset.Price.ToString("N2")</span>
+                                <span class="text-xs font-bold @(asset.Change24h >= 0 ? "text-emerald-500" : "text-red-500")">
+                                    @(asset.Change24h >= 0 ? "▲" : "▼") @Math.Abs(asset.Change24h).ToString("F2")%
+                                </span>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // ── Lógica de Logos idéntica a Market Index ──
-        (function () {
-            const TICKER_DOMAIN_MAP = {
-                AAPL:'apple.com', MSFT:'microsoft.com', GOOGL:'google.com', GOOG:'google.com',
-                AMZN:'amazon.com', NVDA:'nvidia.com', TSLA:'tesla.com', META:'meta.com'
-            };
-            const CDN = 'https://cdn.tickerlogos.com/';
+        // ── MOTOR DE RESCATE DE LOGOS ──
+        const TICKER_MAP = {
+            'BTC': 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+            'ETH': 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
+            'USDT': 'https://assets.coingecko.com/coins/images/325/large/Tether.png',
+            'BNB': 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
+            'SOL': 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
+            'NVDA': 'https://logo.clearbit.com/nvidia.com',
+            'AAPL': 'https://logo.clearbit.com/apple.com',
+            'TSLA': 'https://logo.clearbit.com/tesla.com',
+            'MSFT': 'https://logo.clearbit.com/microsoft.com',
+            'AMZN': 'https://logo.clearbit.com/amazon.com'
+        };
 
-            window.handleLogoError = function(img, symbol, type) {
-                if (!img.dataset.triedSynth) {
-                    img.dataset.triedSynth = '1';
-                    img.src = 'https://logo.synthfinance.com/ticker/' + (symbol || '');
-                    return;
-                }
+        window.handleLogoError = function(img, symbol) {
+            if (img.dataset.fallbackTried) {
                 img.style.display = 'none';
-                const wrap = img.closest('.asset-logo-wrap');
-                if (wrap) {
-                    let fb = wrap.querySelector('.asset-logo-fallback');
-                    if (!fb) {
-                        fb = document.createElement('span');
-                        fb.className = 'asset-logo-fallback';
-                        fb.textContent = symbol ? symbol.charAt(0).toUpperCase() : '?';
-                        wrap.appendChild(fb);
-                    }
-                    fb.style.display = '';
-                }
-            };
+                img.nextElementSibling.classList.remove('hidden');
+                img.nextElementSibling.classList.add('flex');
+                return;
+            }
+            img.dataset.fallbackTried = 'true';
+            img.src = TICKER_MAP[symbol.toUpperCase()] || `https://logo.synthfinance.com/ticker/${symbol}`;
+        };
 
-            document.querySelectorAll('img[data-stock-ticker]').forEach(img => {
-                const ticker = img.getAttribute('data-stock-ticker') || '';
-                const domain = TICKER_DOMAIN_MAP[ticker.toUpperCase()];
-                if (domain) {
-                    img.src = CDN + domain;
-                    img.style.display = 'block';
-                    const fb = img.parentElement.querySelector('.asset-logo-fallback');
-                    if (fb) fb.style.display = 'none';
-                }
-            });
-        })();
+        window.handleListLogoError = function(img, symbol) {
+            if (img.dataset.fallbackTried) {
+                img.style.display = 'none';
+                img.nextElementSibling.classList.remove('hidden');
+                img.nextElementSibling.classList.add('flex');
+                return;
+            }
+            img.dataset.fallbackTried = 'true';
+            img.src = TICKER_MAP[symbol.toUpperCase()] || `https://logo.synthfinance.com/ticker/${symbol}`;
+        };
 
-        // ── Lógica de la Gráfica ──
+        // ── Gráficas e Iconos ──
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -294,7 +302,6 @@
             gradient.addColorStop(0, gradientColor);
             gradient.addColorStop(1, 'rgba(0,0,0,0)');
 
-            // Función para obtener el color del texto según el tema actual
             function getTextColor() {
                 return document.documentElement.getAttribute('data-theme') === 'light' ? '#6b7280' : '#8b8fa8';
             }
@@ -311,7 +318,7 @@
                         data: dataPoints.length > 0 ? dataPoints : [0,0,0,0,0,0],
                         borderColor: lineColor,
                         backgroundColor: gradient,
-                        borderWidth: 2,
+                        borderWidth: 2.5,
                         pointRadius: 0,
                         pointHoverRadius: 6,
                         fill: true,
@@ -326,10 +333,14 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
-                            backgroundColor: 'rgba(124,58,237,0.9)',
+                            backgroundColor: 'rgba(15,23,42,0.9)',
                             titleColor: '#fff',
                             bodyColor: '#fff',
-                            bodyFont: { family: "'JetBrains Mono', monospace" }
+                            bodyFont: { family: "'JetBrains Mono', monospace" },
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false
                         }
                     },
                     scales: {
@@ -337,10 +348,7 @@
                         y: {
                             display: true,
                             position: 'right',
-                            grid: {
-                                color: getGridColor(),
-                                drawBorder: false
-                            },
+                            grid: { color: getGridColor(), drawBorder: false },
                             ticks: {
                                 color: getTextColor(),
                                 font: { family: "'JetBrains Mono', monospace", size: 10 },
@@ -352,7 +360,7 @@
                 }
             });
 
-            // Escuchar cambios de tema para actualizar colores de la gráfica
+            // Actualizar colores si cambian de tema
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.attributeName === "data-theme") {
