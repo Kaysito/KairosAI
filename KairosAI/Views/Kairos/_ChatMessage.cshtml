@@ -1,0 +1,45 @@
+﻿@model KairosAI.Models.ViewModels.ChatMessage
+
+@{
+    bool isAi = Model.Role == "Kairos";
+}
+
+@if (isAi)
+{
+    <div class="msg-enter k-msg">
+        <div class="avatar-ai">
+            <i data-lucide="bot"></i>
+        </div>
+        <div class="k-msg__body">
+            <div class="k-msg__label">
+                KAIROS AI
+                <span class="k-msg__label-dot"></span>
+                <span class="k-msg__label-version">v2.4</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Reasoning))
+            {
+                <details class="reasoning-details">
+                    <summary>💭 Ver razonamiento</summary>
+                    <div class="ai-prose">@Model.Reasoning</div>
+                </details>
+            }
+
+            <div class="ai-prose raw-markdown">@Model.Text</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="msg-enter k-msg k-msg--user">
+        <div class="avatar-user">
+            @* TODO: Generar iniciales dinámicamente *@
+            KH
+        </div>
+        <div class="k-msg__body--user">
+            <div class="bubble-user">
+                @Model.Text
+            </div>
+        </div>
+    </div>
+}

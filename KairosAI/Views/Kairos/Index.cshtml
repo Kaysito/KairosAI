@@ -9,122 +9,140 @@
     <link rel="stylesheet" href="~/css/Kairos/Index.css" asp-append-version="true" />
 }
 
-<div style="display:flex;flex-direction:column;height:calc(100dvh - 2rem);background:var(--bg-main);overflow:hidden;">
+<div class="k-app">
 
-    <header style="height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--bg-panel);border-bottom:1px solid var(--border-color);z-index:20;">
-        <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.08));border:1px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;">
-                <i data-lucide="bot" style="width:16px;height:16px;color:#7c3aed;"></i>
+    @* ═══════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════ *@
+    <header class="k-header">
+        <div class="k-header__brand">
+            <div class="k-header__logo">
+                <i data-lucide="bot"></i>
             </div>
             <div>
-                <div style="font-size:0.82rem;font-weight:700;color:var(--text-main);line-height:1.2;letter-spacing:0.02em;">Kairos Intelligence</div>
-                <div style="display:flex;align-items:center;gap:5px;font-size:0.6rem;font-weight:700;color:#10b981;letter-spacing:0.08em;font-family:'JetBrains Mono',monospace;text-transform:uppercase;">
-                    <div class="live-dot"></div> Modelo financiero activo
+                <div class="k-header__title">Kairos Intelligence</div>
+                <div class="k-header__status">
+                    <div class="live-dot"></div>
+                    Modelo financiero activo
                 </div>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:0.58rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(124,58,237,0.1);color:#7c3aed;font-family:'JetBrains Mono',monospace;border:1px solid rgba(124,58,237,0.18);">v2.4</span>
+        <div class="k-header__actions">
+            <span class="k-header__version">v@(Model.AppVersion)</span>
             <form asp-action="Clear" method="post">
-                <button type="submit" class="act-btn" title="Nueva conversación" style="margin-left:2px;">
-                    <i data-lucide="square-pen" style="width:16px;height:16px;"></i>
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="act-btn"
+                        title="Nueva conversación"
+                        aria-label="Iniciar nueva conversación">
+                    <i data-lucide="square-pen"></i>
                 </button>
             </form>
         </div>
     </header>
 
-    <main style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--bg-main);">
-        <div id="chatContainer" class="scroll-h" style="flex:1;overflow-y:auto;padding:20px 16px 150px;scroll-behavior:smooth;">
+    @* ═══════════════════════════════════════════════════════════
+       MAIN CHAT AREA
+       ═══════════════════════════════════════════════════════════ *@
+    <main class="k-main">
+        <div id="chatContainer" class="k-chat-scroll scroll-h">
 
             @if (!Model.ConversationHistory.Any())
             {
-                <div id="emptyState" class="k-fade-in" style="min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 16px;animation-delay:0.1s;">
-                    <div style="width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.06));border:1px solid rgba(124,58,237,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 28px rgba(124,58,237,0.1);">
-                        <i data-lucide="sparkles" style="width:30px;height:30px;color:#7c3aed;"></i>
+                @* ── Estado Vacío ── *@
+                <div id="emptyState" class="k-empty k-fade-in">
+                    <div class="k-empty__icon">
+                        <i data-lucide="sparkles"></i>
                     </div>
-                    <h2 style="font-size:1.25rem;font-weight:800;color:var(--text-main);margin-bottom:8px;">Hola, Kevin 👋</h2>
-                    <p style="max-width:340px;font-size:0.8rem;line-height:1.7;color:var(--text-muted);margin-bottom:26px;">
-                        Soy tu asesor financiero IA. Analizo portafolios, explico conceptos DeFi y te ayudo a invertir con más criterio.
+                    <h2 class="k-empty__greeting">
+                        Hola, @Model.UserDisplayName 👋
+                    </h2>
+                    <p class="k-empty__description">
+                        Soy tu asesor financiero IA. Analizo portafolios,
+                        explico conceptos DeFi y te ayudo a invertir
+                        con más criterio.
                     </p>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;width:100%;max-width:480px;">
-                        <button onclick="fillInput('Analiza mi rendimiento mensual')" class="suggestion-chip">
-                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">📈 Rendimiento</span>
-                            ¿Cómo va mi portafolio este mes?
-                        </button>
-                        <button onclick="fillInput('¿Qué es un ETF de Bitcoin?')" class="suggestion-chip">
-                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#06b6d4;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">📚 Academia</span>
-                            ¿Qué es un ETF de Bitcoin?
-                        </button>
-                        <button onclick="fillInput('¿Cuál es mi perfil de riesgo actual?')" class="suggestion-chip">
-                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">🎯 Estrategia</span>
-                            ¿Cuál es mi perfil de riesgo?
-                        </button>
-                        <button onclick="fillInput('Dame noticias del mercado crypto hoy')" class="suggestion-chip">
-                            <span style="display:block;font-size:0.62rem;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;">⚡ Mercado</span>
-                            Noticias crypto de hoy
-                        </button>
+                    <div class="k-suggestions">
+                        @foreach (var chip in Model.SuggestionChips)
+                        {
+                            <button type="button"
+                                    class="suggestion-chip"
+                                    data-prompt="@chip.Prompt">
+                                <span class="k-suggestion__category k-suggestion__category--@chip.CssModifier">
+                                    @chip.Icon @chip.Label
+                                </span>
+                                @chip.DisplayText
+                            </button>
+                        }
                     </div>
                 </div>
             }
             else
             {
-                <div id="messagesWrapper" style="max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:22px;">
+                @* ── Mensajes ── *@
+                <div id="messagesWrapper" class="k-messages">
                     @foreach (var msg in Model.ConversationHistory)
                     {
-                        bool isAi = msg.Role == "Kairos";
-                        if (isAi)
-                        {
-                            <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;">
-                                <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-size:0.58rem;font-weight:800;color:#7c3aed;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;">
-                                        KAIROS AI <span style="width:3px;height:3px;border-radius:50%;background:rgba(124,58,237,0.35);"></span>
-                                        <span style="font-weight:500;color:var(--text-muted);letter-spacing:0.03em;text-transform:none;font-size:0.56rem;">v2.4</span>
-                                    </div>
-                                    <div class="ai-prose raw-markdown">@msg.Text</div>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="msg-enter" style="display:flex;gap:11px;align-items:flex-start;flex-direction:row-reverse;">
-                                <div class="avatar-user">KH</div>
-                                <div style="max-width:76%;flex-shrink:0;">
-                                    <div class="bubble-user" style="padding:11px 15px;border-radius:18px;border-top-right-radius:4px;font-size:0.875rem;line-height:1.6;word-break:break-word;">
-                                        @msg.Text
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                        @await Html.PartialAsync("_ChatMessage", msg)
                     }
                 </div>
             }
 
-            <div id="typingIndicator" class="hidden" style="max-width:740px;margin:12px auto 0;">
-                <div style="display:flex;gap:11px;align-items:flex-start;">
-                    <div class="avatar-ai"><i data-lucide="bot" style="width:15px;height:15px;"></i></div>
-                    <div style="display:flex;align-items:center;gap:5px;padding:12px 14px;border-radius:14px;background:var(--bg-card);border:1px solid var(--border-color);">
-                        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+            @* ── Indicador de escritura ── *@
+            <div id="typingIndicator"
+                 class="k-typing hidden"
+                 aria-live="polite"
+                 aria-label="Kairos está escribiendo">
+                <div class="k-typing__inner">
+                    <div class="avatar-ai">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <div class="k-typing__dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="input-fade" style="position:absolute;bottom:0;left:0;right:0;padding:8px 16px 18px;z-index:20;">
-            <form id="chatForm" style="max-width:740px;margin:0 auto;">
-                <div class="chat-input-box" style="display:flex;align-items:flex-end;gap:6px;padding:5px 7px;">
-                    <button type="button" class="act-btn" title="Adjuntar">
-                        <i data-lucide="paperclip" style="width:17px;height:17px;"></i>
+        @* ═══════════════════════════════════════════════════════
+           INPUT BAR
+           ═══════════════════════════════════════════════════════ *@
+        <div class="k-input-area input-fade">
+            <form id="chatForm" class="k-input-form">
+                @Html.AntiForgeryToken()
+                <div class="chat-input-box k-input-row">
+                    <button type="button"
+                            class="act-btn"
+                            title="Adjuntar archivo (próximamente)"
+                            aria-label="Adjuntar archivo"
+                            disabled>
+                        <i data-lucide="paperclip"></i>
                     </button>
-                    <textarea asp-for="CurrentInput" id="chatInput" rows="1" placeholder="Pregunta sobre activos, estrategias o conceptos..." class="chat-textarea" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
-                    <button type="submit" id="sendBtn" class="send-btn" title="Enviar">
-                        <i data-lucide="arrow-up" style="width:17px;height:17px;stroke-width:2.5;"></i>
+                    <textarea asp-for="CurrentInput"
+                              id="chatInput"
+                              rows="1"
+                              placeholder="Pregunta sobre activos, estrategias o conceptos..."
+                              class="chat-textarea"
+                              aria-label="Escribe tu mensaje"
+                              maxlength="2000"></textarea>
+                    <button type="submit"
+                            id="sendBtn"
+                            class="send-btn"
+                            title="Enviar mensaje"
+                            aria-label="Enviar mensaje">
+                        <i data-lucide="arrow-up"></i>
                     </button>
-                    <button type="button" id="stopBtn" class="stop-btn hidden" title="Detener" onclick="stopGeneration()">
-                        <i data-lucide="square" style="width:15px;height:15px;fill:currentColor;"></i>
+                    <button type="button"
+                            id="stopBtn"
+                            class="stop-btn hidden"
+                            title="Detener generación"
+                            aria-label="Detener respuesta">
+                        <i data-lucide="square"></i>
                     </button>
                 </div>
-                <p style="text-align:center;font-size:0.58rem;color:var(--text-muted);margin-top:6px;opacity:0.65;">
+                <p class="k-disclaimer">
                     Kairos puede cometer errores · Verifica siempre la información financiera
                 </p>
             </form>
@@ -134,6 +152,5 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
     <script src="~/js/Kairos/Index.js" asp-append-version="true"></script>
 }
