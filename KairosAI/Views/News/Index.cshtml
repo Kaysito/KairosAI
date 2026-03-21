@@ -3,12 +3,9 @@
     ViewData["Title"] = "Noticias - KairosAI";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    // ── Lógica de Kairós: Veredicto de Noticias ──
     int totalNews = Model.Headlines.Count();
     int positiveCount = Model.Headlines.Count(n => n.Sentiment == "Positivo");
     int negativeCount = Model.Headlines.Count(n => n.Sentiment == "Negativo");
-
-    // Evitar división por cero si no hay noticias
     int positivePct = totalNews > 0 ? (int)Math.Round((double)positiveCount / totalNews * 100) : 0;
     int negativePct = totalNews > 0 ? (int)Math.Round((double)negativeCount / totalNews * 100) : 0;
     int neutralPct = totalNews > 0 ? 100 - positivePct - negativePct : 0;
@@ -17,8 +14,62 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/News/Index.css" asp-append-version="true" />
 }
+
 <div class="news-page h-full overflow-y-auto" style="padding: 0 0 60px;">
 
+    @* ═══ MARKET TICKER BANNER ═══ *@
+    @if (Model.MarketTicker.Any())
+    {
+        <div class="market-ticker-container k-fade">
+            <div class="market-ticker-track" id="tickerTrack">
+                @foreach (var tick in Model.MarketTicker)
+                {
+                    <div class="ticker-item" data-symbol="@tick.Symbol">
+                        @if (!string.IsNullOrEmpty(tick.ImageUrl))
+                        {
+                            <img src="@tick.ImageUrl" alt="@tick.Symbol" class="ticker-icon" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="ticker-icon-placeholder">
+                                <i data-lucide="@(tick.AssetType == "crypto" ? "bitcoin" : "trending-up")" style="width:12px;height:12px;"></i>
+                            </div>
+                        }
+                        <span class="ticker-symbol">@tick.Symbol</span>
+                        <span class="ticker-price" id="price-@tick.Symbol">@tick.PriceFormatted</span>
+                        <span class="ticker-change @(tick.IsPositive ? "up" : "down")" id="change-@tick.Symbol">
+                            <i data-lucide="@(tick.IsPositive ? "trending-up" : "trending-down")" style="width:10px;height:10px;"></i>
+                            @tick.ChangeFormatted
+                        </span>
+                    </div>
+                }
+                @* Duplicar para scroll infinito *@
+                @foreach (var tick in Model.MarketTicker)
+                {
+                    <div class="ticker-item" data-symbol="@tick.Symbol" aria-hidden="true">
+                        @if (!string.IsNullOrEmpty(tick.ImageUrl))
+                        {
+                            <img src="@tick.ImageUrl" alt="@tick.Symbol" class="ticker-icon" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="ticker-icon-placeholder">
+                                <i data-lucide="@(tick.AssetType == "crypto" ? "bitcoin" : "trending-up")" style="width:12px;height:12px;"></i>
+                            </div>
+                        }
+                        <span class="ticker-symbol">@tick.Symbol</span>
+                        <span class="ticker-price">@tick.PriceFormatted</span>
+                        <span class="ticker-change @(tick.IsPositive ? "up" : "down")">
+                            <i data-lucide="@(tick.IsPositive ? "trending-up" : "trending-down")" style="width:10px;height:10px;"></i>
+                            @tick.ChangeFormatted
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @* ═══ HEADER ═══ *@
     <div class="news-header px-5 sm:px-8">
         <div class="max-w-7xl mx-auto">
 
@@ -61,35 +112,33 @@
                 </div>
             </div>
 
+            @* ═══ FILTER TABS ═══ *@
             <div class="filter-tabs k-fade" style="transition-delay:0.15s;" role="tablist" aria-label="Filtrar noticias">
                 <button class="filter-pill active" onclick="filterNews(this,'todo')" role="tab" aria-selected="true">
                     <i data-lucide="layout-grid" style="width:12px;height:12px;"></i>
-                    Todo
+                    Todo <span class="pill-count">@totalNews</span>
                 </button>
                 <button class="filter-pill" onclick="filterNews(this,'cripto')" role="tab" aria-selected="false">
                     <i data-lucide="bitcoin" style="width:12px;height:12px;"></i>
-                    Cripto
+                    Cripto <span class="pill-count">@Model.Headlines.Count(n => n.Category == "cripto")</span>
                 </button>
                 <button class="filter-pill" onclick="filterNews(this,'forex')" role="tab" aria-selected="false">
                     <i data-lucide="dollar-sign" style="width:12px;height:12px;"></i>
-                    Forex
+                    Forex <span class="pill-count">@Model.Headlines.Count(n => n.Category == "forex")</span>
                 </button>
                 <button class="filter-pill" onclick="filterNews(this,'acciones')" role="tab" aria-selected="false">
                     <i data-lucide="trending-up" style="width:12px;height:12px;"></i>
-                    Acciones
+                    Acciones <span class="pill-count">@Model.Headlines.Count(n => n.Category == "acciones")</span>
                 </button>
                 <button class="filter-pill" onclick="filterNews(this,'macro')" role="tab" aria-selected="false">
                     <i data-lucide="globe" style="width:12px;height:12px;"></i>
-                    Macro
-                </button>
-                <button class="filter-pill" onclick="filterNews(this,'video')" role="tab" aria-selected="false">
-                    <i data-lucide="youtube" style="width:12px;height:12px;"></i>
-                    Videos
+                    Macro <span class="pill-count">@Model.Headlines.Count(n => n.Category == "macro")</span>
                 </button>
             </div>
         </div>
     </div>
 
+    @* ═══ NEWS GRID ═══ *@
     <div class="px-5 sm:px-8 mt-6">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 k-fade" style="transition-delay:0.2s;" id="newsGrid">
@@ -99,6 +148,7 @@
                     <div class="empty-state">
                         <i data-lucide="inbox" style="width:40px;height:40px;margin:0 auto 12px;opacity:0.3;"></i>
                         <p style="font-size:0.9rem;">No hay noticias disponibles por ahora.</p>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Las APIs podrían estar temporalmente inaccesibles.</p>
                     </div>
                 }
 
@@ -121,52 +171,39 @@
                         _ => "minus"
                     };
 
-                    // Category detection (simple heuristic — reemplaza con tu campo real)
-                    string cat = "default";
-                    string catLabel = "General";
-                    var titleLower = item.Title.ToLower();
-                    if (titleLower.Contains("bitcoin") || titleLower.Contains("eth") || titleLower.Contains("crypto") || titleLower.Contains("cripto") || titleLower.Contains("defi"))
-                    { cat = "cripto"; catLabel = "Cripto"; }
-                    else if (titleLower.Contains("dólar") || titleLower.Contains("euro") || titleLower.Contains("forex") || titleLower.Contains("divisa"))
-                    { cat = "forex"; catLabel = "Forex"; }
-                    else if (titleLower.Contains("bolsa") || titleLower.Contains("acción") || titleLower.Contains("nasdaq") || titleLower.Contains("s&p"))
-                    { cat = "acciones"; catLabel = "Acciones"; }
-                    else if (titleLower.Contains("fed") || titleLower.Contains("inflación") || titleLower.Contains("pib") || titleLower.Contains("macro"))
-                    { cat = "macro"; catLabel = "Macro"; }
-
-                    // Video detection
-                    string videoId = "";
-                    if (item.Title.Contains("Video") || item.Title.Contains("Análisis"))
+                    string cat = item.Category;
+                    string catLabel = cat switch
                     {
-                        videoId = "plz-8Z8GzK8";
-                        cat = "video"; catLabel = "Video";
-                    }
-
-                    string externalLink = "#"; // item.Url
+                        "cripto" => "Cripto",
+                        "forex" => "Forex",
+                        "acciones" => "Acciones",
+                        "macro" => "Macro",
+                        _ => "General"
+                    };
 
                     if (isFirst)
                     {
                         isFirst = false;
+                        @* ═══ FEATURED CARD (primera noticia) ═══ *@
                         <article class="card-featured" data-category="@cat">
                             <div class="card-accent-bar"></div>
 
-                            @if (!string.IsNullOrEmpty(videoId))
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
-                                <div class="video-wrapper">
-                                    <iframe src="https://www.youtube.com/embed/@videoId"
-                                            title="@item.Title" frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen loading="lazy"></iframe>
+                                <div class="card-image-wrap">
+                                    <img src="@item.ImageUrl" alt="@item.Title" loading="lazy" />
+                                    <div class="card-image-overlay"></div>
+                                    <span class="card-image-badge">DESTACADO</span>
                                 </div>
                             }
                             else
                             {
-                                <div style="height:180px;background:linear-gradient(135deg,rgba(124,58,237,0.12) 0%,rgba(6,182,212,0.06) 100%);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border-color);position:relative;overflow:hidden;">
-                                    <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);top:-40px;left:-40px;"></div>
-                                    <div style="position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.1),transparent 70%);bottom:-30px;right:20px;"></div>
+                                <div class="card-hero-placeholder">
+                                    <div class="hero-orb hero-orb-1"></div>
+                                    <div class="hero-orb hero-orb-2"></div>
                                     <div style="text-align:center;position:relative;z-index:1;">
                                         <i data-lucide="newspaper" style="width:36px;height:36px;color:rgba(124,58,237,0.4);margin:0 auto 8px;display:block;"></i>
-                                        <span style="font-size:0.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">ANÁLISIS DESTACADO</span>
+                                        <span class="hero-label">AN��LISIS DESTACADO</span>
                                     </div>
                                 </div>
                             }
@@ -180,7 +217,7 @@
                                         </span>
                                         <span class="category-tag tag-@cat">@catLabel</span>
                                     </div>
-                                    <span style="font-size:0.65rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:4px;">
+                                    <span class="time-stamp">
                                         <i data-lucide="clock" style="width:11px;height:11px;"></i>
                                         @item.TimeAgo
                                     </span>
@@ -193,6 +230,50 @@
                                     @item.Summary
                                 </p>
 
+                                @* ═══ PRECIOS EN TIEMPO REAL ═══ *@
+                                @if (item.RelatedAssets.Any())
+                                {
+                                    <div class="related-assets-container">
+                                        <div class="related-assets-header">
+                                            <i data-lucide="bar-chart-3" style="width:11px;height:11px;color:#7c3aed;"></i>
+                                            <span>Activos relacionados</span>
+                                        </div>
+                                        <div class="related-assets-grid">
+                                            @foreach (var asset in item.RelatedAssets)
+                                            {
+                                                <div class="asset-chip @(asset.IsPositive ? "asset-up" : "asset-down")">
+                                                    @if (!string.IsNullOrEmpty(asset.ImageUrl))
+                                                    {
+                                                        <img src="@asset.ImageUrl" alt="@asset.Symbol" class="asset-icon" loading="lazy" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="asset-icon-text">@asset.Symbol[..1]</div>
+                                                    }
+                                                    <div class="asset-info">
+                                                        <span class="asset-symbol">@asset.Symbol</span>
+                                                        <span class="asset-name">@asset.Name</span>
+                                                    </div>
+                                                    <div class="asset-price-block">
+                                                        <span class="asset-price">@asset.PriceFormatted</span>
+                                                        <span class="asset-change @(asset.IsPositive ? "change-up" : "change-down")">
+                                                            <i data-lucide="@(asset.IsPositive ? "arrow-up-right" : "arrow-down-right")" style="width:9px;height:9px;"></i>
+                                                            @asset.ChangeFormatted
+                                                        </span>
+                                                    </div>
+                                                    @if (asset.SparklineData.Any())
+                                                    {
+                                                        <canvas class="sparkline-canvas"
+                                                                data-sparkline="@string.Join(",", asset.SparklineData.Select(d => d.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)))"
+                                                                data-positive="@asset.IsPositive.ToString().ToLower()"
+                                                                width="60" height="24"></canvas>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
                                 <div class="kairos-insight">
                                     <i data-lucide="sparkles" style="width:13px;height:13px;"></i>
                                     <span>KairosAI detecta señal <strong style="color:var(--text-main);">@item.Sentiment.ToLower()</strong> en este artículo. Puede impactar activos relacionados en las próximas 24h.</span>
@@ -200,12 +281,11 @@
 
                                 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-color);">
                                     <div class="source-chip">
-                                        <div class="source-avatar">@item.Source.Substring(0, 1)</div>
+                                        <div class="source-avatar">@item.Source.Substring(0, Math.Min(1, item.Source.Length))</div>
                                         <span style="font-size:0.75rem;font-weight:600;color:var(--text-main);">@item.Source</span>
                                     </div>
-                                    <a href="@externalLink" target="_blank"
-                                       style="font-size:0.75rem;font-weight:700;color:#7c3aed;text-decoration:none;display:flex;align-items:center;gap:4px;transition:opacity 0.15s;"
-                                       onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                    <a href="@item.Url" target="_blank" rel="noopener"
+                                           class="read-link">
                                         Leer análisis completo
                                         <i data-lucide="arrow-up-right" style="width:13px;height:13px;"></i>
                                     </a>
@@ -215,16 +295,15 @@
                     }
                     else
                     {
+                        @* ═══ STANDARD CARD ═══ *@
                         <article class="card-news" data-category="@cat">
                             <div class="card-accent-bar"></div>
 
-                            @if (!string.IsNullOrEmpty(videoId))
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
-                                <div class="video-wrapper">
-                                    <iframe src="https://www.youtube.com/embed/@videoId"
-                                            title="@item.Title" frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowfullscreen loading="lazy"></iframe>
+                                <div class="card-image-wrap card-image-small">
+                                    <img src="@item.ImageUrl" alt="@item.Title" loading="lazy" />
+                                    <div class="card-image-overlay"></div>
                                 </div>
                             }
 
@@ -237,7 +316,7 @@
                                         </span>
                                         <span class="category-tag tag-@cat">@catLabel</span>
                                     </div>
-                                    <span style="font-size:0.62rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:3px;">
+                                    <span class="time-stamp">
                                         <i data-lucide="clock" style="width:10px;height:10px;"></i>
                                         @item.TimeAgo
                                     </span>
@@ -246,18 +325,45 @@
                                 <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
                                     @item.Title
                                 </h2>
-                                <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:12px;">
+                                <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:10px;">
                                     @item.Summary
                                 </p>
 
+                                @* ═══ PRECIOS EN TIEMPO REAL (compact) ═══ *@
+                                @if (item.RelatedAssets.Any())
+                                {
+                                    <div class="related-assets-compact">
+                                        @foreach (var asset in item.RelatedAssets)
+                                        {
+                                            <div class="asset-mini @(asset.IsPositive ? "asset-up" : "asset-down")">
+                                                @if (!string.IsNullOrEmpty(asset.ImageUrl))
+                                                {
+                                                    <img src="@asset.ImageUrl" alt="@asset.Symbol" class="asset-mini-icon" loading="lazy" />
+                                                }
+                                                <span class="asset-mini-symbol">@asset.Symbol</span>
+                                                <span class="asset-mini-price">@asset.PriceFormatted</span>
+                                                <span class="asset-mini-change @(asset.IsPositive ? "change-up" : "change-down")">
+                                                    @asset.ChangeFormatted
+                                                </span>
+                                                @if (asset.SparklineData.Any())
+                                                {
+                                                    <canvas class="sparkline-mini"
+                                                            data-sparkline="@string.Join(",", asset.SparklineData.Select(d => d.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)))"
+                                                            data-positive="@asset.IsPositive.ToString().ToLower()"
+                                                            width="40" height="16"></canvas>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
                                 <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border-color);">
                                     <div class="source-chip">
-                                        <div class="source-avatar">@item.Source.Substring(0, 1)</div>
+                                        <div class="source-avatar">@item.Source.Substring(0, Math.Min(1, item.Source.Length))</div>
                                         <span style="font-size:0.72rem;font-weight:600;color:var(--text-main);">@item.Source</span>
                                     </div>
-                                    <a href="@externalLink" target="_blank"
-                                       style="font-size:0.7rem;font-weight:700;color:#7c3aed;text-decoration:none;display:flex;align-items:center;gap:3px;transition:opacity 0.15s;"
-                                       onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                    <a href="@item.Url" target="_blank" rel="noopener"
+                                           class="read-link read-link-sm">
                                         Leer nota
                                         <i data-lucide="external-link" style="width:11px;height:11px;"></i>
                                     </a>

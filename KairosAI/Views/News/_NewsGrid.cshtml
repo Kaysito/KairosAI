@@ -1,0 +1,72 @@
+﻿@model KairosAI.Models.ViewModels.NewsIndexViewModel
+
+@if (!Model.Headlines.Any())
+{
+    <div class="empty-state">
+        <i data-lucide="inbox" style="width:40px;height:40px;margin:0 auto 12px;opacity:0.3;"></i>
+        <p style="font-size:0.9rem;">No hay noticias disponibles.</p>
+    </div>
+}
+
+@{
+    bool isFirst = true;
+}
+
+@foreach (var item in Model.Headlines)
+{
+    var sClass = item.Sentiment switch { "Positivo" => "pos", "Negativo" => "neg", _ => "neu" };
+    var sIcon = item.Sentiment switch { "Positivo" => "trending-up", "Negativo" => "trending-down", _ => "minus" };
+    string cat = item.Category;
+    string catLabel = cat switch { "cripto" => "Cripto", "forex" => "Forex", "acciones" => "Acciones", "macro" => "Macro", _ => "General" };
+
+    <article class="@(isFirst ? "card-featured" : "card-news")" data-category="@cat">
+        <div class="card-accent-bar"></div>
+        <div style="padding:16px;display:flex;flex-direction:column;flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:6px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                    <span class="s-badge @sClass">
+                        <i data-lucide="@sIcon" style="width:10px;height:10px;"></i>
+                        @item.Sentiment
+                    </span>
+                    <span class="category-tag tag-@cat">@catLabel</span>
+                </div>
+                <span class="time-stamp">
+                    <i data-lucide="clock" style="width:10px;height:10px;"></i>
+                    @item.TimeAgo
+                </span>
+            </div>
+            <h2 style="font-size:0.92rem;font-weight:700;color:var(--text-main);line-height:1.4;margin-bottom:7px;">@item.Title</h2>
+            <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.55;flex:1;margin-bottom:10px;">@item.Summary</p>
+
+            @if (item.RelatedAssets.Any())
+            {
+                <div class="related-assets-compact">
+                    @foreach (var asset in item.RelatedAssets)
+                    {
+                        <div class="asset-mini @(asset.IsPositive ? "asset-up" : "asset-down")">
+                            @if (!string.IsNullOrEmpty(asset.ImageUrl))
+                            {
+                                <img src="@asset.ImageUrl" alt="@asset.Symbol" class="asset-mini-icon" loading="lazy" />
+                            }
+                            <span class="asset-mini-symbol">@asset.Symbol</span>
+                            <span class="asset-mini-price">@asset.PriceFormatted</span>
+                            <span class="asset-mini-change @(asset.IsPositive ? "change-up" : "change-down")">@asset.ChangeFormatted</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border-color);">
+                <div class="source-chip">
+                    <div class="source-avatar">@item.Source.Substring(0, Math.Min(1, item.Source.Length))</div>
+                    <span style="font-size:0.72rem;font-weight:600;color:var(--text-main);">@item.Source</span>
+                </div>
+                <a href="@item.Url" target="_blank" rel="noopener" class="read-link read-link-sm">
+                    Leer nota <i data-lucide="external-link" style="width:11px;height:11px;"></i>
+                </a>
+            </div>
+        </div>
+    </article>
+
+    isFirst = false;
+}

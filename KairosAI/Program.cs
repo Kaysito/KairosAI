@@ -1,25 +1,45 @@
+using KairosAI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 //using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. [CR�TICO] Habilitar HttpClient para las llamadas a CoinGecko y Github Models
+// 1. [CRÍTICO] Habilitar HttpClient para las llamadas a CoinGecko y Github Models
 builder.Services.AddHttpClient();
 
-// 2. [VITAL] Memoria Cach� para el motor de la IA (Rate Limiting y Sesiones Aisladas)
-// Esta l�nea es crucial para que el KairosController reconozca el IMemoryCache
+// 2. [VITAL] Memoria Caché para el motor de la IA (Rate Limiting y Sesiones Aisladas)
 builder.Services.AddMemoryCache();
 
-// 3. [VITAL] Configuraci�n para Autenticaci�n (Preparando Google/Facebook)
+// ═══ HTTP Clients con Typed Clients ═══
+builder.Services.AddHttpClient<ICryptoService, CryptoService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+});
+
+builder.Services.AddHttpClient<IStockService, StockService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+});
+
+// ═══ News Aggregator ═══
+builder.Services.AddScoped<INewsAggregatorService, NewsAggregatorService>();
+
+// 3. [VITAL] Configuración para Autenticación (Preparando Google/Facebook)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    // Aqu� es donde en el futuro podr�as agregar:
-    // options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // D�nde mandar al usuario si no ha iniciado sesi�n
+    options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
@@ -37,7 +57,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configuraci�n del pipeline (Middleware)
+// Configuración del pipeline (Middleware)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -49,14 +69,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 5. [ORDEN CR�TICO] Sesiones y Seguridad
-app.UseSession(); // Debe ir ANTES de la Autenticaci�n/Autorizaci�n en muchos casos, o justo aqu�.
-app.UseAuthentication(); // Authentication: �Qui�n eres? 
-app.UseAuthorization();  // Authorization: �Tienes permiso de estar aqu�?
+// 5. [ORDEN CRÍTICO] Sesiones y Seguridad
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Configuraci�n de rutas
+// Configuración de rutas
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}"); // Inicia en el Login por defecto
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
